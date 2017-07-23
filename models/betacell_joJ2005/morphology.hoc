@@ -1,0 +1,36 @@
+// Cell Template
+// ncells
+
+//chdir("C:/betacell/mod")
+
+//nrn_load_dll("nrnmech.dll")
+
+//load_file("nrngui.hoc")
+
+begintemplate CellTemp
+public soma
+create soma
+
+proc init() {
+    create soma
+
+    soma {
+	nseg=1
+	L=20
+	insert morphology {diam=20}
+	insert k_ion {ek=-75}
+	insert ca_ion {eca=25}
+	insert capacitance {cm=6.3}
+	insert cal {gbar_cal=3e-3 mtau0_cal=0.00001}
+	insert kdr {gbar_kdr=4e-3 mtau0_kdr=10}
+	insert kslow {gbar_kslow=3e-3}
+	insert pas {g_pas = 0.5e-3 e_pas = -75}
+	}
+}
+endtemplate CellTemp
+
+//objectvar cell[ncells]
+
+//for i = 0, ncells-1 {
+//    cell[i] = new CellTemp()
+//}

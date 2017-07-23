@@ -1,0 +1,14 @@
+// calculates release from number of spikes
+
+objref nc[ncells], nil[ncells], indx[ncells], numofspikes[ncells]
+
+for i=0, ncells-1 {
+indx[i] = new Vector ()
+numofspikes[i] = new Vector ()
+access cell[i].soma
+nc[i] = new NetCon(&v(0.5), nil[i]) 
+nc[i].threshold = -30
+nc[i].record(indx[i])								// record indexes of the positive nc.threshold crossings
+}
+
+// add "numofspikes[i].append(indx.size())" after run(). numofspikes.x[0] is the number of nc.threshold crossings in the recording

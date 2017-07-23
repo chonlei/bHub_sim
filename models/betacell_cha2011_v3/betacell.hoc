@@ -1,0 +1,129 @@
+// Cell template of beta cell by Cha et al. 2011
+// 
+// Created by Chon Lei
+// The currently version is based on the model from 
+// Cha et al. 2011
+// Last updated: 25/03/2017
+// 
+// Units: ([unit_in_NEURON -> corresponding_unit_in_paper])
+// t [ms]
+// v [mV]
+// i [mA/cm2 -> pA]
+// conc [mM]
+// cm [uF/cm2 -> nF]
+// L [um]
+// vol [fL]
+// Ri [Mohm]
+// 
+
+
+begintemplate betacell
+public soma
+create soma
+
+
+proc init() {
+	create soma
+	//***********ThermodynamicConstants**********//
+	//R=8.3143
+	//Tem=310.15
+	//F=96.4867
+	//RTF=R*Tem/F
+	//RTF2=RTF/2.
+	
+	//************Cellular Parameters************//
+	Naout=140.0	// mM
+	Kout=5.4	// mM
+	Caout=2.6	// mM
+	Cm=6.158	// pF
+	voli=764.0	// fL
+	Rcell=5.67111	// um
+	volER=280.0	// fL
+	fi=0.01
+	fer=0.025 
+	
+	//************Initial Conditions************//
+	/*Voltage0=-69.8663703359279
+	Nai0=7.92502913389466
+	Ki0=125.248586232226
+	Cai0=7.56138347594955E-05
+	CaER0=0.0047417301517704
+	ATP0=0.555590618124385
+	MgADP0=0.172220469094538
+	Re0=0.126089115827976
+	q_KDr0=0.999871116432097 
+	d_CaL0=0.0305677246684658
+	U_CaL0=0.97136209316892
+	fus0=0.953871341074278
+	r_KDr0=5.50634588785556E-05
+	m_Kto0=0.00429094440645993
+	h_Kto0=0.973579888263364
+	E1_tota0=0.0995446568706361
+	I10=0.347091674662305
+	I20=0.552654630410071*/
+	
+	Voltage0=-48.9045
+	Nai0=5.804
+	Ki0=126.776
+	Cai0=0.000306139
+	CaER0=0.0234849
+	ATP0=2.64667
+	MgADP0=0.127093
+	Re0=0.64195
+	q_KDr0=0.970421
+	d_CaL0=0.101898
+	U_CaL0=0.635696
+	fus0=0.827114
+	r_KDr0=0.00105694
+	m_Kto0=0.0170783
+	h_Kto0=0.301612
+	E1_tota0=0.354892
+	I10=0.151253
+	I20=0.489584
+	
+	Glucose=8.0
+	
+	//*********** soma setup ***********//
+	soma {
+		nseg=1
+		L=Rcell
+		celsius = 37	// K : +273.15
+		insert morphology {diam=Rcell}	// um
+		insert na_ion {nai0_na_ion=Nai0
+				nao0_na_ion=Naout}
+		insert k_ion {ki0_k_ion=Ki0
+				ko0_k_ion=Kout}
+		insert ca_ion {cai0_ca_ion=Cai0
+				cao0_ca_ion=Caout}
+		insert capacitance {cm=Cm*1e3}
+		
+		insert bcellcha {Voltage0_bcellcha=Voltage0
+				Nai0_bcellcha=Nai0
+				Ki0_bcellcha=Ki0
+				Cai0_bcellcha=Cai0
+				CaER0_bcellcha=CaER0
+				ATP0_bcellcha=ATP0
+				MgADP0_bcellcha=MgADP0
+				Re0_bcellcha=Re0
+				q_KDr0_bcellcha=q_KDr0
+				d_CaL0_bcellcha=d_CaL0
+				U_CaL0_bcellcha=U_CaL0
+				fus0_bcellcha=fus0
+				r_KDr0_bcellcha=r_KDr0
+				m_Kto0_bcellcha=m_Kto0
+				h_Kto0_bcellcha=h_Kto0
+				E1_tota0_bcellcha=E1_tota0
+				I10_bcellcha=I10
+				I20_bcellcha=I20
+				Glucose_bcellcha=Glucose}
+		
+		insert nadifl {voli_nadifl=voli}
+		insert kdifl {voli_kdifl=voli}
+		insert cadifl {fi_cadifl=fi
+				voli_cadifl=voli}
+	}
+}
+
+
+endtemplate betacell
+

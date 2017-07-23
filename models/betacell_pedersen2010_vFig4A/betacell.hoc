@@ -1,0 +1,54 @@
+// Cell template of beta cell by Pedersen 2010
+// 
+// Created by Chon Lei
+// The currently version is based on the model from 
+// Morten Gram Pedersen 2010 Biophysical Journal Vol. 99
+// Last updated: 10/02/2017
+// 
+// Units:
+// t [ms]
+// v [mV]
+// i [mA/cm2]
+// conc [mM]
+// cm [uF/cm2]
+// L [um]
+// g [S/cm2]
+// Ri [Mohm]
+// 
+
+//load_file("nrngui.hoc")
+
+
+begintemplate betacell
+public soma
+create soma
+
+
+proc init() {
+    create soma
+    
+    soma {
+	nseg=1
+	L=20
+	insert morphology {diam=20}
+	insert na_ion {ena=70}
+	insert k_ion {ek=-75}
+	insert ca_ion {eca=65}
+	insert capacitance {cm=1.0} // bring up by 10^6
+	
+	// Since cm brought up by 10^6, so as gbar.
+	insert nap {gbar_nap=0.4e-3}
+	insert cal {gbar_cal=0.14e-3}
+	insert cat {gbar_cat=0.05e-3}
+	insert capq {gbar_capq=0.17e-3}
+	insert kv {gbar_kv=1e-3}
+	insert kbk {gbar_kbk=20e-3}
+	insert herg {gbar_herg=0.2e-3}
+	insert katp {gbar_katp=0.015e-3}
+	insert pas {g_pas = 0.015e-3 e_pas = -30}
+    }
+}
+
+
+endtemplate betacell
+

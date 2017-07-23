@@ -1,0 +1,23 @@
+// makes a gap junction between 2 soma compartments
+// $o1 - cell[1],
+// $o2 - cell[2],
+// $3, $4 - position within section1, section2
+// $5 - gj conductance
+begintemplate gapjunction
+      public g
+	  public setg, setcells, cell1, cell2
+      objref con1, con2
+      proc init() {
+        objref con1, con2
+        $o1.soma con1 = new Gap($3)
+        $o2.soma con2 = new Gap($4)
+        setpointer con1.vgap, $o2.soma.v($4)
+        setpointer con2.vgap, $o1.soma.v($3)
+		con1.g = $5
+		con2.g = $5
+      }
+	 proc setg() { // change the gj conductance externally
+        con1.g = $1
+        con2.g = $1
+      }
+endtemplate gapjunction
