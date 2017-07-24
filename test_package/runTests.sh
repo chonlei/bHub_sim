@@ -7,5 +7,5 @@ python test1_2.py
 echo "DONE!"
 cd ../test2
 echo "Runnning test2.py: MPI4PY test"
-python test2.py
+mpiexec -n 16 python test2.py
 echo "DONE!"
