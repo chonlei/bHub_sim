@@ -74,8 +74,11 @@ print("*************************")
 
 
 ## Exporting
+membranepotential6 = np.array(membranepotential6)
+np.savetxt("testoutput.txt", membranepotential6)
 
 
+"""
 ## Visualisation
 time = np.array(time)
 
@@ -123,3 +126,4 @@ plt.ylabel("V [mV]", fontsize=20)
 
 
 plt.show()
+"""
