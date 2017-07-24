@@ -74,9 +74,13 @@ print("*************************")
 
 
 ## Exporting
-membranepotential6 = np.array(membranepotential6)
-np.savetxt("testoutput.txt", membranepotential6)
-
+membranepotential6 = np.array(membranepotential6)[::50]
+#np.savetxt("testoutput.txt", membranepotential6[::50])
+toCompare = np.loadtxt("testoutput.txt")
+if np.sum(np.abs(membranepotential6-toCompare)) < 1e-6:
+    print "PASS!"
+else:
+    print "FAILED!!"
 
 """
 ## Visualisation
