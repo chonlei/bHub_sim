@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+"""
 ## 
 ## Simulation of the electrophysiology of the beta-cell and hubs effects.
 ## Using package NEURON yale.
@@ -5,6 +7,7 @@
 ## Created by Chon Lei
 ## Last updated: August 2017
 ## 
+"""
 
 try:
     from neuron import h
@@ -15,6 +18,7 @@ import matplotlib.pylab as plt
 import random as random
 import sys
 import modelSetup
+
 
 ######
 ## Define model and setup
@@ -40,6 +44,8 @@ if morphology == 1:
 
 random.seed(pyseed)
 np.random.seed(pyseed)
+modelSetup.SetRandomSeed(pyseed)
+
 
 ######
 ## Import system setup files (.hoc files and system matrix)

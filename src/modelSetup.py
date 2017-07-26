@@ -1,6 +1,32 @@
+# -*- coding: utf-8 -*-
+"""Some documentations here
+
+"""
+
 import numpy as np
-pyseed = 1
-np.random.seed(pyseed)
+import random
+
+
+#pyseed = 1
+def SetRandomSeed(pyseed):
+    """Set random seed for reproducibility
+    
+    This function shall be called before using the rest of the module.
+    
+    Args:
+        pyseed (int): The seed for np.random and random
+    
+    """
+    np.random.seed(pyseed)
+    random.seed(pyseed)
+
+
+def outputSetup():
+    """Set up the output folders and names
+    
+    """
+
+
 
 ## ********************************************************** ##
 ## ********************  Some functions  ******************** ##
