@@ -6,6 +6,8 @@ import numpy as np
 import matplotlib.pylab as plt
 import sys
 
+
+## Define model and setup
 model = 1
 if model == 1:
     sys.path.append("../models/betacell_hermann2007_vFinal")
@@ -14,14 +16,18 @@ if model == 1:
 ## Using package NEURON yale.
 ## 
 ## Created by Chon Lei
-## The currently version is based on the model from 
+## The current version is based on the model from 
 ## M. Meyer-Hermann 2007 Biophysical Journal Vol. 93
 ## Last updated: 18/02/2017
 ## 
+morphology = 1
+if morphology == 1:
+    CoupledMatrixFile = '../morphologies/mice/CouplingMatrix-mouse40-3-175.dat'
+pyseed = 1
 
 
 ## Import system setup files (.hoc files and system matrix)
-CoupledMatrix = np.loadtxt('CouplingMatrix.dat',delimiter=' ')
+CoupledMatrix = np.loadtxt(CoupledMatrixFile,delimiter=' ')
 ncells = CoupledMatrix.shape[0]
 if ncells != CoupledMatrix.shape[1]:
     raise Exception("CoupledMatrix invalid dimensions.")
