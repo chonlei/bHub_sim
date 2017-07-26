@@ -37,7 +37,7 @@ STATE {m}
 BREAKPOINT {
 	: control glucose level here.
 	if (t>3e3) {gamma = 10}
-	if (t>5e4) {gamma = 1}
+	:if (t>5e4) {gamma = 1}
 	
 	SOLVE states METHOD cnexp
 	ik = gbar * (1 - m) * (v - ek)

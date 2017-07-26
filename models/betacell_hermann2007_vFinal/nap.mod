@@ -6,7 +6,7 @@ NEURON {
     THREADSAFE
 	SUFFIX nap
 	USEION na READ ena WRITE ina
-	:RANGE  gbar, Vm, km, mtau, mtau0, Vh, kh, htau
+	RANGE  gbar:, Vm, km, mtau, mtau0, Vh, kh, htau
 	:GLOBAL minf, hinf
 }
 

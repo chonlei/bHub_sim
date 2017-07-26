@@ -6,7 +6,7 @@ NEURON {
     THREADSAFE
 	SUFFIX jk
 	USEION k READ ik,ek WRITE ik
-	RANGE  JK
+	RANGE  JK,rho_KATP,rho_KV,rho_sKCa,rho_KCa,rho_NaK,kappa_KATP
 }
 
 PARAMETER {

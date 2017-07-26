@@ -7,7 +7,7 @@ NEURON {
 	SUFFIX nak
 	USEION na READ nai WRITE ina
 	USEION k READ ki WRITE ik
-	:RANGE  gbar, knak, nnak, nanak, ntnak, i, alpha
+	RANGE  gbar:, knak, nnak, nanak, ntnak, i, alpha
 }
 
 PARAMETER {

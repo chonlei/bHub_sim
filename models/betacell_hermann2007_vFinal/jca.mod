@@ -6,6 +6,7 @@ NEURON {
     THREADSAFE
 	SUFFIX jca
 	USEION ca READ ica,eca WRITE ica
+	RANGE rho_CaL,rho_CaT,rho_NCX,rho_PMCA
 }
 
 PARAMETER {

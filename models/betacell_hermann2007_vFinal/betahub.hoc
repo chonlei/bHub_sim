@@ -1,0 +1,300 @@
+// Cell template of beta hub-cell based on Hermann 2007
+// 
+// Created by Chon Lei
+// The currently version is based on the model from 
+// M. Meyer-Hermann 2007 Biophysical Journal Vol. 93
+// Last updated: 19/02/2017
+// 
+// Units:
+// t [ms]
+// v [mV]
+// i [mA/cm2]
+// conc [mM]
+// cm [uF/cm2]
+// L [um]
+// g [S/cm2]
+// Ri [Mohm]
+// 
+
+//load_file("nrngui.hoc")
+
+
+begintemplate betahub
+public soma
+create soma
+
+
+proc init() {
+	create soma
+	
+	//*********** Parameters ***********//
+	Rcell = 6.1 // um
+	C_m = 1.0 // reported 1.0
+	
+	//// Equilibrium constants
+	V0 = -70.  // mV
+	K0 = 95.  // mM
+	K_ext = 5.7  // mM
+	N0 = 20.  // mM
+	N_ext = 400.  // mM
+	C0 = 0.1e-3  // mM
+	C_ext = 1.5  // mM
+	gamma0 = 1.  // mM
+	
+	//// Densities of ion-conducting transmembrane proteins
+	rho_NaV = 1.4
+	rho_NaK = 2000.
+	alpha_NaK = 1.5
+	rho_NCX = 14.
+	alpha_NCX = 3.
+	rho_KATP = 0.08
+	rho_KV = 4.9
+	rho_sKCa = 0.6
+	rho_KCa = 0.4
+	rho_CaL = 0.7
+	rho_CaT = 0.15
+	z_Ca = 2.
+	rho_PMCA = 1100.
+
+	//// Properties of single Na and K conducting transmembrane proteins
+	I_NaK_bar = 0.03e-4  // with rho; mA/cm2
+	n_NaK = 2.
+	K_NaK = 33.3
+	n_NaK_til = 2.
+	K_NaK_til = 20.
+
+	V_Na_bar = 80.  // the sodium reversal potential
+	g_NaV_bar = 14.0e-4  // with rho; S/cm2
+	V_NaV = -35.  // activation dynamics properties 1
+	kappa_NaV = 8.  // activation dynamics properties 2 - steepness
+	W_NaV = -109.  // inactivation dynamics properties 1
+	lamb_NaV = 20.  // inactivation dynamics properties 2 - steepness
+
+	I_NCX_bar = -0.5e-4
+	C_NCX = 1.8e-3  // 0.0022 mM(?)
+	n_NCX = 1.  // The NCX-Hill-coefficient is controversial
+
+	I_PMCA_bar = 1e-6  // z_Ca*e*k_a
+	C_PMCA = 0.1e-3  // the half activation calcium concentration
+	n_PMCA = 2.0
+
+//*************************************************************************//
+//******************************* HUB PARAM *******************************//
+//*************************************************************************//
+	g_KATP_bar = 54.0e-4  // single channel conductance of K
+	gamma_KATP = 1.14  // around the resting level of glucose
+	kappa_KATP = 5.3  // steepness
+//*************************************************************************//
+
+	V_K_bar = -75.  // param ref, Eq(5)
+	g_KV_bar = 10e-4  // the maximum conductance
+	V_KV = 1.0  // activation dynamics properties 1
+	kappa_KV = 8.5  // activation dynamics properties 2 - steepness
+	W_KV = -25.  // inactivation dynamics properties 1
+	lamb_KV = 7.3  // inactivation dynamics properties 2 - steepness
+
+	g_KCa_bar = 220e-4  // up to 300pS depending on T
+	n_KCa = 2.  // Hill-coefficient
+	V_KCa = -40.  // activation dynamics properties 1
+	kappa_KCa = 25.  // activation dynamics properties 2 - steepness
+
+	g_sKCa_bar = 0.5e-4  // At physiological ionic gradients 0.1pS were found
+	C_sKCa = 0.64e-3  // given by Eq(24)
+	kappa_sKCa = 0.39e-3  // 0.39 uM
+
+	//// Properties of single Ca conducting transmembrane proteins
+	V_Ca_bar = 128.  // ref table 2, Eq(5) 128mV; Ref(9) VCa=50mV
+	VCa_corr = 78.  // i.e. 128 - 78 to give VCa=50 from Ref(9)
+
+	C_CaL = 4e-3  // half maximal inactivation
+	n_CaL = 1.  // Hill-coefficient
+	g_CaL_bar = 27e-4  //22 // 27 pS in dendrites
+	// h_CaL = 1.  // Voltage-dependent inactivation is not observed for L-type (??)
+	V_CaL = 0.  // -3.8  // -18mV CA1-pyramidal cells; +9mV CA1-pyramidal neurons
+	kappa_CaL = 12.  // 8.4  // 10mV; 6.0mV (?)
+	W_CaL = 100.
+	lamb_CaL = 10.
+
+	g_CaT_bar = 10e-4  // measured in dendrites of pyramidal neurons
+	V_CaT = -30.  // -32.  // -70 to -30 mV with a half opening at -55mV
+	kappa_CaT = 7.0
+	W_CaT = -67.
+	lamb_CaT = 6.5
+	
+	//*********** soma setup ***********//
+	soma {
+		nseg=1
+		L=Rcell
+		celsius = 36.7842
+		insert morphology {diam=Rcell}
+		insert na_ion {ena=V_Na_bar 
+				nai0_na_ion=N0
+				nao0_na_ion=N_ext}
+		insert k_ion {ek=V_K_bar 
+				ki0_k_ion=K0
+				ko0_k_ion=K_ext}
+		insert ca_ion {eca=V_Ca_bar-VCa_corr
+				cai0_ca_ion=C0
+				cao0_ca_ion=C_ext}
+		// manually update eca: (eca - VCa_corr)
+		insert ecaup {T_ecaup=celsius+273.15 
+				zca_ecaup=z_Ca
+				CorrVCa_ecaup=VCa_corr}
+		insert capacitance {cm=C_m} // keep uF/cm2
+		
+		// gbar use S/cm2; Ibar use mI/cm2
+		insert nap {gbar_nap = rho_NaV*g_NaV_bar
+				Vm_nap = V_NaV
+				km_nap = -1*kappa_NaV
+				mtau0_nap = 11.5
+				Vh_nap = W_NaV
+				kh_nap = lamb_NaV
+				htau_nap = 4.6
+				V0_nap = V0}
+		insert nak {gbar_nak=rho_NaK*I_NaK_bar
+				knak_nak = K_NaK
+				nnak_nak = n_NaK
+				nanak_nak = K_NaK_til
+				ntnak_nak = n_NaK_til
+				alpha_nak = alpha_NaK}
+		insert ncx {gbar_ncx=rho_NCX*I_NCX_bar
+				cncx_ncx = C_NCX
+				nncx_ncx = n_NCX
+				alpha_ncx = alpha_NCX
+				zca_ncx = z_Ca}
+		insert pmca {gbar_pmca=rho_PMCA*I_PMCA_bar
+				cpmca_pmca = C_PMCA
+				npmca_pmca = n_PMCA}
+		insert katp {gbar_katp=rho_KATP*g_KATP_bar
+				gammakatp_katp = gamma_KATP
+				nkatp_katp = -1*kappa_KATP
+				mtau_katp = 0.5e3}
+		insert kv {gbar_kv=rho_KV*g_KV_bar
+				Vm_kv = V_KV
+				km_kv = -1*kappa_KV
+				mtau0_kv = 60
+				Vh_kv = W_KV
+				kh_kv = lamb_KV
+				htau_kv = 400}	
+		insert kca {gbar_kca=rho_KCa*g_KCa_bar
+				Vm_kca = V_KCa
+				km_kca = -1*kappa_KCa
+				mtau_kca = 100
+				nkca_kca = n_KCa
+				a_kca = 45
+				b_kca = 30}
+		insert skca {gbar_skca=rho_sKCa*g_sKCa_bar
+				Vm_skca = C_sKCa
+				km_skca = -1*kappa_sKCa
+				mtau_skca = 75}
+		insert cal {gbar_cal=rho_CaL*g_CaL_bar
+				Vm_cal = V_CaL
+				km_cal = -1*kappa_CaL
+				mtau_cal = 6
+				Vh_cal = W_CaL
+				kh_cal = lamb_CaL
+				htau_cal = 10e3
+				ccal_cal = C_CaL
+				ncal_cal = n_CaL}
+		insert cat {gbar_cat=rho_CaT*g_CaT_bar
+				Vm_cat = V_CaT
+				km_cat = -1*kappa_CaT
+				mtau_cat = 10
+				Vh_cat = W_CaT
+				kh_cat = lamb_CaT
+				htau_cat = 18}
+		// Leakage Currents
+		insert jna {V0_jna=V0
+				V_NaV_jna=V_NaV
+				kappa_NaV_jna=kappa_NaV
+				W_NaV_jna=W_NaV
+				lamb_NaV_jna=lamb_NaV
+				g_NaV_bar_jna=g_NaV_bar
+				V_Na_bar_jna=V_Na_bar
+				I_NaK_bar_jna=I_NaK_bar
+				K0_jna=K0
+				K_NaK_jna=K_NaK
+				n_NaK_jna=n_NaK
+				N0_jna=N0
+				K_NaK_til_jna=K_NaK_til
+				n_NaK_til_jna=n_NaK_til
+				I_NCX_bar_jna=I_NCX_bar
+				C0_jna=C0
+				C_NCX_jna=C_NCX
+				n_NCX_jna=n_NCX
+				rho_NaV_jna=rho_NaV
+				rho_NaK_jna=rho_NaK
+				rho_NCX_jna=rho_NCX
+				alpha_NCX_jna=alpha_NCX}
+		insert jk {I_NaK_bar_jk=I_NaK_bar
+				K0_jk=K0
+				K_NaK_jk=K_NaK
+				n_NaK_jk=n_NaK
+				N0_jk=N0
+				K_NaK_til_jk=K_NaK_til
+				n_NaK_til_jk=n_NaK_til
+				ass_jk = 45.
+				bss_jk = 30.
+				gamma0_jk=gamma0
+				gamma_KATP_jk=gamma_KATP
+				kappa_KATP_jk=kappa_KATP
+				g_KATP_bar_jk=g_KATP_bar
+				V0_jk=V0 
+				V_K_bar_jk=V_K_bar
+				V_KV_jk=V_KV
+				kappa_KV_jk=kappa_KV
+				W_KV_jk=W_KV
+				lamb_KV_jk=lamb_KV
+				g_KV_bar_jk=g_KV_bar
+				C0_jk=C0
+				C_sKCa_jk=C_sKCa
+				kappa_sKCa_jk=kappa_sKCa
+				g_sKCa_bar_jk=g_sKCa_bar
+				g_KCa_bar_jk=g_KCa_bar
+				n_KCa_jk=n_KCa
+				V_KCa_jk=V_KCa
+				kappa_KCa_jk=kappa_KCa
+				rho_KATP_jk=rho_KATP
+				rho_KV_jk=rho_KV
+				rho_sKCa_jk=rho_sKCa
+				rho_KCa_jk=rho_KCa
+				rho_NaK_jk=rho_NaK}
+		insert jca {I_NCX_bar_jca=I_NCX_bar
+				C0_jca=C0
+				C_NCX_jca=C_NCX
+				n_NCX_jca=n_NCX
+				V0_jca=V0
+				V_CaL_jca=V_CaL
+				kappa_CaL_jca=kappa_CaL
+				W_CaL_jca = W_CaL
+				lamb_CaL_jca = lamb_CaL
+				g_CaL_bar_jca=g_CaL_bar
+				V_Ca_bar_jca=V_Ca_bar
+				C_CaL_jca=C_CaL
+				n_CaL_jca=n_CaL
+				V_CaT_jca=V_CaT
+				kappa_CaT_jca=kappa_CaT
+				g_CaT_bar_jca=g_CaT_bar
+				W_CaT_jca=W_CaT
+				lamb_CaT_jca=lamb_CaT
+				I_PMCA_bar_jca=I_PMCA_bar
+				C_PMCA_jca=C_PMCA
+				n_PMCA_jca=n_PMCA
+				rho_CaL_jca=rho_CaL
+				rho_CaT_jca=rho_CaT
+				rho_NCX_jca=rho_NCX
+				rho_PMCA_jca=rho_PMCA
+				z_Ca_jca=z_Ca}
+		
+		//insert ionflux
+		insert cadifl{zca_cadifl = z_Ca
+				c0_cadifl = 1
+				kc_cadifl = 1e-3}
+		insert nadifl
+		insert kdifl
+	}
+}
+
+
+endtemplate betahub
+

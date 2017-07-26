@@ -7,7 +7,7 @@ NEURON {
 	SUFFIX kca
 	USEION k READ ek WRITE ik
 	USEION ca READ cai
-	RANGE  gbar, Vm, km, mtau, nkca, a, b
+	RANGE  gbar, Vm, km, mtau, nkca, a, b, i
 	GLOBAL minf, cinf
 }
 
@@ -34,6 +34,7 @@ ASSIGNED {
 	v 		(mV)
 	cai		(mM)
 	ik 		(mA/cm2)
+	i 		(mA/cm2)
 	g		(S/cm2) 	
 	minf
 	cinf		(mM)
@@ -44,7 +45,8 @@ STATE { m  c }
 BREAKPOINT {
         SOLVE states METHOD cnexp
         g = gbar * m * hill(cai, c, nkca)
-	ik = g * (v - ek)
+	i = g * (v - ek)
+	ik = i
 }
 
 INITIAL {

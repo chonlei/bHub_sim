@@ -1,3 +1,7 @@
+## Beta cell hub simulation
+## Created by Chon Lei
+## Last updated: August 2017
+
 try:
     from neuron import h
 except Exception:
@@ -11,7 +15,11 @@ import modelSetup
 ## Define model and setup
 model = 1
 if model == 1:
-    sys.path.append("../models/betacell_hermann2007_vFinal")
+    pathToModel = "../models/betacell_hermann2007_vFinal/"
+    h('nrn_load_dll("%sx86_64/.libs/libnrnmech.so")'%pathToModel)
+    h.load_file (pathToModel+"betacell.hoc")
+    h.load_file (pathToModel+"betahub.hoc")
+    h.load_file (pathToModel+"gapjunction.hoc")
     loadHetero = modelSetup.loadHeteroHermann2007
     setHetero = modelSetup.setHeteroHermann2007
     HetDict = modelSetup.HetDictHermann2007
@@ -28,6 +36,7 @@ morphology = 1
 if morphology == 1:
     CoupledMatrixFile = '../morphologies/mice/CouplingMatrix-mouse40-3-175.dat'
 pyseed = 1
+mode = 0
 random.seed(pyseed)
 
 
@@ -36,11 +45,10 @@ CoupledMatrix = np.loadtxt(CoupledMatrixFile,delimiter=' ')
 ncells = CoupledMatrix.shape[0]
 if ncells != CoupledMatrix.shape[1]:
     raise Exception("CoupledMatrix invalid dimensions.")
-
-h.load_file ("betacell.hoc")
-h.load_file ("betahub.hoc")
-h.load_file("gapjunction.hoc")
-
+try:
+    pass
+except AttributeError:
+    raise Exception("Please make sure files has been compiled using \n$ nrnivmodl\n")
 Total = (ncells*ncells)/2 - ncells # maximum number of gapjunctions that could be formed
 
 
@@ -85,8 +93,7 @@ for i in range(ncells):
         #loadHeteroHermann2007(cell[i],HetMatrix,i)
         cell[i].soma(0.5).nkatp_katp = -5.8
         if mode==1:
-            # I clamp hubs to silence them, compare results from Johnston et al., 20
-16
+            # I clamp hubs to silence them, compare results from Johnston et al., 2016
             iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
             iclamp_hubs[-1].delay = 0
             iclamp_hubs[-1].dur = 120000

@@ -6,7 +6,7 @@ NEURON {
     THREADSAFE
 	SUFFIX cat
 	USEION ca READ eca,ica WRITE ica
-	RANGE  g
+	RANGE  g,gbar
 	GLOBAL minf, hinf
 }
 

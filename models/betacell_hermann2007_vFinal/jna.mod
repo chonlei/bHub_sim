@@ -6,7 +6,7 @@ NEURON {
     THREADSAFE
 	SUFFIX jna
 	USEION na READ ina, ena,nai,nao WRITE ina
-	RANGE  JNA
+	RANGE  JNA, rho_NaV, rho_NaK, rho_NCX
 }
 
 PARAMETER {
