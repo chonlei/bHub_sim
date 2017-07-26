@@ -16,7 +16,7 @@ except Exception:
 import numpy as np
 import matplotlib.pylab as plt
 import random as random
-import sys
+import os.path as path
 import modelSetup
 
 
@@ -163,7 +163,7 @@ h.load_file("stdrun.hoc")
 h.init()
 # h.v_init = purkinjecelly.undershootpotential
 #h.v_init = -70
-h.tstop = 1e3
+h.tstop = 1e2
 h.dt = 0.1
 h.steps_per_ms = 1./h.dt
 print("Running main simulation...")
@@ -176,7 +176,40 @@ print("*************************")
 ######
 ## Exporting
 ######
-print("Exporting results...")
+print("Converting results for export...")
+# Down sampling
+carec = modelSetup.convertSimOutput(carec,100)
+vrec = modelSetup.convertSimOutput(vrec,100)
+print("Exporting Ca traces...")
+## TODO change output name and work with modelSetup.outputSetup()
+filename = path.join('../output/', 'Ca_mnonhub_5phubs_40s_sGJ_%dby%d.dat'%(len(carec),len(carec[0])))
+fp = np.memmap(filename, dtype="float64", mode='w+', shape=(len(carec),len(carec[0])))
+fp[:] = carec[:]
+if fp.filename == path.abspath(filename):
+    print "shape: (", len(carec), ", ", len(carec[0]), ")"
+    print("Successfully exported Ca_dynamics to: %s"%filename)
+    del fp
+else:
+    print("Cannot write to address: %s"%filename)
+    del fp
+    print("Writing to current path instead...")
+    np.savetxt('carec.txt',carec)
+    print("Successfully exported Ca_dynamics to current path.")
+# newfp = np.memmap(filename, dtype='float64', mode='r', shape=(#cells,#timepoints)) # to read
+print("Exporting Vm traces...")
+filename = path.join('../output/', 'Vm_mnonhub_5phubs_40s_sGJ_%dby%d.dat'%(len(vrec),len(vrec[0])))
+fp = np.memmap(filename, dtype="float64", mode='w+', shape=(len(vrec),len(vrec[0])))
+fp[:] = vrec[:]
+if fp.filename == path.abspath(filename):
+    print "shape: (", len(vrec), ", ", len(vrec[0]), ")"
+    print("Successfully exported Vm to: %s"%filename)
+    del fp
+else:
+    print("Cannot write to address: %s"%filename)
+    del fp
+    print("Writing to current path instead...")
+    np.savetxt('vrec.txt',vrec)
+    print("Successfully exported Vm to current path.")
 
 
 ######
