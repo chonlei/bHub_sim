@@ -1,6 +1,10 @@
-## Beta cell hub simulation
+## 
+## Simulation of the electrophysiology of the beta-cell and hubs effects.
+## Using package NEURON yale.
+## 
 ## Created by Chon Lei
 ## Last updated: August 2017
+## 
 
 try:
     from neuron import h
@@ -12,52 +16,57 @@ import random as random
 import sys
 import modelSetup
 
+######
 ## Define model and setup
+######
 model = 1
+morphology = 1
+pyseed = 1
+mode = 0  # 0: WT; 1: silent hubs; 2: silent non hubs
+pHubs = 0.05  # percentage/fraction of hubs in islet
+
 if model == 1:
+    ## Created by Chon Lei
+    ## The current version is based on the model from 
+    ## M. Meyer-Hermann 2007 Biophysical Journal Vol. 93
+    ## Last updated: 18/02/2017
     pathToModel = "../models/betacell_hermann2007_vFinal/"
+    loadHetero = modelSetup.loadHeteroHermann2007
+    setHetero = modelSetup.setHeteroHermann2007
+    HetDict = modelSetup.HetDictHermann2007
+
+if morphology == 1:
+    pathToCoupledMatrix = '../morphologies/mice/CouplingMatrix-mouse40-3-175.dat'
+
+random.seed(pyseed)
+np.random.seed(pyseed)
+
+######
+## Import system setup files (.hoc files and system matrix)
+######
+CoupledMatrix = np.loadtxt(pathToCoupledMatrix,delimiter=' ')
+ncells = CoupledMatrix.shape[0]
+if ncells != CoupledMatrix.shape[1]:
+    raise Exception("CoupledMatrix invalid dimensions.")
+Total = (ncells*ncells)/2 - ncells # maximum number of gapjunctions that could be formed
+
+try:
+    # assumed using x64 bits; change if needed
     h('nrn_load_dll("%sx86_64/.libs/libnrnmech.so")'%pathToModel)
     h.load_file (pathToModel+"betacell.hoc")
     h.load_file (pathToModel+"betahub.hoc")
     h.load_file (pathToModel+"gapjunction.hoc")
-    loadHetero = modelSetup.loadHeteroHermann2007
-    setHetero = modelSetup.setHeteroHermann2007
-    HetDict = modelSetup.HetDictHermann2007
-## 
-## Simulation of the electrophysiology of the beta-cell.
-## Using package NEURON yale.
-## 
-## Created by Chon Lei
-## The current version is based on the model from 
-## M. Meyer-Hermann 2007 Biophysical Journal Vol. 93
-## Last updated: 18/02/2017
-## 
-morphology = 1
-if morphology == 1:
-    CoupledMatrixFile = '../morphologies/mice/CouplingMatrix-mouse40-3-175.dat'
-pyseed = 1
-mode = 0
-random.seed(pyseed)
-
-
-## Import system setup files (.hoc files and system matrix)
-CoupledMatrix = np.loadtxt(CoupledMatrixFile,delimiter=' ')
-ncells = CoupledMatrix.shape[0]
-if ncells != CoupledMatrix.shape[1]:
-    raise Exception("CoupledMatrix invalid dimensions.")
-try:
-    pass
-except AttributeError:
+except Exception:
     raise Exception("Please make sure files has been compiled using \n$ nrnivmodl\n")
-Total = (ncells*ncells)/2 - ncells # maximum number of gapjunctions that could be formed
 
-
+######
 ## System set-up
+######
 print("*************************")
 print("Starting system set-up...")
 
 # Define beta hubs cells
-numHubs = int(0.05*ncells)
+numHubs = int(pHubs*ncells)
 temp = range(ncells)
 random.shuffle(temp)
 hubsList = temp[0:numHubs]
@@ -90,14 +99,14 @@ for i in range(ncells):
             iclamp_hubs[-1].amp = -0.002
     else:
         cell.append(h.betahub())
-        #loadHeteroHermann2007(cell[i],HetMatrix,i)
+        #loadHetero(cell[i],HetMatrix,i) # no heterogenity for betahubs
         cell[i].soma(0.5).nkatp_katp = -5.8
         if mode==1:
             # I clamp hubs to silence them, compare results from Johnston et al., 2016
             iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
             iclamp_hubs[-1].delay = 0
             iclamp_hubs[-1].dur = 120000
-            #  all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
+            # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
             iclamp_hubs[-1].amp = -0.002
 
 
@@ -115,8 +124,9 @@ for i in range(ncells):
         elif CoupledMatrix[i,j] > 0: #and ((i not in nonHubsToPickList) or (j not in nonHubsToPickList)):
             gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, 0.05*0.00017e-1*CoupledMatrix[i,j]))
 
-
+######
 ## External stimulation
+######
 """
 stimulus = h.IClamp (0.5, sec = cell[0].soma)
 stimulus.delay = 100
@@ -125,8 +135,10 @@ stimulus.amp = 0.5
 """
 
 
-print "Creating recorder vectors..."
+######
 ## System recorder initalisation
+######
+print("Creating recorder vectors...")
 t = h.Vector()
 t.record(h._ref_t)
 vrec = []
@@ -138,7 +150,9 @@ for i in range(ncells):
     carec[i].record(cell[i].soma(0.5)._ref_cai)
 
 
+######
 ## Main simulation
+######
 h.load_file("stdrun.hoc")
 h.init()
 # h.v_init = purkinjecelly.undershootpotential
@@ -146,17 +160,22 @@ h.init()
 h.tstop = 1e3
 h.dt = 0.1
 h.steps_per_ms = 1./h.dt
-print("Starting main simulation...")
+print("Running main simulation...")
 h.run()
 print("Simulation completed! :)")
 print("*************************")
 
 
 ## ******************************************** ##
+######
 ## Exporting
+######
+print("Exporting results...")
 
 
+######
 ## Visualisation
+######
 toVisual = False
 if toVisual:
     t = np.array(t)
@@ -167,3 +186,7 @@ if toVisual:
     plt.plot(t, membranepotential2)
     
     plt.show()
+
+##########
+## End  ##
+##########
