@@ -5,6 +5,7 @@
 
 import numpy as np
 import random
+import os
 
 
 #pyseed = 1
@@ -21,10 +22,21 @@ def SetRandomSeed(pyseed):
     random.seed(pyseed)
 
 
-def outputSetup():
+def outputSetup(model,morphology,pyseed,mode):
     """Set up the output folders and names
     
     """
+    out = '../output/'
+    idx = len([name for name in os.listdir(out) if os.path.isdir(out+name)])
+    try:
+        outputdir = '../output/sim%d/'%idx
+        os.makedirs(outputdir)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+    outputidx = 'model_'+str(model)+'_morphology_'+str(morphology)+'_seed_'+str(pyseed)+'_mode_'+str(mode)
+    return outputidx, outputdir
+
 
 
 
