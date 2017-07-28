@@ -78,8 +78,8 @@ elif model == 2:
         cellList[i].soma(0.5).gammatoset_katp = 10.0
 
 if morphology == 1:
-    pathToCoupledMatrix = '../morphologies/mice/CouplingMatrix-mouse40-3-175.dat'
-    #pathToCoupledMatrix = '../morphologies/mice/CouplingMatrixMouse403.dat'
+    pathToCoupledMatrix = '../morphologies/mouse/CouplingMatrix-mouse40-3-175.dat'
+    #pathToCoupledMatrix = '../morphologies/mouse/CouplingMatrixMouse403.dat'
 
 random.seed(pyseed)
 np.random.seed(pyseed)
