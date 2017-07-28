@@ -25,6 +25,18 @@ def SetRandomSeed(pyseed):
 def outputSetup(model,morphology,pyseed,mode):
     """Set up the output folders and names
     
+    This function create and return the output directory and output file name based on the simulation set up.
+
+    Args:
+        model (int): model id
+        morphology (int): morphology id
+        pyseed (int): The seed for np.random and random
+        mode (int): simulation mode
+
+    Return:
+        outputidx (str): The output file name
+        outputdir (str): The (created) output file directory
+
     """
     out = '../output/'
     idx = len([name for name in os.listdir(out) if os.path.isdir(out+name)])
@@ -62,16 +74,18 @@ HetIndexHermann2007 = {0:'rho_NaV', \
                                         8:'rho_CaT', \
                                         9:'rho_PMCA'}
 
-HetDictHermann2007 = {'rho_NaV':(1.4, 0.05*1.4), \
-                                        'rho_NaK':(2000., 0.05*2000.), \
-                                        'rho_NCX':(14., 0.05*14.), \
-                                        'rho_KATP':(0.08, 0.05*0.08), \
-                                        'rho_KV':(4.9, 0.05*4.9), \
-                                        'rho_sKCa':(0.6, 0.05*0.6), \
-                                        'rho_KCa':(0.4, 0.05*0.4), \
-                                        'rho_CaL':(0.7, 0.05*0.7), \
-                                        'rho_CaT':(0.15, 0.05*0.15), \
-                                        'rho_PMCA':(1100., 0.05*1100.)}
+def setupHetDict(varp=0.05):
+    global HetDictHermann2007
+    HetDictHermann2007 = {'rho_NaV':(1.4, varp*1.4), \
+                                        'rho_NaK':(2000., varp*2000.), \
+                                        'rho_NCX':(14., varp*14.), \
+                                        'rho_KATP':(0.08, varp*0.08), \
+                                        'rho_KV':(4.9, varp*4.9), \
+                                        'rho_sKCa':(0.6, varp*0.6), \
+                                        'rho_KCa':(0.4, varp*0.4), \
+                                        'rho_CaL':(0.7, varp*0.7), \
+                                        'rho_CaT':(0.15, varp*0.15), \
+                                        'rho_PMCA':(1100., varp*1100.)}
 
 
 def setHeteroHermann2007(b_cell,HetMatrix,i):

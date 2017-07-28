@@ -32,6 +32,7 @@ pHubs = 0.1  # percentage/fraction of hubs in islet
 ggap = 0.5*0.00017e-1
 ggaphub = 1.0*0.00017e-1
 dthres = 17.5
+hetVar = 0.05
 tstop = 50e3
 dt = 0.1
 
@@ -40,7 +41,7 @@ outlog = path.join(outputdir, outputidx+'.log')
 outCa = path.join(outputdir, 'Ca_'+outputidx)
 outVm = path.join(outputdir, 'Vm_'+outputidx)
 with open(outlog, 'w') as f:
-    f.write('#model: %d \n#morphology: %d \n#isHuman: %d \n#pyseed: %d \n#mode: %d \n#pHubs: %f \n#ggap: %f \n#ggaphub: %f \n#dthres: %f \n#tstop: %f \n#dt: %f \n\n'%(model,morphology,isHuman,pyseed,mode,pHubs,ggap,ggaphub,dthres,tstop,dt))
+    f.write('#model = %d \n#morphology = %d \n#isHuman = %d \n#pyseed = %d \n#mode = %d \n#pHubs = %f \n#ggap = %f \n#ggaphub = %f \n#dthres = %f \n#hetVar = %f \n#tstop = %f \n#dt = %f \n\n'%(model,morphology,isHuman,pyseed,mode,pHubs,ggap,ggaphub,dthres,hetVar,tstop,dt))
 
 if model == 1:
     ## Created by Chon Lei
@@ -48,6 +49,7 @@ if model == 1:
     ## M. Meyer-Hermann 2007 Biophysical Journal Vol. 93
     ## Last updated: 18/02/2017
     pathToModel = "../models/betacell_hermann2007_vFinal/"
+    modelSetup.setupHetDict(varp=hetVar)
     loadHetero = modelSetup.loadHeteroHermann2007
     setHetero = modelSetup.setHeteroHermann2007
     HetDict = modelSetup.HetDictHermann2007
@@ -66,6 +68,7 @@ elif model == 2:
     ## M. Meyer-Hermann 2007 Biophysical Journal Vol. 93
     ## Last updated: 18/02/2017
     pathToModel = "../models/betacell_hermann2007_vMetabolic/"
+    modelSetup.setupHetDict(varp=hetVar)
     loadHetero = modelSetup.loadHeteroHermann2007
     setHetero = modelSetup.setHeteroHermann2007
     HetDict = modelSetup.HetDictHermann2007
@@ -130,7 +133,7 @@ hubsList = temp[0:numHubs]
 #hubsList = [1025, 570, 1294, 81, 169, 659, 890, 1622, 1486, 1250, 247, 59, 595, 1526, 546, 1008, 1629, 1748, 923, 872, 742, 635, 920, 977, 1333, 867, 1438, 434, 524, 1053, 1235, 420, 718, 1042, 835, 399, 775, 1275, 1573, 148, 407, 365, 1240, 515, 523, 452, 391, 1743, 1049, 753, 1463, 388, 1502, 448, 166, 1718, 687, 1090, 1536, 254, 1219, 1490, 683, 0, 584, 1701, 1747, 11, 1424, 1350, 377, 1062, 1031, 1026, 1266, 1652, 367, 1181, 669, 550, 643, 1137, 1349, 1411, 141, 1247, 95, 1082] # same as strong GJ
 print(hubsList)
 with open(outlog, 'a') as f:
-    f.write('#hubsList: \n')
+    f.write('#hubsList = \n')
     f.write(','.join(map(str, hubsList)))
     f.write('\n\n')
 
@@ -141,7 +144,7 @@ random.shuffle(temp)
 nonHubsToPickList = temp[0:numNonHubsToPick]
 print(nonHubsToPickList)
 with open(outlog, 'a') as f:
-    f.write('#nonHubsToPickList: ')
+    f.write('#nonHubsToPickList = ')
     f.write(','.join(map(str, nonHubsToPickList)))
     f.write('\n\n')
 
@@ -260,7 +263,7 @@ else:
     np.savetxt('carec.txt',carec)
     print("Successfully exported Ca_dynamics to current path.")
 with open(outlog,'a') as f:
-    f.write('#Ca_shape: (%d, %d)\n'%(len(carec),len(carec[0])))
+    f.write('#Ca_shape = (%d, %d)\n'%(len(carec),len(carec[0])))
 # newfp = np.memmap(filename, dtype='float64', mode='r', shape=(#cells,#timepoints)) # to read
 print("Exporting Vm traces...")
 filename = outVm+'_%dx%d.dat'%(len(vrec),len(vrec[0]))
@@ -277,7 +280,7 @@ else:
     np.savetxt('vrec.txt',vrec)
     print("Successfully exported Vm to current path.")
 with open(outlog,'a') as f:
-    f.write('#Vm_shape: (%d, %d)\n'%(len(vrec),len(vrec[0])))
+    f.write('#Vm_shape = (%d, %d)\n'%(len(vrec),len(vrec[0])))
 
 
 ######
