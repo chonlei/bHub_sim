@@ -178,10 +178,21 @@ def loadHeteroHermann2007(b_cell,HetMatrix,i):
 #  - set cutoff distance cutoffConnect ~ 20 um
 #  - convert it into binary matrix
 
-def genCoupleMatrix(coorData, cutoff=20, uptri=True):
-    # Generate a binary CoupleMatrix using islet coordinates data
-    # 
-    # if given 3 columns coordinate data of one cell type (e.g. b-cell)
+def genCoupleMatrix(coorData, cutoff=20., dcentre=None, uptri=True):
+    """Generate coupling matrix
+    
+    This function generates a binary coupling matrix using islet coordinates data. This should take 3 columns coordinate data of one cell type (e.g. b-cell).
+
+    Args:
+        coorData (array): three columns coordinate data
+        cutoff (float): cut-off threshold of any two cells being connected. Default: 20.0.
+        dcentre (float): distance from centre, of which cells within it will be included. Default: None; include all cells.
+        uptri (bool): if True, return upper triangular coupling matrix. Default: True.
+
+    Return:
+        CoupleMatrix (matrix): binary coupling matrix
+
+    """
     if isinstance(coorData, (str, unicode)):
         coorData = np.loadtxt(coorData)
     # else assume it is a numpy array type with equivalent format
@@ -199,6 +210,11 @@ def genCoupleMatrix(coorData, cutoff=20, uptri=True):
     CoupleMatrix[CoupleMatrix>cutoff] = 0
     if uptri:
         CoupleMatrix = np.tril(CoupleMatrix,-1)
+    if dcentre!=None:
+        # get cells within distance dcentre from centre
+        centreCoorData = np.mean(coorData,0)
+        CoorDataMask = (np.sum((coorData - centreCoorData)**2,1)<(dcentre**2))
+        CoupleMatrix = CoupleMatrix[CoorDataMask][:,CoorDataMask]
     return CoupleMatrix
 
 ## Tested

@@ -27,13 +27,14 @@ model = 2
 morphology = 3
 isHuman = 0  # 1: human; 0: mouse
 pyseed = 1
-mode = 2  # 0: WT; 1: silent hubs; 2: silent non hubs
+mode = 0  # 0: WT; 1: silent hubs; 2: silent non hubs
 pHubs = 0.1  # percentage/fraction of hubs in islet
 ggap = 0.5*0.00017e-1
 ggaphub = 1.0*0.00017e-1
 dthres = 17.5
+isletsize = 40
 hetVar = 0.05
-tstop = 50e3
+tstop = 90e3
 dt = 0.1
 
 outputidx, outputdir = modelSetup.outputSetup(model,morphology,pyseed,mode)
@@ -41,7 +42,7 @@ outlog = path.join(outputdir, outputidx+'.log')
 outCa = path.join(outputdir, 'Ca_'+outputidx)
 outVm = path.join(outputdir, 'Vm_'+outputidx)
 with open(outlog, 'w') as f:
-    f.write('#model = %d \n#morphology = %d \n#isHuman = %d \n#pyseed = %d \n#mode = %d \n#pHubs = %f \n#ggap = %f \n#ggaphub = %f \n#dthres = %f \n#hetVar = %f \n#tstop = %f \n#dt = %f \n\n'%(model,morphology,isHuman,pyseed,mode,pHubs,ggap,ggaphub,dthres,hetVar,tstop,dt))
+    f.write('#model = %d \n#morphology = %d \n#isHuman = %d \n#pyseed = %d \n#mode = %d \n#pHubs = %f \n#ggap = %f \n#ggaphub = %f \n#dthres = %f \n#isletsize = %f \n#hetVar = %f \n#tstop = %f \n#dt = %f \n\n'%(model,morphology,isHuman,pyseed,mode,pHubs,ggap,ggaphub,dthres,isletsize,hetVar,tstop,dt))
 
 if model == 1:
     ## Created by Chon Lei
@@ -101,7 +102,7 @@ modelSetup.SetRandomSeed(pyseed)
 CoorData = np.loadtxt(pathToMorphology)
 # process CoorData to be acceptable format in modelSetup.genCoupleMatrix()
 CoorData = CoorData[CoorData[:,0]==11][:,1:4]
-CoupledMatrix = modelSetup.genCoupleMatrix(CoorData,dthres)
+CoupledMatrix = modelSetup.genCoupleMatrix(CoorData,dthres,isletsize,True)
 ncells = CoupledMatrix.shape[0]
 if ncells != CoupledMatrix.shape[1]:
     raise Exception("CoupledMatrix invalid dimensions.")
