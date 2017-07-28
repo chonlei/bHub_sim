@@ -61,7 +61,8 @@ from mpl_toolkits.mplot3d import Axes3D
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 centreCoorData = np.mean(CoorData,0)
-CoorDataMask = np.sum((CoorData - centreCoorData)**2,1)<1500
+dcentre = 40
+CoorDataMask = (np.sum((CoorData - centreCoorData)**2,1)<(dcentre**2))
 for xs,ys,zs in CoorData[CoorDataMask,:]: #np.array(len(CoorData))[CoorDataMask]
     ax.scatter(xs, ys, zs, c='b', marker='o')
 ax.set_xlabel('X')
