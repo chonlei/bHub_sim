@@ -24,12 +24,14 @@ import modelSetup
 ## Define model and setup
 ######
 model = 2
-morphology = 1
+morphology = 3
+isHuman = 0  # 1: human; 0: mouse
 pyseed = 1
 mode = 2  # 0: WT; 1: silent hubs; 2: silent non hubs
 pHubs = 0.1  # percentage/fraction of hubs in islet
 ggap = 0.5*0.00017e-1
 ggaphub = 1.0*0.00017e-1
+dthres = 17.5
 tstop = 50e3
 dt = 0.1
 
@@ -38,7 +40,7 @@ outlog = path.join(outputdir, outputidx+'.log')
 outCa = path.join(outputdir, 'Ca_'+outputidx)
 outVm = path.join(outputdir, 'Vm_'+outputidx)
 with open(outlog, 'w') as f:
-    f.write('#model: %d \n#morphology: %d \n#pyseed: %d \n#mode: %d \n#pHubs: %f \n#ggap: %f \n#ggaphub: %f \n#tstop: %f \n#dt: %f \n\n'%(model,morphology,pyseed,mode,pHubs,ggap,ggaphub,tstop,dt))
+    f.write('#model: %d \n#morphology: %d \n#isHuman: %d \n#pyseed: %d \n#mode: %d \n#pHubs: %f \n#ggap: %f \n#ggaphub: %f \n#dthres: %f \n#tstop: %f \n#dt: %f \n\n'%(model,morphology,isHuman,pyseed,mode,pHubs,ggap,ggaphub,dthres,tstop,dt))
 
 if model == 1:
     ## Created by Chon Lei
@@ -77,9 +79,12 @@ elif model == 2:
         cellList.append(h.betacell())
         cellList[i].soma(0.5).gammatoset_katp = 10.0
 
-if morphology == 1:
-    pathToCoupledMatrix = '../morphologies/mouse/CouplingMatrix-mouse40-3-175.dat'
+if isHuman:
+    pathToMorphology = ""
+else:
+    #pathToCoupledMatrix = '../morphologies/mouse/CouplingMatrix-mouse40-3-175.dat'
     #pathToCoupledMatrix = '../morphologies/mouse/CouplingMatrixMouse403.dat'
+    pathToMorphology = "../morphologies/mouse/Mouse 40-%d.txt"%morphology
 
 random.seed(pyseed)
 np.random.seed(pyseed)
@@ -89,7 +94,11 @@ modelSetup.SetRandomSeed(pyseed)
 ######
 ## Import system setup files (.hoc files and system matrix)
 ######
-CoupledMatrix = np.loadtxt(pathToCoupledMatrix,delimiter=' ')#[-100:,-100:] #only taking last 100 cells
+#CoupledMatrix = np.loadtxt(pathToCoupledMatrix,delimiter=' ')#[-100:,-100:] #only taking last 100 cells
+CoorData = np.loadtxt(pathToMorphology)
+# process CoorData to be acceptable format in modelSetup.genCoupleMatrix()
+CoorData = CoorData[CoorData[:,0]==11][:,1:4]
+CoupledMatrix = modelSetup.genCoupleMatrix(CoorData,dthres)
 ncells = CoupledMatrix.shape[0]
 if ncells != CoupledMatrix.shape[1]:
     raise Exception("CoupledMatrix invalid dimensions.")
@@ -118,7 +127,7 @@ hubsList = temp[0:numHubs]
 # Use a previously generated indices
 # Comment this out to run another simulation
 #hubsList = [64, 74, 34, 18, 11, 61, 98, 44, 94, 47]
-hubsList = [1025, 570, 1294, 81, 169, 659, 890, 1622, 1486, 1250, 247, 59, 595, 1526, 546, 1008, 1629, 1748, 923, 872, 742, 635, 920, 977, 1333, 867, 1438, 434, 524, 1053, 1235, 420, 718, 1042, 835, 399, 775, 1275, 1573, 148, 407, 365, 1240, 515, 523, 452, 391, 1743, 1049, 753, 1463, 388, 1502, 448, 166, 1718, 687, 1090, 1536, 254, 1219, 1490, 683, 0, 584, 1701, 1747, 11, 1424, 1350, 377, 1062, 1031, 1026, 1266, 1652, 367, 1181, 669, 550, 643, 1137, 1349, 1411, 141, 1247, 95, 1082] # same as strong GJ
+#hubsList = [1025, 570, 1294, 81, 169, 659, 890, 1622, 1486, 1250, 247, 59, 595, 1526, 546, 1008, 1629, 1748, 923, 872, 742, 635, 920, 977, 1333, 867, 1438, 434, 524, 1053, 1235, 420, 718, 1042, 835, 399, 775, 1275, 1573, 148, 407, 365, 1240, 515, 523, 452, 391, 1743, 1049, 753, 1463, 388, 1502, 448, 166, 1718, 687, 1090, 1536, 254, 1219, 1490, 683, 0, 584, 1701, 1747, 11, 1424, 1350, 377, 1062, 1031, 1026, 1266, 1652, 367, 1181, 669, 550, 643, 1137, 1349, 1411, 141, 1247, 95, 1082] # same as strong GJ
 print(hubsList)
 with open(outlog, 'a') as f:
     f.write('#hubsList: \n')

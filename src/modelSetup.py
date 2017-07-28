@@ -164,9 +164,9 @@ def loadHeteroHermann2007(b_cell,HetMatrix,i):
 #  - set cutoff distance cutoffConnect ~ 20 um
 #  - convert it into binary matrix
 
-def genCoupleMatrix(coorData, cutoff=20):
+def genCoupleMatrix(coorData, cutoff=20, uptri=True):
     # Generate a binary CoupleMatrix using islet coordinates data
-    #
+    # 
     # if given 3 columns coordinate data of one cell type (e.g. b-cell)
     if isinstance(coorData, (str, unicode)):
         coorData = np.loadtxt(coorData)
@@ -183,6 +183,8 @@ def genCoupleMatrix(coorData, cutoff=20):
     # convert it to binary matrix
     CoupleMatrix[CoupleMatrix<cutoff] = 1
     CoupleMatrix[CoupleMatrix>cutoff] = 0
+    if uptri:
+        CoupleMatrix = np.tril(CoupleMatrix,-1)
     return CoupleMatrix
 
 ## Tested
