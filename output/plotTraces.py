@@ -4,12 +4,16 @@ import matplotlib
 matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab! - Otherwise figures try to load but -X not necessarily on
 import matplotlib.pyplot as plt
 import sys
+import os
 
 # setup data
 try:
     fileName = sys.argv[1]
 except Exception:
     fileName = "Ca_WT_5phubs_9s_sGJ_100by501.dat"
+fileDir = os.path.dirname(fileName)
+fileIdx = re.findall(".*model_(\d+)_morphology_(\d+)_seed_(\d+)_mode_(\d+)_.*",fileName)
+fileId = "model_%s_morphology_%s_seed_%s_mode_%s"%fileIdx[0]
 shape = re.findall('.*_(\w+)x(\w+)\.dat',fileName)[0]
 shapeX = (int(shape[0]),int(shape[1]))
 varName = r"[Ca]$_i$ [mM]"
@@ -21,7 +25,7 @@ X = np.memmap(fileName, dtype='float64', mode='r', shape=shapeX)
 time = np.arange(shapeX[1])*10.0  # account dt
 
 # hubList (if have)
-hubList = [1025, 570, 1294, 81, 169, 659, 890, 1622, 1486, 1250, 247, 59, 595, 1526, 546, 1008, 1629, 1748, 923, 872, 742, 635, 920, 977, 1333, 867, 1438, 434, 524, 1053, 1235, 420, 718, 1042, 835, 399, 775, 1275, 1573, 148, 407, 365, 1240, 515, 523, 452, 391, 1743, 1049, 753, 1463, 388, 1502, 448, 166, 1718, 687, 1090, 1536, 254, 1219, 1490, 683, 0, 584, 1701, 1747, 11, 1424, 1350, 377, 1062, 1031, 1026, 1266, 1652, 367, 1181, 669, 550, 643, 1137, 1349, 1411, 141, 1247, 95, 1082] #[62, 77, 27, 4, 85, 57, 66, 37, 48, 45]#[64, 74, 34, 18, 11, 61, 98, 44, 94, 47]
+hubList = np.loadtxt(os.path.join(fileDir,fileId+'.log'),delimiter=',',dtype=int)
 
 # main plot
 aveX = np.zeros(X[0].shape)
