@@ -24,8 +24,9 @@ import modelSetup
 ## Define model and setup
 ######
 model = 2
+gjmodel = 1
 morphology = 3
-isHuman = 0  # 1: human; 0: mouse
+species = 0  # 0: mouse; 1: human; 2: cubic lattice
 pyseed = 1
 mode = 0  # 0: WT; 1: silent hubs; 2: silent non hubs
 pHubs = 0.1  # percentage/fraction of hubs in islet
@@ -42,7 +43,7 @@ outlog = path.join(outputdir, outputidx+'.log')
 outCa = path.join(outputdir, 'Ca_'+outputidx)
 outVm = path.join(outputdir, 'Vm_'+outputidx)
 with open(outlog, 'w') as f:
-    f.write('#model = %d \n#morphology = %d \n#isHuman = %d \n#pyseed = %d \n#mode = %d \n#pHubs = %f \n#ggap = %f \n#ggaphub = %f \n#dthres = %f \n#isletsize = %f \n#hetVar = %f \n#tstop = %f \n#dt = %f \n\n'%(model,morphology,isHuman,pyseed,mode,pHubs,ggap,ggaphub,dthres,isletsize,hetVar,tstop,dt))
+    f.write('#model = %d \n#gjmodel = %d \n#morphology = %d \n#species = %d \n#pyseed = %d \n#mode = %d \n#pHubs = %f \n#ggap = %f \n#ggaphub = %f \n#dthres = %f \n#isletsize = %f \n#hetVar = %f \n#tstop = %f \n#dt = %f \n\n'%(model,gjmodel,morphology,species,pyseed,mode,pHubs,ggap,ggaphub,dthres,isletsize,hetVar,tstop,dt))
 
 if model == 1:
     ## Created by Chon Lei
@@ -83,12 +84,19 @@ elif model == 2:
         cellList.append(h.betacell())
         cellList[i].soma(0.5).gammatoset_katp = 10.0
 
-if isHuman:
-    pathToMorphology = ""
-else:
+if gjmodel==1:
+    pathToGJModel = "../models/gapjunction_pedersen2015"
+elif gjmodel==2:
+    pathToGJModel = "../models/gapjunction_hermann2010"
+
+if species==0:
     #pathToCoupledMatrix = '../morphologies/mouse/CouplingMatrix-mouse40-3-175.dat'
     #pathToCoupledMatrix = '../morphologies/mouse/CouplingMatrixMouse403.dat'
     pathToMorphology = "../morphologies/mouse/Mouse 40-%d.txt"%morphology
+elif species==1:
+    pathToMorphology = ""
+elif species==2:
+    pathToMorphology = "../morphologies/cubic_lattice/cubic%d.txt"%morphology
 
 random.seed(pyseed)
 np.random.seed(pyseed)
@@ -111,9 +119,10 @@ Total = (ncells*ncells)/2 - ncells # maximum number of gapjunctions that could b
 try:
     # assumed using x64 bits; change if needed
     h('nrn_load_dll("%sx86_64/.libs/libnrnmech.so")'%pathToModel)
+    h('nrn_load_dll("%sx86_64/.libs/libnrnmech.so")'%pathToGJModel)
     h.load_file (pathToModel+"betahub.hoc")
     h.load_file (pathToModel+"betacell.hoc")
-    h.load_file (pathToModel+"gapjunction.hoc")
+    h.load_file (pathToGJModel+"gapjunction.hoc")
 except Exception:
     raise Exception("Please make sure files has been compiled using \n$ nrnivmodl\n")
 
