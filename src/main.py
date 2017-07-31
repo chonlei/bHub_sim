@@ -25,8 +25,8 @@ import modelSetup
 ######
 model = 2
 gjmodel = 1
-morphology = 3
-species = 0  # 0: mouse; 1: human; 2: cubic lattice
+morphology = 0#3
+species = 2  # 0: mouse; 1: human; 2: cubic lattice
 pyseed = 1
 mode = 0  # 0: WT; 1: silent hubs; 2: silent non hubs
 pHubs = 0.1  # percentage/fraction of hubs in islet
@@ -85,9 +85,9 @@ elif model == 2:
         cellList[i].soma(0.5).gammatoset_katp = 10.0
 
 if gjmodel==1:
-    pathToGJModel = "../models/gapjunction_pedersen2015"
+    pathToGJModel = "../models/gapjunction_pedersen2015/"
 elif gjmodel==2:
-    pathToGJModel = "../models/gapjunction_hermann2010"
+    pathToGJModel = "../models/gapjunction_hermann2010/"
 
 if species==0:
     #pathToCoupledMatrix = '../morphologies/mouse/CouplingMatrix-mouse40-3-175.dat'
