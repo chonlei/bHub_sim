@@ -24,7 +24,7 @@ import modelSetup
 ## Define model and setup
 ######
 model = 2
-gjmodel = 1
+gjmodel = 2
 morphology = 0#3
 species = 2  # 0: mouse; 1: human; 2: cubic lattice
 pyseed = 1
@@ -32,6 +32,7 @@ mode = 0  # 0: WT; 1: silent hubs; 2: silent non hubs
 pHubs = 0.1  # percentage/fraction of hubs in islet
 ggap = 0.5*0.00017e-1
 ggaphub = 1.0*0.00017e-1
+gjtau = 500.0
 dthres = 17.5
 isletsize = 40
 hetVar = 0.05
@@ -43,7 +44,7 @@ outlog = path.join(outputdir, outputidx+'.log')
 outCa = path.join(outputdir, 'Ca_'+outputidx)
 outVm = path.join(outputdir, 'Vm_'+outputidx)
 with open(outlog, 'w') as f:
-    f.write('#model = %d \n#gjmodel = %d \n#morphology = %d \n#species = %d \n#pyseed = %d \n#mode = %d \n#pHubs = %f \n#ggap = %f \n#ggaphub = %f \n#dthres = %f \n#isletsize = %f \n#hetVar = %f \n#tstop = %f \n#dt = %f \n\n'%(model,gjmodel,morphology,species,pyseed,mode,pHubs,ggap,ggaphub,dthres,isletsize,hetVar,tstop,dt))
+    f.write('#model = %d \n#gjmodel = %d \n#morphology = %d \n#species = %d \n#pyseed = %d \n#mode = %d \n#pHubs = %f \n#ggap = %f \n#ggaphub = %f \n#gjtau = %f \n#dthres = %f \n#isletsize = %f \n#hetVar = %f \n#tstop = %f \n#dt = %f \n\n'%(model,gjmodel,morphology,species,pyseed,mode,pHubs,ggap,ggaphub,gjtau,dthres,isletsize,hetVar,tstop,dt))
 
 if model == 1:
     ## Created by Chon Lei
@@ -203,9 +204,9 @@ for i in range(ncells):
         if CoupledMatrix[i,j] > 0 and ((i in hubsList) or (j in hubsList)):
             #print i,j
             # strongly connect hubs with other cells, for testing purpose.
-            gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, ggaphub*CoupledMatrix[i,j]))
+            gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, ggaphub*CoupledMatrix[i,j],gjtau))
         elif CoupledMatrix[i,j] > 0: #and ((i not in nonHubsToPickList) or (j not in nonHubsToPickList)):
-            gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, ggap*CoupledMatrix[i,j]))
+            gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, ggap*CoupledMatrix[i,j],gjtau))
 
 ######
 ## External stimulation
