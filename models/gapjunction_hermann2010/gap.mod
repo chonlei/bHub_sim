@@ -30,12 +30,18 @@ ASSIGNED {
    nai		(mM)
    ki		(mM)
    cai		(mM)
+   naj          (mM)
+   kj           (mM)
+   caj          (mM)
    ina 		(mA/cm2)
    ik 		(mA/cm2)
    ica 		(mA/cm2)
    vinfna	(mV)
    vinfk	(mV)
    vinfca	(mV)
+   Tem
+   RTF
+   RTF2
 }
 
 STATE { vgapna  vgapk  vgapca }
