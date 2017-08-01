@@ -7,11 +7,30 @@ Created on Wed Apr 26 23:24:03 2017
 
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 
+try:
+    speices = int(sys.argv[1])
+    morphology = int(sys.argv[2])
+except Exception:
+    raise Exception("Please enter speices ID and morphology ID")
+try:
+    dcentre = int(sys.argv[3])
+except Exception:
+    dcentre = 40
 
 # Define data file and parameters for testing
-pathToFile = "./mouse/"
-coorDataFile = "Mouse 40-3"
+if speices==0:
+    pathToFile = "./mouse/"
+    coorDataFile = "Mouse 40-%d"%morphology
+elif speices==1:
+    #get human islet data
+    pass
+elif speices==2:
+    pathToFile = "./cubic_lattice/"
+    coorDataFile = "cubic%d"%morphology
+
+
 cutoffTest = [5,7.5,10,12.5,15,17.5,20]
 CoorData = np.loadtxt(pathToFile+coorDataFile+".txt")
 
@@ -42,6 +61,7 @@ def genCoupleMatrix(coorData, cutoff=20):
 # proceed CoorData to be acceptable format in genCoupleMatrix()
 CoorData = CoorData[CoorData[:,0]==11][:,1:4]
 
+plt.figure(1)
 for i in cutoffTest:
     cm = genCoupleMatrix(CoorData,i)
     numLinks = np.sum(cm,1)
@@ -53,15 +73,13 @@ plt.title("GJ spatial network distribution - %s"%coorDataFile)
 plt.xlabel("number of GJ to neighbouring cells")
 plt.ylabel("number of cells")
 #plt.savefig("SN_dist-%s.png"%coorDataFile)
-plt.show()
 
 
 # plot the islet
 from mpl_toolkits.mplot3d import Axes3D
-fig = plt.figure()
+fig = plt.figure(2)
 ax = fig.add_subplot(111, projection='3d')
 centreCoorData = np.mean(CoorData,0)
-dcentre = 40
 CoorDataMask = (np.sum((CoorData - centreCoorData)**2,1)<(dcentre**2))
 for xs,ys,zs in CoorData[CoorDataMask,:]: #np.array(len(CoorData))[CoorDataMask]
     ax.scatter(xs, ys, zs, c='b', marker='o')
@@ -74,3 +92,5 @@ ax.set_zlabel('Z')
 # turn cm to usable coupling matrix in NEURON script
 cm = np.tril(cm,-1)
 #np.savetxt("CouplingMatrix-%s-%d.dat"%(coorDataFile,int(i*10),cm))
+
+plt.show()
