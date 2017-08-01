@@ -114,7 +114,7 @@ a = a/max(a)*100;
 N = N/sum(N)*100;
 x=(edges(1:end-1)+edges(2:end))/2;
 
-If h = figure;set(h, 'Visible', 'off');
+h = figure;set(h, 'Visible', 'off');
 loglog(x,N,'o')
 xlabel('%links')
 ylabel('P(%links)*100')

@@ -1,6 +1,10 @@
 % use averaged threshold rather than individual threshold
 function Ca_bi = binarise_trace(Ca_input,savefile)
 
+if nargin < 2
+    savefile = 'None'
+end
+
 % Signal_Lisse_Input = Ca input
 %Ca_input = dlmread('Ca2_WT_10phubs_90s_sGJ_100by5001.txt');
 Ca_bi = zeros(size(Ca_input));
