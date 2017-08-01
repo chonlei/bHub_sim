@@ -1,5 +1,5 @@
 % compute power law 
-function analyse_raster(Ca_bi,nSigma)
+function analyse_raster(Ca_bi,nSigma,hubList)
 %Raster: input raw raster
 test = 3;
 if test==1
@@ -116,6 +116,11 @@ x=(edges(1:end-1)+edges(2:end))/2;
 
 h = figure;set(h, 'Visible', 'off');
 loglog(x,N,'o')
+for ihub=hubList
+    hLink = a(find(cumsum(nonZeros)==ihub));
+    ph = N(x>hLink);
+    loglog(hLink,ph(1),'x')
+end
 xlabel('%links')
 ylabel('P(%links)*100')
 saveas(h,'temp_fig.png');
@@ -131,7 +136,7 @@ if findone
         end
     end
 else
-    temp = find(a>80);
+    temp = find(a>60);
     for i=1:length(temp)
         thehubid = find(cumsum(nonZeros)==temp(i))
     end
