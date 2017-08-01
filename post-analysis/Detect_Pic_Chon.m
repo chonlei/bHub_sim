@@ -1,8 +1,13 @@
 
+% Signal_Lisse_Input = Ca input
+Ca_input = dlmread('Ca_model_2_morphology_0_seed_1_mode_0_57x601.txt');
+Ca_bi = zeros(size(Ca_input));
+
+for cellid = 1:size(Ca_input,1)
+
 Signaux = struct;
 
-% Signal_Lisse_Input = Ca input
-Signal_Lisse_Input = [0.99 1.2 4.1 12. 3 2 1 0 0.3];
+Signal_Lisse_Input = Ca_input(cellid,:);
 
 Signal = Signal_Lisse_Input;
 
@@ -26,4 +31,9 @@ Signaux.Base_Signal_Lisse_Courant=mean(Signal_Lisse_Tmp(find(Signal_Lisse_Tmp<a+
 Test_Pic_Tmp=Signaux.Base_Signal_Lisse_Courant+alpha*(c-a);
 
 Signaux.Activite_Totale_Courante=Signal_Lisse_Input>Test_Pic_Tmp;
-    
+
+Ca_bi(cellid,:) = Signaux.Activite_Totale_Courante;
+
+end
+
+dlmwrite('Ca_model_2_morphology_0_seed_1_mode_0_57x601_bi.txt',Ca_bi,'\t')

@@ -1,7 +1,15 @@
 
 %Raster: input raw raster
-%load('temp_raster');
-Raster = csvread('recording1_Raster.csv');
+test = 3;
+if test==1
+    load('temp_raster');
+    Raster = a;
+elseif test==2
+    Raster = csvread('recording1_Raster.csv');
+elseif test==3
+    Raster = Ca_bi';
+end
+
 Signaux = struct;
 Images = struct;
 %Images.Nombre_Regions_Interet = number of cells (ROI)
