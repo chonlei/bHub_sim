@@ -2,10 +2,13 @@
 % to run: ./analyse_power_law.sh /usr/local/MATLAB/R2014a path_to_Ca
 % -- or --
 % to run: matlab -r "analyse_power_law(path_to_Ca); quit"
-function rc = get_power_law(path_to_Ca,nSigma)
+function rc = get_power_law(path_to_Ca,startIdx,nSigma)
 
 if nargin < 2
+    startIdx = 1; % cut out the first part of the simulation
     nSigma = 2; % number of sigma for significant threshold
+elseif nargin < 3
+    nSigma = 2;
 end
 
 try
@@ -20,6 +23,8 @@ catch
     Ca_input = reshape(Ca_input,str2num(shape{1}{2}),str2num(shape{1}{1}))'; % oddly they are flipped
     hubList = dlmread(fullfile(pathstr,[fileId '.log']),',');
 end
+
+Ca_input = Ca_input(:,startIdx:end);
 
 Ca_bi = binarise_trace(Ca_input,'None');
 
