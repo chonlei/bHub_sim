@@ -1,4 +1,5 @@
-
+% compute power law 
+function analyse_raster(Ca_bi,nSigma)
 %Raster: input raw raster
 test = 3;
 if test==1
@@ -8,6 +9,8 @@ elseif test==2
     Raster = csvread('recording1_Raster.csv');
 elseif test==3
     Raster = Ca_bi';
+    nonZeros = (sum(Raster,1)>0);
+    Raster = Raster(:,nonZeros);
 end
 
 Signaux = struct;
@@ -100,7 +103,7 @@ end
 % Determination de la matrice de correlation
 Correlation_Aleatoire_Mean_Tmp=mean(mean(Signaux.Correlation_Brassee));
 Correlation_Aleatoire_Std_Tmp=mean(std(Signaux.Correlation_Brassee));
-Seuil_Significativite_Correlation=Correlation_Aleatoire_Mean_Tmp+2*Correlation_Aleatoire_Std_Tmp;
+Seuil_Significativite_Correlation=Correlation_Aleatoire_Mean_Tmp+nSigma*Correlation_Aleatoire_Std_Tmp;
 
 Signaux.Correlation_Test=Signaux.Correlation>Seuil_Significativite_Correlation;
 
@@ -110,4 +113,30 @@ a = a/max(a)*100;
 [N,edges] = histcounts(a,20);
 N = N/sum(N)*100;
 x=(edges(1:end-1)+edges(2:end))/2;
+
+If h = figure;set(h, 'Visible', 'off');
 loglog(x,N,'o')
+xlabel('%links')
+ylabel('P(%links)*100')
+saveas(h,'temp_fig.png');
+
+findone = 0;
+if findone
+    try
+        thehubid = find(cumsum(nonZeros)==find(a==100))
+    catch
+        temp = find(a==100);
+        for i=1:length(temp)
+        thehubid = find(cumsum(nonZeros)==temp(i))
+        end
+    end
+else
+    temp = find(a>80);
+    for i=1:length(temp)
+        thehubid = find(cumsum(nonZeros)==temp(i))
+    end
+end
+
+
+%plot(Ca_input(thehubid,:))
+end
