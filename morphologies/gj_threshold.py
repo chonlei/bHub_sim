@@ -149,6 +149,7 @@ fig = plt.figure(2)
 ax = fig.add_subplot(111, projection='3d')
 centreCoorData = np.mean(CoorData,0)
 CoorDataMask = (np.sum((CoorData - centreCoorData)**2,1)<(dcentre**2))
+print "imagedCells: ", cellImaged
 for i,(xs,ys,zs) in enumerate(CoorData[CoorDataMask,:]): #np.array(len(CoorData))[CoorDataMask]
     ax.scatter(xs, ys, zs, c='b', marker='o')
     if i in cellImaged:
