@@ -6,6 +6,7 @@
 import numpy as np
 import random
 import os
+import warnings
 
 
 #pyseed = 1
@@ -43,12 +44,58 @@ def outputSetup(model,morphology,pyseed,mode):
     try:
         outputdir = '../output/sim%d/'%idx
         os.makedirs(outputdir)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
+    except Exception:
+        raise Exception("Cannot create directory ../output/sim%d/"%idx)
     outputidx = 'model_'+str(model)+'_morphology_'+str(morphology)+'_seed_'+str(pyseed)+'_mode_'+str(mode)
     return outputidx, outputdir
 
+
+def getImagedCellIdx(coorData, topDir=2, imageDepth=10, Ncells=100, method=0):
+    """Get Experimentally trackable cell indices
+    
+    The function returns the cell indices that are experimentally trackable, 
+    and there are two realisations of this, the first one simply takes the 
+    cells that are within the imageDepth in the topDir direction; the second 
+    method takes the cells that are at imageDepth distance underneath the cell 
+    surface. Finally, you can also fix to pick the top Ncells number of cells. 
+    
+    Args:
+        coorData (arr): The coordinate of the cells.
+        topDir (int): The image direction/the direction to search cell. 
+                      Pick: 0='x',1='y',2='z'. Default: 2.
+        imageDepth (float): The distance of which can be imaged.
+        Ncells (int): The number of cells to pick if using method=0. 
+        method (int): The method to select cells.
+                      0 = fixed number of cells to pick. (Default)
+                      1 = imageDepth as distance from the top cell in the given
+                          direction.
+                      2 = cells that are at imageDepth distance underneath the 
+                          islet surface.
+    
+    Return:
+        cellIdx (arr): A list of cell indices that can be imaged.
+    
+    """
+    cellIdx = []
+    if method==0:
+        # fixed number of cells to pick
+        cellIdx = np.argsort(coorData[:,topDir])
+        cellIdx = cellIdx[:Ncells] if Ncells>0 else cellIdx[Ncells:]
+    elif method==1:
+        # imageDepth as distance from the top cell in the given direction
+        topCellCoor = np.max(coorData[:,topDir])
+        isWithinDepth = coorData[:,topDir] > (topCellCoor-imageDepth)
+        cellIdx = np.arange(len(coorData[:,topDir]))[isWithinDepth]
+        if len(cellIdx)>Ncells:
+            warnings.warn("Warning: returned cells are more than Ncells")
+        elif len(cellIdx)<0.5*Ncells:
+            warnings.warn("Warning: returned cells are less than half of Ncells")
+    elif method==2:
+        # cells that are at imageDepth distance underneath the islet surface
+        # TBU 
+        raise Exception("Method 2 is due to be implemented...")
+        pass
+    return cellIdx
 
 
 
