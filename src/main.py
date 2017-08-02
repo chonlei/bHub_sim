@@ -28,23 +28,30 @@ gjmodel = 2
 morphology = 3
 species = 0  # 0: mouse; 1: human; 2: cubic lattice
 pyseed = 1
+isImitateExp = 0  # if True, simulate whole islet but only analyse imaged cells
 mode = 0  # 0: WT; 1: silent hubs; 2: silent non hubs
 pHubs = 0.1  # percentage/fraction of hubs in islet
+methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
 ggap = 1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
 ggaphub = 1/6.*5.1*0.385*1e-4#1.0*0.00017e-1
 gjtau = 160.0
-dthres = 17.5
-isletsize = 40
+dthres = 17.5  # spatial cutoff distance to def GJ connection
+isletsize = 40  # islet size of interest (None for whole islet)
 hetVar = 0.05
-tstop = 90e3
-dt = 0.1
+tstop = 90e3  # usually in [ms]
+dt = 0.1  # usually in [ms]
+downSampling = 100  # down sample the output -> output_timestep = dt*downSampling
 
+if isImitateExp:
+    isletsize = None # force to use whole islet
+
+# Create output directories and log file
 outputidx, outputdir = modelSetup.outputSetup(model,morphology,pyseed,mode)
 outlog = path.join(outputdir, outputidx+'.log')
 outCa = path.join(outputdir, 'Ca_'+outputidx)
 outVm = path.join(outputdir, 'Vm_'+outputidx)
 with open(outlog, 'w') as f:
-    f.write('#model = %d \n#gjmodel = %d \n#morphology = %d \n#species = %d \n#pyseed = %d \n#mode = %d \n#pHubs = %f \n#ggap = %f \n#ggaphub = %f \n#gjtau = %f \n#dthres = %f \n#isletsize = %f \n#hetVar = %f \n#tstop = %f \n#dt = %f \n\n'%(model,gjmodel,morphology,species,pyseed,mode,pHubs,ggap,ggaphub,gjtau,dthres,isletsize,hetVar,tstop,dt))
+    f.write('#model = %d \n#gjmodel = %d \n#morphology = %d \n#species = %d \n#pyseed = %d \n#isImitateExp = %d \n#mode = %d \n#pHubs = %f \n#methodToPickHubs = %d \n#ggap = %f \n#ggaphub = %f \n#gjtau = %f \n#dthres = %f \n#isletsize = %f \n#hetVar = %f \n#tstop = %f \n#dt = %f \n#downSampling = %d \n\n'%(model,gjmodel,morphology,species,pyseed,isImitateExp,mode,pHubs,methodToPickHubs,ggap,ggaphub,gjtau,dthres,isletsize,hetVar,tstop,dt,downSampling))
 
 if model == 1:
     ## Created by Chon Lei
@@ -117,6 +124,13 @@ if ncells != CoupledMatrix.shape[1]:
     raise Exception("CoupledMatrix invalid dimensions.")
 Total = (ncells*ncells)/2 - ncells # maximum number of gapjunctions that could be formed
 
+if isImitateExp==1:
+    imagedCells = modelSetup.getImagedCellIdx(CoorData,topDir=2,imageDepth=10,Ncells=100,method=0)
+with open(outlog, 'a') as f:
+    f.write('#imagedCells = ')
+    f.write(','.join(map(str, imagedCells)))
+    f.write('\n\n')
+
 try:
     # assumed using x64 bits; change if needed
     h('nrn_load_dll("%sx86_64/.libs/libnrnmech.so")'%pathToModel)
@@ -138,14 +152,23 @@ numHubs = int(pHubs*ncells)
 temp = range(ncells)
 random.shuffle(temp)
 hubsList = temp[0:numHubs]
+imagedHubs = list(set(hubsList).intersection(imagedCells))
+if len(imagedHubs) < int(pHubs*len(imagedCells)):
+    nMorehubs = len(imagedHubs) - int(pHubs*len(imagedCells))
+    tempCellsToPick = [x for x in imagedCells if x not in imagedHubs]
+    random.shuffle(tempCellsToPick)
+    hubsList += tempCellsToPick[0:nMorehubs]
+    imagedHubs += tempCellsToPick[0:nMorehubs]
 # Use a previously generated indices
-# Comment this out to run another simulation
-#hubsList = [64, 74, 34, 18, 11, 61, 98, 44, 94, 47]
-#hubsList = [1025, 570, 1294, 81, 169, 659, 890, 1622, 1486, 1250, 247, 59, 595, 1526, 546, 1008, 1629, 1748, 923, 872, 742, 635, 920, 977, 1333, 867, 1438, 434, 524, 1053, 1235, 420, 718, 1042, 835, 399, 775, 1275, 1573, 148, 407, 365, 1240, 515, 523, 452, 391, 1743, 1049, 753, 1463, 388, 1502, 448, 166, 1718, 687, 1090, 1536, 254, 1219, 1490, 683, 0, 584, 1701, 1747, 11, 1424, 1350, 377, 1062, 1031, 1026, 1266, 1652, 367, 1181, 669, 550, 643, 1137, 1349, 1411, 141, 1247, 95, 1082] # same as strong GJ
+# Uncomment this to set specific hubs
+#hubsList = [self_def_list]
 print(hubsList)
 with open(outlog, 'a') as f:
     f.write('#hubsList = \n')
     f.write(','.join(map(str, hubsList)))
+    f.write('\n\n')
+    f.write('#imagedHubs = ')
+    f.write(','.join(map(str, imagedHubs)))
     f.write('\n\n')
 
 # Randomly pick some non-hubs cells
@@ -256,10 +279,10 @@ print("*************************")
 ######
 print("Converting results for export...")
 # Down sampling
-carec = modelSetup.convertSimOutput(carec,100)
-vrec = modelSetup.convertSimOutput(vrec,100)
+carec = modelSetup.convertSimOutput(carec,downSampling)
+vrec = modelSetup.convertSimOutput(vrec,downSampling)
 print("Exporting Ca traces...")
-## TODO change output name and work with modelSetup.outputSetup()
+## output name from modelSetup.outputSetup()
 filename = outCa+'_%dx%d.dat'%(len(carec),len(carec[0]))
 fp = np.memmap(filename, dtype="float64", mode='w+', shape=(len(carec),len(carec[0])))
 fp[:] = carec[:]
