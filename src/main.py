@@ -23,16 +23,16 @@ import modelSetup
 ######
 ## Define model and setup
 ######
-model = 2
+model = 1
 gjmodel = 2
-morphology = 0#3
-species = 2  # 0: mouse; 1: human; 2: cubic lattice
+morphology = 3
+species = 0  # 0: mouse; 1: human; 2: cubic lattice
 pyseed = 1
 mode = 0  # 0: WT; 1: silent hubs; 2: silent non hubs
 pHubs = 0.1  # percentage/fraction of hubs in islet
 ggap = 1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
 ggaphub = 1/6.*5.1*0.385*1e-4#1.0*0.00017e-1
-gjtau = 500.0
+gjtau = 160.0
 dthres = 17.5
 isletsize = 40
 hetVar = 0.05
