@@ -23,12 +23,12 @@ import modelSetup
 ######
 ## Define model and setup
 ######
-model = 1
+model = 2
 gjmodel = 2
 morphology = 3
 species = 0  # 0: mouse; 1: human; 2: cubic lattice
 pyseed = 1
-isImitateExp = 0  # if True, simulate whole islet but only analyse imaged cells
+isImitateExp = 1  # if True, simulate whole islet but only analyse imaged cells
 mode = 0  # 0: WT; 1: silent hubs; 2: silent non hubs
 pHubs = 0.1  # percentage/fraction of hubs in islet
 methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
@@ -51,7 +51,8 @@ outlog = path.join(outputdir, outputidx+'.log')
 outCa = path.join(outputdir, 'Ca_'+outputidx)
 outVm = path.join(outputdir, 'Vm_'+outputidx)
 with open(outlog, 'w') as f:
-    f.write('#model = %d \n#gjmodel = %d \n#morphology = %d \n#species = %d \n#pyseed = %d \n#isImitateExp = %d \n#mode = %d \n#pHubs = %f \n#methodToPickHubs = %d \n#ggap = %f \n#ggaphub = %f \n#gjtau = %f \n#dthres = %f \n#isletsize = %f \n#hetVar = %f \n#tstop = %f \n#dt = %f \n#downSampling = %d \n\n'%(model,gjmodel,morphology,species,pyseed,isImitateExp,mode,pHubs,methodToPickHubs,ggap,ggaphub,gjtau,dthres,isletsize,hetVar,tstop,dt,downSampling))
+    f.write('#model = %d \n#gjmodel = %d \n#morphology = %d \n#species = %d \n#pyseed = %d \n#isImitateExp = %d \n#mode = %d \n#pHubs = %f \n#methodToPickHubs = %d \n#ggap = %f \n#ggaphub = %f \n#gjtau = %f \n#dthres = %f \n#isletsize = '%(model,gjmodel,morphology,species,pyseed,isImitateExp,mode,pHubs,methodToPickHubs,ggap,ggaphub,gjtau,dthres)+str(isletsize)+' \n')
+    f.write('#hetVar = %f \n#tstop = %f \n#dt = %f \n#downSampling = %d \n\n'%(hetVar,tstop,dt,downSampling))
 
 if model == 1:
     ## Created by Chon Lei
