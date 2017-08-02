@@ -115,14 +115,16 @@ N = N/sum(N)*100;
 x=(edges(1:end-1)+edges(2:end))/2;
 
 h = figure;set(h, 'Visible', 'off');
-loglog(x,N,'o')
-for ihub=hubList
-    hLink = a(find(cumsum(nonZeros)==ihub));
-    ph = N(x>hLink);
+loglog(x,N,'o');hold on;
+for ihub=hubList'
+    hLinkIdx = cumsum(nonZeros);
+    hLink = a(hLinkIdx(ihub));
+    ph = N(edges(2:end)>hLink);
     loglog(hLink,ph(1),'x')
 end
 xlabel('%links')
 ylabel('P(%links)*100')
+hold off;
 saveas(h,'temp_fig.png');
 
 findone = 0;

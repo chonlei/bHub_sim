@@ -11,7 +11,7 @@ if nargin < 2
 elseif nargin < 3
     binariseMethod = 1;
     nSigma = 2;
-elseif nargin < 3
+elseif nargin < 4
     nSigma = 2;
 end
 
@@ -33,7 +33,13 @@ end
 
 Ca_input = Ca_input(:,startIdx:end);
 
-Ca_bi = binarise_trace(Ca_input,'None');
+if binariseMethod==0
+    Ca_bi = binarise_trace_original(Ca_input,'None');
+elseif binariseMethod==1
+    Ca_bi = binarise_trace(Ca_input,'None');
+elseif binariseMethod==2
+    Ca_bi = binarise_trace2(Ca_input,'None');
+end
 
 analyse_raster(Ca_bi,nSigma,hubList);
 
