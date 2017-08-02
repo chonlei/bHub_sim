@@ -31,6 +31,7 @@ pyseed = 1
 isImitateExp = 0  # if True, simulate whole islet but only analyse imaged cells
 mode = 0  # 0: WT; 1: silent hubs; 2: silent non hubs
 pHubs = 0.1  # percentage/fraction of hubs in islet
+##TODO need to do methodToPickHubs
 methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
 ggap = 1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
 ggaphub = 1/6.*5.1*0.385*1e-4#1.0*0.00017e-1
