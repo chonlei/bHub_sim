@@ -20,7 +20,7 @@ fileIdx = re.findall(".*model_(\d+)_morphology_(\d+)_seed_(\d+)_mode_(\d+)_.*",f
 fileId = "model_%s_morphology_%s_seed_%s_mode_%s"%fileIdx[0]
 shape = re.findall('.*_(\w+)x(\w+)\.dat',fileName)[0]
 shapeX = (int(shape[0]),int(shape[1]))
-varName = r"[Ca]$_i$ [mM]"
+varName = r"[Ca]$_i$ [mM]" if "Ca" in fileName else r"$V_m$ [mV]"
 title = "short simulation homogeneous GJ @ mouse 40-3"
 saveName = fileName[:-4]+'.png'
 
@@ -71,6 +71,8 @@ plt.plot(time, aveX, 'g', linewidth=3.0, label='average all')
 # plotting setup
 plt.xlabel("t [ms]")
 plt.ylabel(varName)
-plt.title(title)
+if "Ca" in fileName:
+    plt.ylim([0, 0.0005])
+#plt.title(title)
 plt.savefig(saveName)
 
