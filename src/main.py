@@ -29,17 +29,17 @@ morphology = 3
 species = 0  # 0: mouse; 1: human; 2: cubic lattice
 pyseed = 1
 isImitateExp = 1  # if True, simulate whole islet but only analyse imaged cells
-mode = 0  # 0: WT; 1: silent hubs; 2: silent non hubs
+mode = 2  # 0: WT; 1: silent hubs; 2: silent non hubs
 pHubs = 0.1  # percentage/fraction of hubs in islet
 ##TODO need to do methodToPickHubs
 methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
-ggap = 1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
-ggaphub = 1/6.*5.1*0.385*1e-4#1.0*0.00017e-1
+ggap = 1/2.*1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
+ggaphub = 1/4.*1/6.*5.1*0.385*1e-4#1.0*0.00017e-1
 gjtau = 160.0
 dthres = 17.5  # spatial cutoff distance to def GJ connection
 isletsize = 40  # islet size of interest (None for whole islet)
 hetVar = 0.05
-tstop = 90e3  # usually in [ms]
+tstop = 30e3  # usually in [ms]
 dt = 0.1  # usually in [ms]
 downSampling = 100  # down sample the output -> output_timestep = dt*downSampling
 
@@ -178,10 +178,18 @@ numNonHubsToPick = numHubs
 temp = [i for i in range(ncells) if i not in hubsList]
 random.shuffle(temp)
 nonHubsToPickList = temp[0:numNonHubsToPick]
+imagedNonHubs = []
+if isImitateExp:
+    temp = [i for i in imagedCells if i not in imagedHubs]
+    random.shuffle(temp)
+    imagedNonHubs = temp[0:int(pHubs*len(imagedCells))]
 print(nonHubsToPickList)
 with open(outlog, 'a') as f:
     f.write('#nonHubsToPickList = ')
     f.write(','.join(map(str, nonHubsToPickList)))
+    f.write('\n\n')
+    f.write('#imagedNonHubs = ')
+    f.write(','.join(map(str, imagedNonHubs)))
     f.write('\n\n')
 
 # Declare heterogeneity matrix
@@ -200,23 +208,43 @@ for i in range(ncells):
         #cell.append(h.betacell())
         #setHetero(cell[i],HetMatrix,i)
         defineBeta(cell,i)
-        if (i in nonHubsToPickList) and (mode==2):
-            iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
-            iclamp_hubs[-1].delay = 0
-            iclamp_hubs[-1].dur = 120000
-            iclamp_hubs[-1].amp = -0.002
+        if isImitateExp:
+            if (i in imagedNonHubs) and (mode==2):
+                print "silencing cell ",i
+                iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
+                iclamp_hubs[-1].delay = 0
+                iclamp_hubs[-1].dur = 120000
+                iclamp_hubs[-1].amp = -0.002
+        else:
+            if (i in nonHubsToPickList) and (mode==2):
+                print "silencing cell ",i
+                iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
+                iclamp_hubs[-1].delay = 0
+                iclamp_hubs[-1].dur = 120000
+                iclamp_hubs[-1].amp = -0.002
     else:
         #cell.append(h.betahub())
         ##loadHetero(cell[i],HetMatrix,i) # no heterogenity for betahubs
         #cell[i].soma(0.5).nkatp_katp = -5.8
         defineBetaHub(cell,i)
-        if mode==1:
-            # I clamp hubs to silence them, compare results from Johnston et al., 2016
-            iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
-            iclamp_hubs[-1].delay = 0
-            iclamp_hubs[-1].dur = 120000
-            # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
-            iclamp_hubs[-1].amp = -0.002
+        if isImitateExp:
+            if mode==1 and (i in imagedHubs[:len(imagedHubs)]):
+                # I clamp hubs to silence them, compare results from Johnston et al., 2016
+                print "silencing cell ",i
+                iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
+                iclamp_hubs[-1].delay = 0
+                iclamp_hubs[-1].dur = 120000
+                # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
+                iclamp_hubs[-1].amp = -0.002 #-0.002
+        else:
+            if mode==1:
+                # I clamp hubs to silence them, compare results from Johnston et al., 2016
+                print "silencing cell ",i
+                iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
+                iclamp_hubs[-1].delay = 0
+                iclamp_hubs[-1].dur = 120000
+                # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
+                iclamp_hubs[-1].amp = -0.002 #-0.002
 
 
 print "Defining gap junction connections..."
