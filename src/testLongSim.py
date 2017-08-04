@@ -40,11 +40,8 @@ dt = 0.1  # usually in [ms]
 downSampling = 100  # down sample the output -> output_timestep = dt*downSampling
 tbatch = 10e3 # split simulation into batches; same unit as tstop
 
-if isImitateExp:
-    isletsize = None # force to use whole islet
-
 # Create output directories and log file
-outputidx, outputdir = modelSetup.outputSetup(model,morphology,pyseed,mode,isTest=True)
+outputidx, outputdir = modelSetup.outputSetup(model,morphology,pyseed,0,isTest=True)
 outlog = path.join(outputdir, outputidx+'.log')
 outCa = path.join(outputdir, 'Ca_'+outputidx)
 outVm = path.join(outputdir, 'Vm_'+outputidx)
