@@ -44,7 +44,7 @@ if isImitateExp:
     isletsize = None # force to use whole islet
 
 # Create output directories and log file
-outputidx, outputdir = modelSetup.outputSetup(model,morphology,pyseed,mode)
+outputidx, outputdir = modelSetup.outputSetup(model,morphology,pyseed,mode,isTest=True)
 outlog = path.join(outputdir, outputidx+'.log')
 outCa = path.join(outputdir, 'Ca_'+outputidx)
 outVm = path.join(outputdir, 'Vm_'+outputidx)
