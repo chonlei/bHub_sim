@@ -14,9 +14,15 @@ except Exception:
     raise Exception("Please enter path to log file")
 
 try:
-    isImagedCells = bool(sys.argv[2])
+    isImagedCells = bool(int(sys.argv[2]))
 except Exception:
     isImagedCells = False
+
+try:
+    isPrintOutHubs = bool(int(sys.argv[3]))
+except Exception:
+    isPrintOutHubs = False
+
 
 fileDir = os.path.dirname(fileName)
 fileBase = os.path.basename(fileName)
@@ -45,6 +51,7 @@ if isImagedCells:
             if ln.startswith(startName):
                 imagedHubs = ln[len(startName):]
     imagedHubs = [int(x.strip()) for x in imagedHubs.split(',')]
+    #TODO: fix the index for those imaged cells only
     hubList = imagedHubs
 
 startName = "#silencedCell = "
@@ -108,7 +115,9 @@ ncells = CoupledMatrix.shape[0]
 if isImagedCells:
     CoupledMatrix = CoupledMatrix[imagedCells,:][:,imagedCells]
 numLinks = np.sum(CoupledMatrix+CoupledMatrix.T,1)
-
+if isPrintOutHubs:
+    for i in hubList:
+        print("cell %d ; links %d"%(i,numLinks[i]))
 
 ######
 ## Plot the spatial connectivity distribution
