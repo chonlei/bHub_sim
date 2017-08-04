@@ -122,6 +122,7 @@ CoorData = np.loadtxt(pathToMorphology)
 CoorData = CoorData[CoorData[:,0]==11][:,1:4]
 CoupledMatrix = modelSetup.genCoupleMatrix(CoorData,dthres,isletsize,True)
 ncells = CoupledMatrix.shape[0]
+nSpatialLinks = np.sum(CoupledMatrix+CoupledMatrix.T,1)
 if ncells != CoupledMatrix.shape[1]:
     raise Exception("CoupledMatrix invalid dimensions.")
 Total = (ncells*ncells)/2 - ncells # maximum number of gapjunctions that could be formed
@@ -213,6 +214,7 @@ for i in range(ncells):
                 print "silencing cell ",i
                 with open(outlog, 'a') as f:
                     f.write('#silencedCell = %d\n'%i)
+                    f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
                 iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
                 iclamp_hubs[-1].delay = 0
                 iclamp_hubs[-1].dur = 120000
@@ -222,6 +224,7 @@ for i in range(ncells):
                 print "silencing cell ",i
                 with open(outlog, 'a') as f:
                     f.write('#silencedCell = %d\n'%i)
+                    f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
                 iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
                 iclamp_hubs[-1].delay = 0
                 iclamp_hubs[-1].dur = 120000
@@ -232,11 +235,12 @@ for i in range(ncells):
         #cell[i].soma(0.5).nkatp_katp = -5.8
         defineBetaHub(cell,i)
         if isImitateExp:
-            if mode==1 and (i == imagedHubs[0]):
+            if mode==1 and (i == imagedHubs[1]):
                 # I clamp hubs to silence them, compare results from Johnston et al., 2016
                 print "silencing cell ",i
                 with open(outlog, 'a') as f:
                     f.write('#silencedCell = %d\n'%i)
+                    f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
                 iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
                 iclamp_hubs[-1].delay = 0
                 iclamp_hubs[-1].dur = 120000
@@ -248,6 +252,7 @@ for i in range(ncells):
                 print "silencing cell ",i
                 with open(outlog, 'a') as f:
                     f.write('#silencedCell = %d\n'%i)
+                    f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
                 iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
                 iclamp_hubs[-1].delay = 0
                 iclamp_hubs[-1].dur = 120000
