@@ -33,14 +33,14 @@ hubList = np.loadtxt(fileName,delimiter=',',dtype=int)
 if isImagedCells:
     imagedCells = []
     startName = "#imagedCells = "
-    with open(os.path.join(fileDir,fileId+'.log'),"r") as fi:
+    with open(fileName,"r") as fi:
         for ln in fi:
             if ln.startswith(startName):
                 imagedCells = ln[len(startName):]
     imagedCells = [int(x.strip()) for x in imagedCells.split(',')]
     imagedHubs = []
     startName = "#imagedHubs = "
-    with open(os.path.join(fileDir,fileId+'.log'),"r") as fi:
+    with open(fileName,"r") as fi:
         for ln in fi:
             if ln.startswith(startName):
                 imagedHubs = ln[len(startName):]
@@ -48,7 +48,7 @@ if isImagedCells:
     hubList = imagedHubs
 
 startName = "#silencedCell = "
-with open(os.path.join(fileDir,fileId+'.log'),"r") as fi:
+with open(fileName,"r") as fi:
     for ln in fi:
         if ln.startswith(startName):
             temp = ln[len(startName):]
@@ -56,18 +56,35 @@ silencedCell = [int(x.strip()) for x in temp.split(',')]
 
 # get morphology info
 startName = "#morphology = "
-with open(os.path.join(fileDir,fileId+'.log'),"r") as fi: 
+with open(fileName,"r") as fi: 
     for ln in fi: 
         if ln.startswith(startName):
             temp = ln[len(startName):]
 morphology = int(temp)
 
 startName = "#species = "
-with open(os.path.join(fileDir,fileId+'.log'),"r") as fi:
+with open(fileName,"r") as fi:
     for ln in fi:
         if ln.startswith(startName):
             temp = ln[len(startName):]
 species = int(temp)
+
+startName = "#dthres = "
+with open(fileName,"r") as fi:
+    for ln in fi:
+        if ln.startswith(startName):
+            temp = ln[len(startName):]
+dthres = float(temp)
+
+startName = "#isletsize = "
+with open(fileName,"r") as fi:
+    for ln in fi:
+        if ln.startswith(startName):
+            temp = ln[len(startName):]
+try:
+    isletsize = float(temp)
+except Exception:
+    isletsize = None
 
 if species==0:
     #pathToCoupledMatrix = '../morphologies/mouse/CouplingMatrix-mouse40-3-175.dat'
@@ -100,9 +117,10 @@ plt.figure(1)
 countNumLinks = np.histogram(numLinks, bins=np.arange(numLinks.min(), numLinks.max()+1)-0.5)[0]
 labelname = "islet" if not isImagedCells else "imaged" 
 plt.plot(np.arange(numLinks.min(), numLinks.max()), countNumLinks, '-s',label=labelname)
-plt.hist(numLinks[hubList])
+plt.hist(numLinks[hubList],label='hubs')
 plt.xlabel("#GJ to neighbouring cells")
 plt.ylabel("#cells")
+plt.legend()
 
 plt.savefig(saveName)
 
