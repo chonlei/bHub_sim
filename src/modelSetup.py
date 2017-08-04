@@ -23,7 +23,7 @@ def SetRandomSeed(pyseed):
     random.seed(pyseed)
 
 
-def outputSetup(model,morphology,pyseed,mode):
+def outputSetup(model,morphology,pyseed,mode,isTest=False):
     """Set up the output folders and names
     
     This function create and return the output directory and output file name based on the simulation set up.
@@ -41,11 +41,11 @@ def outputSetup(model,morphology,pyseed,mode):
     """
     out = '../output/'
     idx = len([name for name in os.listdir(out) if os.path.isdir(out+name)])
+    outputdir = '../output/sim%d/'%idx if not isTest else '../output/testsim%d/'%idx
     try:
-        outputdir = '../output/sim%d/'%idx
         os.makedirs(outputdir)
     except Exception:
-        raise Exception("Cannot create directory ../output/sim%d/"%idx)
+        raise Exception("Cannot create directory %s"%outputdir)
     outputidx = 'model_'+str(model)+'_morphology_'+str(morphology)+'_seed_'+str(pyseed)+'_mode_'+str(mode)
     return outputidx, outputdir
 
