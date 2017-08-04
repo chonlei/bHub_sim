@@ -29,12 +29,12 @@ morphology = 3
 species = 0  # 0: mouse; 1: human; 2: cubic lattice
 pyseed = 1
 isImitateExp = 1  # if True, simulate whole islet but only analyse imaged cells
-mode = 2  # 0: WT; 1: silent hubs; 2: silent non hubs
-pHubs = 0.1  # percentage/fraction of hubs in islet
+mode = 1  # 0: WT; 1: silent hubs; 2: silent non hubs
+pHubs = 0.01  # percentage/fraction of hubs in islet
 ##TODO need to do methodToPickHubs
 methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
-ggap = 1/2.*1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
-ggaphub = 1/4.*1/6.*5.1*0.385*1e-4#1.0*0.00017e-1
+ggap = 1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
+ggaphub = 1/3.*1/6.*5.1*0.385*1e-4#1.0*0.00017e-1
 gjtau = 160.0
 dthres = 17.5  # spatial cutoff distance to def GJ connection
 isletsize = 40  # islet size of interest (None for whole islet)
@@ -209,15 +209,19 @@ for i in range(ncells):
         #setHetero(cell[i],HetMatrix,i)
         defineBeta(cell,i)
         if isImitateExp:
-            if (i in imagedNonHubs) and (mode==2):
+            if (i == imagedNonHubs[0]) and (mode==2):
                 print "silencing cell ",i
+                with open(outlog, 'a') as f:
+                    f.write('#silencedCell = %d\n'%i)
                 iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
                 iclamp_hubs[-1].delay = 0
                 iclamp_hubs[-1].dur = 120000
-                iclamp_hubs[-1].amp = -0.002
+                iclamp_hubs[-1].amp = -0.005
         else:
             if (i in nonHubsToPickList) and (mode==2):
                 print "silencing cell ",i
+                with open(outlog, 'a') as f:
+                    f.write('#silencedCell = %d\n'%i)
                 iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
                 iclamp_hubs[-1].delay = 0
                 iclamp_hubs[-1].dur = 120000
@@ -228,18 +232,22 @@ for i in range(ncells):
         #cell[i].soma(0.5).nkatp_katp = -5.8
         defineBetaHub(cell,i)
         if isImitateExp:
-            if mode==1 and (i in imagedHubs[:len(imagedHubs)]):
+            if mode==1 and (i == imagedHubs[0]):
                 # I clamp hubs to silence them, compare results from Johnston et al., 2016
                 print "silencing cell ",i
+                with open(outlog, 'a') as f:
+                    f.write('#silencedCell = %d\n'%i)
                 iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
                 iclamp_hubs[-1].delay = 0
                 iclamp_hubs[-1].dur = 120000
                 # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
-                iclamp_hubs[-1].amp = -0.002 #-0.002
+                iclamp_hubs[-1].amp = -0.005 #-0.002
         else:
             if mode==1:
                 # I clamp hubs to silence them, compare results from Johnston et al., 2016
                 print "silencing cell ",i
+                with open(outlog, 'a') as f:
+                    f.write('#silencedCell = %d\n'%i)
                 iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
                 iclamp_hubs[-1].delay = 0
                 iclamp_hubs[-1].dur = 120000
