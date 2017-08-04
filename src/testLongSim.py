@@ -29,22 +29,16 @@ import modelSetup
 model = 2
 gjmodel = 2
 morphology = 3
-species = 0  # 0: mouse; 1: human; 2: cubic lattice
+ncells = 3
 pyseed = 1
-isImitateExp = 1  # if True, simulate whole islet but only analyse imaged cells
-mode = 1  # 0: WT; 1: silent hubs; 2: silent non hubs
-pHubs = 0.01  # percentage/fraction of hubs in islet
-##TODO need to do methodToPickHubs
-methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
 ggap = 1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
 ggaphub = 1/3.*1/6.*5.1*0.385*1e-4#1.0*0.00017e-1
 gjtau = 160.0
-dthres = 17.5  # spatial cutoff distance to def GJ connection
-isletsize = 40  # islet size of interest (None for whole islet)
 hetVar = 0.05
 tstop = 30e3  # usually in [ms]
 dt = 0.1  # usually in [ms]
 downSampling = 100  # down sample the output -> output_timestep = dt*downSampling
+tbatch = 10e3 # split simulation into batches; same unit as tstop
 
 if isImitateExp:
     isletsize = None # force to use whole islet
@@ -55,8 +49,8 @@ outlog = path.join(outputdir, outputidx+'.log')
 outCa = path.join(outputdir, 'Ca_'+outputidx)
 outVm = path.join(outputdir, 'Vm_'+outputidx)
 with open(outlog, 'w') as f:
-    f.write('#model = %d \n#gjmodel = %d \n#morphology = %d \n#species = %d \n#pyseed = %d \n#isImitateExp = %d \n#mode = %d \n#pHubs = %f \n#methodToPickHubs = %d \n#ggap = %f \n#ggaphub = %f \n#gjtau = %f \n#dthres = %f \n#isletsize = '%(model,gjmodel,morphology,species,pyseed,isImitateExp,mode,pHubs,methodToPickHubs,ggap,ggaphub,gjtau,dthres)+str(isletsize)+' \n')
-    f.write('#hetVar = %f \n#tstop = %f \n#dt = %f \n#downSampling = %d \n\n'%(hetVar,tstop,dt,downSampling))
+    f.write('#model = %d \n#gjmodel = %d \n#morphology = %d \n#ncells = %d \n#pyseed = %d \n#ggap = %f \n#ggaphub = %f \n#gjtau = %f '%(model,gjmodel,morphology,ncells,pyseed,ggap,ggaphub,gjtau)+' \n')
+    f.write('#hetVar = %f \n#tstop = %f \n#dt = %f \n#downSampling = %d \n#tbatch = %f \n\n'%(hetVar,tstop,dt,downSampling,tbatch))
 
 if model == 1:
     ## Created by Chon Lei
@@ -102,15 +96,6 @@ if gjmodel==1:
 elif gjmodel==2:
     pathToGJModel = "../models/gapjunction_hermann2010/"
 
-if species==0:
-    #pathToCoupledMatrix = '../morphologies/mouse/CouplingMatrix-mouse40-3-175.dat'
-    #pathToCoupledMatrix = '../morphologies/mouse/CouplingMatrixMouse403.dat'
-    pathToMorphology = "../morphologies/mouse/Mouse 40-%d.txt"%morphology
-elif species==1:
-    pathToMorphology = ""
-elif species==2:
-    pathToMorphology = "../morphologies/cubic_lattice/cubic%d.txt"%morphology
-
 random.seed(pyseed)
 np.random.seed(pyseed)
 modelSetup.SetRandomSeed(pyseed)
@@ -119,23 +104,12 @@ modelSetup.SetRandomSeed(pyseed)
 ######
 ## Import system setup files (.hoc files and system matrix)
 ######
-#CoupledMatrix = np.loadtxt(pathToCoupledMatrix,delimiter=' ')#[-100:,-100:] #only taking last 100 cells
-CoorData = np.loadtxt(pathToMorphology)
-# process CoorData to be acceptable format in modelSetup.genCoupleMatrix()
-CoorData = CoorData[CoorData[:,0]==11][:,1:4]
-CoupledMatrix = modelSetup.genCoupleMatrix(CoorData,dthres,isletsize,True)
+CoupledMatrix = np.tril(np.ones((ncells,ncells)),-1) # just connect all cells
 ncells = CoupledMatrix.shape[0]
 nSpatialLinks = np.sum(CoupledMatrix+CoupledMatrix.T,1)
 if ncells != CoupledMatrix.shape[1]:
     raise Exception("CoupledMatrix invalid dimensions.")
 Total = (ncells*ncells)/2 - ncells # maximum number of gapjunctions that could be formed
-
-if isImitateExp==1:
-    imagedCells = modelSetup.getImagedCellIdx(CoorData,topDir=2,imageDepth=10,Ncells=100,method=0)
-with open(outlog, 'a') as f:
-    f.write('#imagedCells = ')
-    f.write(','.join(map(str, imagedCells)))
-    f.write('\n\n')
 
 try:
     # assumed using x64 bits; change if needed
@@ -153,54 +127,10 @@ except Exception:
 print("*************************")
 print("Starting system set-up...")
 
-# Define beta hubs cells
-numHubs = int(pHubs*ncells)
-temp = range(ncells)
-random.shuffle(temp)
-hubsList = temp[0:numHubs]
-imagedHubs = list(set(hubsList).intersection(imagedCells))
-if len(imagedHubs) < int(pHubs*len(imagedCells)):
-    nMorehubs = len(imagedHubs) - int(pHubs*len(imagedCells))
-    tempCellsToPick = [x for x in imagedCells if x not in imagedHubs]
-    random.shuffle(tempCellsToPick)
-    hubsList += tempCellsToPick[0:nMorehubs]
-    imagedHubs += tempCellsToPick[0:nMorehubs]
-# Use a previously generated indices
-# Uncomment this to set specific hubs
-#hubsList = [self_def_list]
-print(hubsList)
-with open(outlog, 'a') as f:
-    f.write('#hubsList = \n')
-    f.write(','.join(map(str, hubsList)))
-    f.write('\n\n')
-    f.write('#imagedHubs = ')
-    f.write(','.join(map(str, imagedHubs)))
-    f.write('\n\n')
-
-# Randomly pick some non-hubs cells
-numNonHubsToPick = numHubs
-temp = [i for i in range(ncells) if i not in hubsList]
-random.shuffle(temp)
-nonHubsToPickList = temp[0:numNonHubsToPick]
-imagedNonHubs = []
-if isImitateExp:
-    temp = [i for i in imagedCells if i not in imagedHubs]
-    random.shuffle(temp)
-    imagedNonHubs = temp[0:int(pHubs*len(imagedCells))]
-print(nonHubsToPickList)
-with open(outlog, 'a') as f:
-    f.write('#nonHubsToPickList = ')
-    f.write(','.join(map(str, nonHubsToPickList)))
-    f.write('\n\n')
-    f.write('#imagedNonHubs = ')
-    f.write(','.join(map(str, imagedNonHubs)))
-    f.write('\n\n')
-
 # Declare heterogeneity matrix
 HetMatrix = np.zeros((len(HetDict)+1,ncells))
 # Use a previously generated heterogeneity matrix
 # Comment this out and use setHeteroHermann2007() to run another simulation
-#HetMatrix = np.loadtxt('HetMatrix-mouse40-3.txt')
 
 print "Defining cells..."
 # Define as beta hub cell if in the hubsList
@@ -208,60 +138,8 @@ print "Defining cells..."
 cell = []
 iclamp_hubs = []
 for i in range(ncells):
-    if i not in hubsList:
-        #cell.append(h.betacell())
-        #setHetero(cell[i],HetMatrix,i)
-        defineBeta(cell,i)
-        if isImitateExp:
-            if (i == imagedNonHubs[0]) and (mode==2):
-                print "silencing cell ",i
-                with open(outlog, 'a') as f:
-                    f.write('#silencedCell = %d\n'%i)
-                    f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
-                iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
-                iclamp_hubs[-1].delay = 0
-                iclamp_hubs[-1].dur = 120000
-                iclamp_hubs[-1].amp = -0.005
-        else:
-            if (i in nonHubsToPickList) and (mode==2):
-                print "silencing cell ",i
-                with open(outlog, 'a') as f:
-                    f.write('#silencedCell = %d\n'%i)
-                    f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
-                iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
-                iclamp_hubs[-1].delay = 0
-                iclamp_hubs[-1].dur = 120000
-                iclamp_hubs[-1].amp = -0.002
-    else:
-        #cell.append(h.betahub())
-        ##loadHetero(cell[i],HetMatrix,i) # no heterogenity for betahubs
-        #cell[i].soma(0.5).nkatp_katp = -5.8
-        defineBetaHub(cell,i)
-        if isImitateExp:
-            if mode==1 and (i == imagedHubs[1]):
-                # I clamp hubs to silence them, compare results from Johnston et al., 2016
-                print "silencing cell ",i
-                with open(outlog, 'a') as f:
-                    f.write('#silencedCell = %d\n'%i)
-                    f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
-                iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
-                iclamp_hubs[-1].delay = 0
-                iclamp_hubs[-1].dur = 120000
-                # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
-                iclamp_hubs[-1].amp = -0.005 #-0.002
-        else:
-            if mode==1:
-                # I clamp hubs to silence them, compare results from Johnston et al., 2016
-                print "silencing cell ",i
-                with open(outlog, 'a') as f:
-                    f.write('#silencedCell = %d\n'%i)
-                    f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
-                iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
-                iclamp_hubs[-1].delay = 0
-                iclamp_hubs[-1].dur = 120000
-                # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
-                iclamp_hubs[-1].amp = -0.002 #-0.002
-
+    defineBeta(cell,i)
+print HetMatrix
 
 print "Defining gap junction connections..."
 gap = []
@@ -270,11 +148,7 @@ gap = []
 # empirically tested, using 3~5% of 0.00017e-1, weakly connected
 for i in range(ncells):
     for j in range(ncells):
-        if CoupledMatrix[i,j] > 0 and ((i in hubsList) or (j in hubsList)):
-            #print i,j
-            # strongly connect hubs with other cells, for testing purpose.
-            gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, ggaphub*CoupledMatrix[i,j],gjtau))
-        elif CoupledMatrix[i,j] > 0: #and ((i not in nonHubsToPickList) or (j not in nonHubsToPickList)):
+        if CoupledMatrix[i,j] > 0:
             gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, ggap*CoupledMatrix[i,j],gjtau))
 
 ######
@@ -286,6 +160,8 @@ stimulus.delay = 100
 stimulus.dur = 300
 stimulus.amp = 0.5
 """
+
+##TODO: do from here...
 
 
 ######
