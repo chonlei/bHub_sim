@@ -33,7 +33,7 @@ mode = 1  # 0: WT; 1: silent hubs; 2: silent non hubs
 pHubs = 0.01  # percentage/fraction of hubs in islet
 ##TODO need to do methodToPickHubs
 methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
-ggap = 1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
+ggap = 1/3.*1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
 ggaphub = 1/3.*1/6.*5.1*0.385*1e-4#1.0*0.00017e-1
 gjtau = 160.0
 dthres = 17.5  # spatial cutoff distance to def GJ connection
@@ -340,7 +340,7 @@ else:
     np.savetxt('carec.txt',carec)
     print("Successfully exported Ca_dynamics to current path.")
 with open(outlog,'a') as f:
-    f.write('#Ca_shape = (%d, %d)\n'%(len(carec),len(carec[0])))
+    f.write('\n\n#Ca_shape = (%d, %d)\n'%(len(carec),len(carec[0])))
 # newfp = np.memmap(filename, dtype='float64', mode='r', shape=(#cells,#timepoints)) # to read
 print("Exporting Vm traces...")
 filename = outVm+'_%dx%d.dat'%(len(vrec),len(vrec[0]))
