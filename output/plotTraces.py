@@ -16,13 +16,17 @@ try:
 except Exception:
     isImagedCells = False
 fileDir = os.path.dirname(fileName)
+fileBase = os.path.basename(fileName)
 fileIdx = re.findall(".*model_(\d+)_morphology_(\d+)_seed_(\d+)_mode_(\d+)_.*",fileName)
 fileId = "model_%s_morphology_%s_seed_%s_mode_%s"%fileIdx[0]
 shape = re.findall('.*_(\w+)x(\w+)\.dat',fileName)[0]
 shapeX = (int(shape[0]),int(shape[1]))
 varName = r"[Ca]$_i$ [mM]" if "Ca" in fileName else r"$V_m$ [mV]"
 title = "short simulation homogeneous GJ @ mouse 40-3"
-saveName = fileName[:-4]+'.png'
+if isImagedCells:
+    saveName = os.path.join(fileDir,'imaged_'+fileBase[:-4]+'.png')
+else:
+    saveName = os.path.join(fileDir,'whole_'+fileBase[:-4]+'.png')
 
 # load data
 X = np.memmap(fileName, dtype='float64', mode='r', shape=shapeX)
