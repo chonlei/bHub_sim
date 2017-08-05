@@ -208,11 +208,36 @@ modelSetup.savedat(outVm,vrec,'Vm',outlog,idx=None)
 
 """
 ##TODO: check with one simulation; check duplication in successive saving.
+h.load_file("stdrun.hoc")
+h.init()
+h.dt = dt
+h.steps_per_ms = 1./h.dt
+print("Running main simulation...")
+
 temptstop = 0
 nbatch = tstop%tbatch
-for i in range(nbatch):
+tremain = tstop - nbatch*tbatch
+for i in xrange(nbatch):
+    temptstop += i*tbatch
     h.frecord_init()
-    h.continuerun(tstart)
+    h.continuerun(temptstop)
+    # save recording here.
+    tosave = modelSetup.convertSimOutput(carec,downSampling)
+    modelSetup.savedat(outCa,tosave,'Ca',outlog,idx=i)
+    tosave = modelSetup.convertSimOutput(vrec,downSampling)
+    modelSetup.savedat(outVm,tosave,'Vm',outlog,idx=i)
+    print("Finished section %d out of %d."%(i,nbatch))
+if tremain > 0:
+    print("Running final section...")
+    h.frecord_init()
+    h.continuerun(tstop)  # run until the end
+    # save recording here.
+    tosave = modelSetup.convertSimOutput(carec,downSampling)
+    modelSetup.savedat(outCa,tosave,'Ca',outlog,idx=i+1)
+    tosave = modelSetup.convertSimOutput(vrec,downSampling)
+    modelSetup.savedat(outVm,tosave,'Vm',outlog,idx=i+1)
+print("Simulation completed! :)")
+print("*************************")
 """
 
 ######
