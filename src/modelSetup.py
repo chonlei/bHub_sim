@@ -7,6 +7,7 @@ import numpy as np
 import random
 import os
 import warnings
+import os.path as path
 
 
 #pyseed = 1
@@ -96,6 +97,33 @@ def getImagedCellIdx(coorData, topDir=2, imageDepth=10, Ncells=100, method=0):
         raise Exception("Method 2 is due to be implemented...")
         pass
     return cellIdx
+
+
+def savedat(outname,outdata,name,outlog,idx=None):
+    print("Exporting %s traces..."%name)
+    ## output name from modelSetup.outputSetup()
+    if idx==None:
+        filename = outname+'_%dx%d.dat'%(len(outdata),len(outdata[0]))
+    else:
+        filename = outname+'_p_%d_%dx%d.dat'%(idx,len(outdata),len(outdata[0]))
+    fp = np.memmap(filename, dtype="float64", mode='w+', shape=(len(outdata),len(outdata[0])))
+    fp[:] = outdata[:]
+    if fp.filename == path.abspath(filename):
+        print "shape: (", len(outdata), ", ", len(outdata[0]), ")"
+        print("Successfully exported %s time series to: %s"%(name,filename))
+        del fp
+    else:
+        print("Cannot write to address: %s"%filename)
+        del fp
+        print("Writing to current path instead...")
+        if idx==None:
+            np.savetxt('data_%s.txt'%name,outdata)
+        else:
+            np.savetxt('data_%s_p_%d.txt'%(name,idx),outdata)
+        print("Successfully exported %s time series to current path."%name)
+    with open(outlog,'a') as f:
+        f.write('#%s_shape = (%d, %d)\n'%(name,len(outdata),len(outdata[0])))
+
 
 
 

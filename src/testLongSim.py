@@ -200,44 +200,20 @@ print("Converting results for export...")
 # Down sampling
 carec = modelSetup.convertSimOutput(carec,downSampling)
 vrec = modelSetup.convertSimOutput(vrec,downSampling)
-print("Exporting Ca traces...")
-## output name from modelSetup.outputSetup()
-filename = outCa+'_%dx%d.dat'%(len(carec),len(carec[0]))
-fp = np.memmap(filename, dtype="float64", mode='w+', shape=(len(carec),len(carec[0])))
-fp[:] = carec[:]
-if fp.filename == path.abspath(filename):
-    print "shape: (", len(carec), ", ", len(carec[0]), ")"
-    print("Successfully exported Ca_dynamics to: %s"%filename)
-    del fp
-else:
-    print("Cannot write to address: %s"%filename)
-    del fp
-    print("Writing to current path instead...")
-    np.savetxt('carec.txt',carec)
-    print("Successfully exported Ca_dynamics to current path.")
-with open(outlog,'a') as f:
-    f.write('#Ca_shape = (%d, %d)\n'%(len(carec),len(carec[0])))
-# newfp = np.memmap(filename, dtype='float64', mode='r', shape=(#cells,#timepoints)) # to read
-print("Exporting Vm traces...")
-filename = outVm+'_%dx%d.dat'%(len(vrec),len(vrec[0]))
-fp = np.memmap(filename, dtype="float64", mode='w+', shape=(len(vrec),len(vrec[0])))
-fp[:] = vrec[:]
-if fp.filename == path.abspath(filename):
-    print "shape: (", len(vrec), ", ", len(vrec[0]), ")"
-    print("Successfully exported Vm to: %s"%filename)
-    del fp
-else:
-    print("Cannot write to address: %s"%filename)
-    del fp
-    print("Writing to current path instead...")
-    np.savetxt('vrec.txt',vrec)
-    print("Successfully exported Vm to current path.")
-with open(outlog,'a') as f:
-    f.write('#Vm_shape = (%d, %d)\n'%(len(vrec),len(vrec[0])))
+
+# Output files
+modelSetup.savedat(outCa,carec,'Ca',outlog,idx=None)
+modelSetup.savedat(outVm,vrec,'Vm',outlog,idx=None)
 
 
+"""
 ##TODO: check with one simulation; check duplication in successive saving.
-
+temptstop = 0
+nbatch = tstop%tbatch
+for i in range(nbatch):
+    h.frecord_init()
+    h.continuerun(tstart)
+"""
 
 ######
 ## Visualisation

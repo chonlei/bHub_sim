@@ -33,7 +33,7 @@ mode = 1  # 0: WT; 1: silent hubs; 2: silent non hubs
 pHubs = 0.01  # percentage/fraction of hubs in islet
 ##TODO need to do methodToPickHubs
 methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
-ggap = 1/3.*1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
+ggap = 1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
 ggaphub = 1/3.*1/6.*5.1*0.385*1e-4#1.0*0.00017e-1
 gjtau = 160.0
 dthres = 17.5  # spatial cutoff distance to def GJ connection
@@ -324,40 +324,10 @@ print("Converting results for export...")
 # Down sampling
 carec = modelSetup.convertSimOutput(carec,downSampling)
 vrec = modelSetup.convertSimOutput(vrec,downSampling)
-print("Exporting Ca traces...")
-## output name from modelSetup.outputSetup()
-filename = outCa+'_%dx%d.dat'%(len(carec),len(carec[0]))
-fp = np.memmap(filename, dtype="float64", mode='w+', shape=(len(carec),len(carec[0])))
-fp[:] = carec[:]
-if fp.filename == path.abspath(filename):
-    print "shape: (", len(carec), ", ", len(carec[0]), ")"
-    print("Successfully exported Ca_dynamics to: %s"%filename)
-    del fp
-else:
-    print("Cannot write to address: %s"%filename)
-    del fp
-    print("Writing to current path instead...")
-    np.savetxt('carec.txt',carec)
-    print("Successfully exported Ca_dynamics to current path.")
-with open(outlog,'a') as f:
-    f.write('\n\n#Ca_shape = (%d, %d)\n'%(len(carec),len(carec[0])))
-# newfp = np.memmap(filename, dtype='float64', mode='r', shape=(#cells,#timepoints)) # to read
-print("Exporting Vm traces...")
-filename = outVm+'_%dx%d.dat'%(len(vrec),len(vrec[0]))
-fp = np.memmap(filename, dtype="float64", mode='w+', shape=(len(vrec),len(vrec[0])))
-fp[:] = vrec[:]
-if fp.filename == path.abspath(filename):
-    print "shape: (", len(vrec), ", ", len(vrec[0]), ")"
-    print("Successfully exported Vm to: %s"%filename)
-    del fp
-else:
-    print("Cannot write to address: %s"%filename)
-    del fp
-    print("Writing to current path instead...")
-    np.savetxt('vrec.txt',vrec)
-    print("Successfully exported Vm to current path.")
-with open(outlog,'a') as f:
-    f.write('#Vm_shape = (%d, %d)\n'%(len(vrec),len(vrec[0])))
+
+# Output files
+modelSetup.savedat(outCa,carec,'Ca',outlog,idx=None)
+modelSetup.savedat(outVm,vrec,'Vm',outlog,idx=None)
 
 
 ######
