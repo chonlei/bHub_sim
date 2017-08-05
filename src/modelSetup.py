@@ -322,11 +322,15 @@ def setSimOutput(b_cells):
 def convertSimOutput(listOutput,sparse=1,reuse=False):
     # Convert a list of h Vector object output to numpy array object
     # DO NOT USE if just want to convert a few of the cells in the whole list
+    # 
+    # Arg:
+    #     sparse (int): down sample the output 
+    #     reuse (bool): create new template list for return and remove last element from the simulation
     n = len(listOutput)
     if reuse:
         output = []
         for i in range(n):
-            output.append(np.array(listOutput[i])[::sparse])
+            output.append(np.array(listOutput[i])[:-1:sparse])#[:-1])
         return output
     else:
         for i in range(n):

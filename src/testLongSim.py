@@ -135,8 +135,9 @@ print "Defining cells..."
 cell = []
 iclamp_hubs = []
 for i in range(ncells):
-    defineBeta(cell,i)
-print HetMatrix
+    #defineBeta(cell,i)
+    defineBetaHub(cell,i)
+#print HetMatrix
 
 print "Defining gap junction connections..."
 gap = []
