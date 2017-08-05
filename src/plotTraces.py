@@ -48,7 +48,10 @@ X = np.memmap(fileName, dtype='float64', mode='r', shape=shapeX)
 t = np.arange(0,shapeX[1]*tstep,tstep)  # account dt
 
 # hubList (if have)
-hubList = np.loadtxt(os.path.join(fileDir,fileId+'.log'),delimiter=',',dtype=int)
+try:
+    hubList = np.loadtxt(os.path.join(fileDir,fileId+'.log'),delimiter=',',dtype=int)
+except Exception:
+    hubList = []
 
 # get only imaged cells (if applicable)
 if isImagedCells:
