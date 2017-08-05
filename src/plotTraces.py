@@ -12,12 +12,18 @@ try:
 except Exception:
     fileName = "Ca_WT_5phubs_9s_sGJ_100by501.dat"
 try:
-    isImagedCells = bool(sys.argv[2])
+    isImagedCells = bool(int(sys.argv[2]))
 except Exception:
     isImagedCells = False
+try:
+    nBatch = int(sys.argv[2])
+except Exception:
+    nBatch = 0
 fileDir = os.path.dirname(fileName)
 fileBase = os.path.basename(fileName)
 fileIdx = re.findall(".*model_(\d+)_morphology_(\d+)_seed_(\d+)_mode_(\d+)_.*",fileName)
+if nBatch>0:
+    startBatch = re.findall(".*_p_(\d+)_.*",fileName)[0]
 fileId = "model_%s_morphology_%s_seed_%s_mode_%s"%fileIdx[0]
 shape = re.findall('.*_(\w+)x(\w+)\.dat',fileName)[0]
 shapeX = (int(shape[0]),int(shape[1]))
