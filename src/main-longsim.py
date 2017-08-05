@@ -29,7 +29,7 @@ morphology = 3
 species = 0  # 0: mouse; 1: human; 2: cubic lattice
 pyseed = 1
 isImitateExp = 1  # if True, simulate whole islet but only analyse imaged cells
-mode = 1  # 0: WT; 1: silent hubs; 2: silent non hubs
+mode = 2  # 0: WT; 1: silent hubs; 2: silent non hubs
 pHubs = 0.01  # percentage/fraction of hubs in islet
 ##TODO need to do methodToPickHubs
 methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
@@ -39,10 +39,10 @@ gjtau = 160.0
 dthres = 17.5  # spatial cutoff distance to def GJ connection
 isletsize = 40  # islet size of interest (None for whole islet)
 hetVar = 0.05
-tstop = 90e3  # usually in [ms]
+tstop = 100e3  # usually in [ms]
 dt = 0.1  # usually in [ms]
-downSampling = 100  # down sample the output -> output_timestep = dt*downSampling
-tbatch = 30e3 # split simulation into batches; same unit as tstop
+downSampling = 5000  # down sample the output -> output_timestep = dt*downSampling
+tbatch = 20e3 # split simulation into batches; same unit as tstop
 
 if isImitateExp:
     isletsize = None # force to use whole islet
