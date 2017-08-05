@@ -17,7 +17,7 @@ try:
 except Exception:
     isImagedCells = False
 try:
-    nBatch = int(sys.argv[2])
+    nBatch = int(sys.argv[3])
 except Exception:
     nBatch = 0
 fileDir = os.path.dirname(fileName)
@@ -31,7 +31,8 @@ if nBatch>0:
     fileNameBatch = []
     shapeXBatch = []
     for i in range(1,nBatch+1):
-        tempfilename = glob.glob(filePrefix+"_p_%d_*"%(startBatch+i))
+        getBatch = int(startBatch)+i
+        tempfilename = glob.glob(filePrefix+"_p_%d_*"%getBatch)[0]
         tempshape = re.findall('.*_(\w+)x(\w+)\.dat',tempfilename)[0]
         shapeXBatch.append((int(tempshape[0]),int(tempshape[1])))
         fileNameBatch.append(tempfilename)
@@ -46,7 +47,6 @@ else:
 tstep = 10.0
 X = np.memmap(fileName, dtype='float64', mode='r', shape=shapeX)
 t = np.arange(0,shapeX[1]*tstep,tstep)  # account dt
-
 # hubList (if have)
 try:
     hubList = np.loadtxt(os.path.join(fileDir,fileId+'.log'),delimiter=',',dtype=int)
