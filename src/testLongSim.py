@@ -174,7 +174,7 @@ for i in range(ncells):
     carec.append(h.Vector())
     vrec[i].record(cell[i].soma(0.5)._ref_v)
     carec[i].record(cell[i].soma(0.5)._ref_cai)
-
+"""
 
 ######
 ## Main simulation
@@ -215,30 +215,30 @@ h.steps_per_ms = 1./h.dt
 print("Running main simulation...")
 
 temptstop = 0
-nbatch = tstop%tbatch
-tremain = tstop - nbatch*tbatch
+nbatch = int(tstop/tbatch)
+tremain = tstop%tbatch
 for i in xrange(nbatch):
-    temptstop += i*tbatch
+    temptstop += tbatch
     h.frecord_init()
     h.continuerun(temptstop)
     # save recording here.
-    tosave = modelSetup.convertSimOutput(carec,downSampling)
+    tosave = modelSetup.convertSimOutput(carec,downSampling,reuse=True)
     modelSetup.savedat(outCa,tosave,'Ca',outlog,idx=i)
-    tosave = modelSetup.convertSimOutput(vrec,downSampling)
+    tosave = modelSetup.convertSimOutput(vrec,downSampling,reuse=True)
     modelSetup.savedat(outVm,tosave,'Vm',outlog,idx=i)
-    print("Finished section %d out of %d."%(i,nbatch))
+    print("Finished section %d out of %d."%(i+1,nbatch))
 if tremain > 0:
     print("Running final section...")
     h.frecord_init()
     h.continuerun(tstop)  # run until the end
     # save recording here.
-    tosave = modelSetup.convertSimOutput(carec,downSampling)
+    tosave = modelSetup.convertSimOutput(carec,downSampling,reuse=True)
     modelSetup.savedat(outCa,tosave,'Ca',outlog,idx=i+1)
-    tosave = modelSetup.convertSimOutput(vrec,downSampling)
+    tosave = modelSetup.convertSimOutput(vrec,downSampling,reuse=True)
     modelSetup.savedat(outVm,tosave,'Vm',outlog,idx=i+1)
 print("Simulation completed! :)")
 print("*************************")
-"""
+
 
 ######
 ## Visualisation

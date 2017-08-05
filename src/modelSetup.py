@@ -319,13 +319,19 @@ def setSimOutput(b_cells):
         carec[i].record(cell[i].soma(0.5)._ref_cai)
     return time, vrec, carec
 
-def convertSimOutput(listOutput,sparse=1):
+def convertSimOutput(listOutput,sparse=1,reuse=False):
     # Convert a list of h Vector object output to numpy array object
     # DO NOT USE if just want to convert a few of the cells in the whole list
     n = len(listOutput)
-    for i in range(n):
-        listOutput[i] = np.array(listOutput[i])[::sparse]
-    return listOutput
+    if reuse:
+        output = []
+        for i in range(n):
+            output.append(np.array(listOutput[i])[::sparse])
+        return output
+    else:
+        for i in range(n):
+            listOutput[i] = np.array(listOutput[i])[::sparse]
+        return listOutput
 
 ## ********************************************************** ##
 ## ********************************************************** ##
