@@ -236,6 +236,9 @@ with open(outlog,'a') as f:
     f.write('#Vm_shape = (%d, %d)\n'%(len(vrec),len(vrec[0])))
 
 
+##TODO: check with one simulation; check duplication in successive saving.
+
+
 ######
 ## Visualisation
 ######
