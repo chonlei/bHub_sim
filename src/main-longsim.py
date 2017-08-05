@@ -305,8 +305,39 @@ for i in range(ncells):
 ######
 ## Main simulation
 ######
+h.load_file("stdrun.hoc")
+h.init()
+h.dt = dt
+h.steps_per_ms = 1./h.dt
+print("Running main simulation...")
 
-
+temptstop = 0  # tstop for current batch
+nbatch = int(tstop/tbatch)  # split simulation into nbatch
+print("Dividing simulation into %d batches..."%nbatch)
+tremain = tstop%tbatch  # remaining simulation time after nbatch
+for i in xrange(nbatch):
+    temptstop += tbatch  # tstop for current batch
+    h.frecord_init()  # reuse all recording vectors
+    h.continuerun(temptstop)
+    # exporting Ca time series
+    tosave = modelSetup.convertSimOutput(carec,downSampling,reuse=True)
+    modelSetup.savedat(outCa,tosave,'Ca',outlog,idx=i)
+    # exporting Vm time series
+    tosave = modelSetup.convertSimOutput(vrec,downSampling,reuse=True)
+    modelSetup.savedat(outVm,tosave,'Vm',outlog,idx=i)
+    print("Finished section %d out of %d."%(i+1,nbatch))
+if tremain > 0:
+    print("Running final section...")
+    h.frecord_init()  # reuse all recording vectors
+    h.continuerun(tstop)  # run until the end
+    # exporting Ca time series
+    tosave = modelSetup.convertSimOutput(carec,downSampling,reuse=True)
+    modelSetup.savedat(outCa,tosave,'Ca',outlog,idx=i+1)
+    # exporting Vm time series
+    tosave = modelSetup.convertSimOutput(vrec,downSampling,reuse=True)
+    modelSetup.savedat(outVm,tosave,'Vm',outlog,idx=i+1)
+print("Simulation completed! :)")
+print("*************************")
 
 
 ######
