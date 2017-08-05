@@ -5,6 +5,7 @@ matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab! - O
 import matplotlib.pyplot as plt
 import sys
 import os
+import glob
 
 # setup data
 try:
@@ -22,11 +23,18 @@ except Exception:
 fileDir = os.path.dirname(fileName)
 fileBase = os.path.basename(fileName)
 fileIdx = re.findall(".*model_(\d+)_morphology_(\d+)_seed_(\d+)_mode_(\d+)_.*",fileName)
-if nBatch>0:
-    startBatch = re.findall(".*_p_(\d+)_.*",fileName)[0]
 fileId = "model_%s_morphology_%s_seed_%s_mode_%s"%fileIdx[0]
 shape = re.findall('.*_(\w+)x(\w+)\.dat',fileName)[0]
 shapeX = (int(shape[0]),int(shape[1]))
+if nBatch>0:
+    filePrefix,startBatch = re.findall("(.*)_p_(\d+)_.*",fileName)[0]
+    fileNameBatch = []
+    shapeXBatch = []
+    for i in range(1,nBatch+1):
+        tempfilename = glob.glob(filePrefix+"_p_%d_*"%(startBatch+i))
+        tempshape = re.findall('.*_(\w+)x(\w+)\.dat',tempfilename)[0]
+        shapeXBatch.append((int(tempshape[0]),int(tempshape[1])))
+        fileNameBatch.append(tempfilename)
 varName = r"[Ca]$_i$ [mM]" if "Ca" in fileName else r"$V_m$ [mV]"
 title = "short simulation homogeneous GJ @ mouse 40-3"
 if isImagedCells:
@@ -35,8 +43,9 @@ else:
     saveName = os.path.join(fileDir,'whole_'+fileBase[:-4]+'.png')
 
 # load data
+tstep = 10.0
 X = np.memmap(fileName, dtype='float64', mode='r', shape=shapeX)
-time = np.arange(shapeX[1])*10.0  # account dt
+t = np.arange(0,shapeX[1]*tstep,tstep)  # account dt
 
 # hubList (if have)
 hubList = np.loadtxt(os.path.join(fileDir,fileId+'.log'),delimiter=',',dtype=int)
@@ -64,19 +73,42 @@ aveX = np.zeros(X[0].shape)
 for i in xrange(len(X)):
     if isImagedCells:
         if (i not in hubList) and (i in imagedCells):
-            plt.plot(time, X[i], 'k', alpha=0.3)
+            plt.plot(t, X[i], 'k', alpha=0.3)
             aveX += X[i]
     else:
         if i not in hubList:
-            plt.plot(time, X[i], 'k', alpha=0.3)
+            plt.plot(t, X[i], 'k', alpha=0.3)
             aveX += X[i]
-plt.plot(time, X[i], 'k', alpha=0.3, label='non-hub')
+plt.plot(t, X[i], 'k', alpha=0.3, label='non-hub')
 for i in np.array(hubList)[np.array(hubList)>0]:
-    plt.plot(time, X[i], 'r')
+    plt.plot(t, X[i], 'r')
     aveX += X[i]
-plt.plot(time, X[i], 'r', label='hub')
+plt.plot(t, X[i], 'r', label='hub')
 aveX = aveX/float(shapeX[0]) if not isImagedCells else aveX/float(len(imagedCells))
-plt.plot(time, aveX, 'g', linewidth=3.0, label='average all')
+plt.plot(t, aveX, 'g', linewidth=3.0, label='average all')
+# plot the rest if splitted into batches
+if nBatch>0:
+    for iBatch in range(nBatch):
+        shapeX = shapeXBatch[iBatch]
+        X = np.memmap(fileNameBatch[iBatch], dtype='float64', mode='r', shape=shapeX)
+        t = np.arange(t[-1],t[-1]+shapeX[1]*tstep,tstep)  # account dt
+        aveX = np.zeros(X[0].shape)
+        for i in xrange(len(X)):
+            if isImagedCells:
+                if (i not in hubList) and (i in imagedCells):
+                    plt.plot(t, X[i], 'k', alpha=0.3)
+                    aveX += X[i]
+            else:
+                if i not in hubList:
+                    plt.plot(t, X[i], 'k', alpha=0.3)
+                    aveX += X[i]
+        for i in np.array(hubList)[np.array(hubList)>0]:
+            plt.plot(t, X[i], 'r')
+            aveX += X[i]
+        plt.plot(t, X[i], 'r')
+        aveX = aveX/float(shapeX[0]) if not isImagedCells else aveX/float(len(imagedCells))
+        plt.plot(t, aveX, 'g', linewidth=3.0)
+
 
 # plotting setup
 plt.xlabel("t [ms]")
