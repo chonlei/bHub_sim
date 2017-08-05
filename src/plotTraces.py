@@ -44,9 +44,22 @@ else:
     saveName = os.path.join(fileDir,'whole_'+fileBase[:-4]+'.png')
 
 # load data
-tstep = 10.0
+startName = "#dt = "
+with open(os.path.join(fileDir,fileId+'.log'),"r") as fi:
+    for ln in fi:
+        if ln.startswith(startName):
+            temp = ln[len(startName):]
+dt = float(temp)
+startName = "#downSampling = "
+with open(os.path.join(fileDir,fileId+'.log'),"r") as fi:
+    for ln in fi:
+        if ln.startswith(startName):
+            temp = ln[len(startName):]
+downSampling = float(temp)
+tstep = dt*downSampling
 X = np.memmap(fileName, dtype='float64', mode='r', shape=shapeX)
-t = np.arange(0,shapeX[1]*tstep,tstep)  # account dt
+t = np.arange(0,shapeX[1]*tstep,tstep)  # account dt and downSampling
+
 # hubList (if have)
 try:
     hubList = np.loadtxt(os.path.join(fileDir,fileId+'.log'),delimiter=',',dtype=int)
