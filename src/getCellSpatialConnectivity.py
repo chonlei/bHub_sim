@@ -144,7 +144,7 @@ if isImagedCells:
 numLinks = np.sum(CoupledMatrix+CoupledMatrix.T,1)
 if isPrintOutHubs:
     for i in hubList:
-        print("cell %d ; links %d"%(i,numLinks[i]))
+        print("cell %d ; links %d; coor %f,%f,%f"%(i,numLinks[i],CoorData[i,0],CoorData[i,1],CoorData[i,2]))
 
 ######
 ## Plot the spatial connectivity distribution
@@ -225,8 +225,8 @@ for i,(xs,ys,zs) in enumerate(CoorData[:,:]):
             ax.scatter(xs, ys, zs, c='c', marker='o',s=size)
         if i in secondLayer:
             ax.scatter(xs, ys, zs, c='y', marker='o',s=size)
-        if i in hubList and i!=cellAnalyse:
-            ax.scatter(xs, ys, zs, c='r', marker='o',s=size)
+    if i in hubList and i!=cellAnalyse:
+        ax.scatter(xs, ys, zs, c='r', marker='o',s=size)
 
 if isInteractivePlot:
     plt.show()
