@@ -30,6 +30,9 @@ species = 0  # 0: mouse; 1: human; 2: cubic lattice
 pyseed = 1
 isImitateExp = 1  # if True, simulate whole islet but only analyse imaged cells
 mode = 1  # 0: WT; 1: silent hubs; 2: silent non hubs
+silenceStart = 0
+silenceDur = 250e3
+silenceAmp = -0.005
 pHubs = 0.01  # percentage/fraction of hubs in islet
 ##TODO need to do methodToPickHubs
 methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
@@ -52,7 +55,7 @@ outlog = path.join(outputdir, outputidx+'.log')
 outCa = path.join(outputdir, 'Ca_'+outputidx)
 outVm = path.join(outputdir, 'Vm_'+outputidx)
 with open(outlog, 'w') as f:
-    f.write('#model = %d \n#gjmodel = %d \n#morphology = %d \n#species = %d \n#pyseed = %d \n#isImitateExp = %d \n#mode = %d \n#pHubs = %f \n#methodToPickHubs = %d \n#ggap = %f \n#ggaphub = %f \n#gjtau = %f \n#dthres = %f \n#isletsize = '%(model,gjmodel,morphology,species,pyseed,isImitateExp,mode,pHubs,methodToPickHubs,ggap,ggaphub,gjtau,dthres)+str(isletsize)+' \n')
+    f.write('#model = %d \n#gjmodel = %d \n#morphology = %d \n#species = %d \n#pyseed = %d \n#isImitateExp = %d \n#mode = %d \n#silenceStart = %f \n#silenceDur = %f \n#silenceAmp = %f \n#pHubs = %f \n#methodToPickHubs = %d \n#ggap = %f \n#ggaphub = %f \n#gjtau = %f \n#dthres = %f \n#isletsize = '%(model,gjmodel,morphology,species,pyseed,isImitateExp,mode,silenceStart,silenceDur,silenceAmp,pHubs,methodToPickHubs,ggap,ggaphub,gjtau,dthres)+str(isletsize)+' \n')
     f.write('#hetVar = %f \n#tstop = %f \n#dt = %f \n#downSampling = %d \n\n'%(hetVar,tstop,dt,downSampling))
 
 if model == 1:
@@ -199,6 +202,14 @@ HetMatrix = np.zeros((len(HetDict)+1,ncells))
 # Comment this out and use setHeteroHermann2007() to run another simulation
 #HetMatrix = np.loadtxt('HetMatrix-mouse40-3.txt')
 
+##TODO: Add function to silent cells
+def silenceCell(iclampList,cell,delay=250e3,dur=250e3,amp=-0.005):
+    # iclamp cell to imitate cell silencing in experiments
+    # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
+    iclampList.append(h.IClamp (0.5, sec = cell.soma) )
+    iclampList[-1].delay = delay
+    iclampList[-1].dur = dur
+    iclampList[-1].amp = amp
 print "Defining cells..."
 # Define as beta hub cell if in the hubsList
 # Introduce heterogeneity to each defined cell
@@ -215,20 +226,14 @@ for i in range(ncells):
                 with open(outlog, 'a') as f:
                     f.write('#silencedCell = %d\n'%i)
                     f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
-                iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
-                iclamp_hubs[-1].delay = 0
-                iclamp_hubs[-1].dur = 120000
-                iclamp_hubs[-1].amp = -0.005
+                silenceCell(iclamp_hubs,cell[i],silenceStart,silenceDur,silenceAmp)
         else:
             if (i in nonHubsToPickList) and (mode==2):
                 print "silencing cell ",i
                 with open(outlog, 'a') as f:
                     f.write('#silencedCell = %d\n'%i)
                     f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
-                iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
-                iclamp_hubs[-1].delay = 0
-                iclamp_hubs[-1].dur = 120000
-                iclamp_hubs[-1].amp = -0.002
+                silenceCell(iclamp_hubs,cell[i],silenceStart,silenceDur,silenceAmp)
     else:
         #cell.append(h.betahub())
         ##loadHetero(cell[i],HetMatrix,i) # no heterogenity for betahubs
@@ -241,11 +246,7 @@ for i in range(ncells):
                 with open(outlog, 'a') as f:
                     f.write('#silencedCell = %d\n'%i)
                     f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
-                iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
-                iclamp_hubs[-1].delay = 0
-                iclamp_hubs[-1].dur = 120000
-                # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
-                iclamp_hubs[-1].amp = -0.005 #-0.002
+                silenceCell(iclamp_hubs,cell[i],silenceStart,silenceDur,silenceAmp)
         else:
             if mode==1:
                 # I clamp hubs to silence them, compare results from Johnston et al., 2016
@@ -253,11 +254,7 @@ for i in range(ncells):
                 with open(outlog, 'a') as f:
                     f.write('#silencedCell = %d\n'%i)
                     f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
-                iclamp_hubs.append(h.IClamp (0.5, sec = cell[i].soma) )
-                iclamp_hubs[-1].delay = 0
-                iclamp_hubs[-1].dur = 120000
-                # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
-                iclamp_hubs[-1].amp = -0.002 #-0.002
+                silenceCell(iclamp_hubs,cell[i],silenceStart,silenceDur,silenceAmp)
 
 
 print "Defining gap junction connections..."
