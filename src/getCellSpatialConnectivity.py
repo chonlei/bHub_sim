@@ -178,5 +178,26 @@ print(nextLayerConnectedCells)
 print("Of which contains other hubs: ")
 print(isNextLayerConnectedCellsHub)
 
+# plot the islet
+from mpl_toolkits.mplot3d import Axes3D
+fig = plt.figure(2)
+ax = fig.add_subplot(111, projection='3d')
+centreCoorData = np.mean(CoorData,0)
+if isImagedCells:
+    CoorDataMask = (np.sum((CoorData - centreCoorData)**2,1)<(dthres**2))
+else:
+    CoorDataMask = (np.sum((CoorData - centreCoorData)**2,1)>0)
+print "imagedCells: ", imagedCells
+for i,(xs,ys,zs) in enumerate(CoorData[CoorDataMask,:]): #np.array(len(CoorData))[CoorDataMask]
+    ax.scatter(xs, ys, zs, c='b', marker='o')
+    if i in imagedCells:
+        ax.scatter(xs, ys, zs, c='r', marker='o')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+
+# plot the analysing cell
+
+
 if isInteractivePlot:
     plt.show()
