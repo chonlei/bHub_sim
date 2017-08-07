@@ -1,7 +1,4 @@
 import numpy as np
-import matplotlib
-matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab! - Otherwise figures try to load but -X not necessarily on
-import matplotlib.pyplot as plt
 import sys
 import os
 import modelSetup
@@ -23,6 +20,17 @@ try:
 except Exception:
     isPrintOutHubs = False
 
+try:
+    isInteractivePlot = bool(int(sys.argv[4]))
+except Exception:
+    isInteractivePlot = False
+
+if not isInteractivePlot:
+    import matplotlib
+    matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab! - Otherwise figures try to load but -X not necessarily on
+    import matplotlib.pyplot as plt
+else:
+    import matplotlib.pyplot as plt
 
 fileDir = os.path.dirname(fileName)
 fileBase = os.path.basename(fileName)
@@ -132,4 +140,5 @@ plt.ylabel("#cells")
 plt.legend()
 
 plt.savefig(saveName)
-
+if isInteractivePlot:
+    plt.show()
