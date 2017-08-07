@@ -3,6 +3,14 @@ import sys
 import os
 import modelSetup
 
+"""
+Args:
+    fileName (str): path to log file
+    isImagedCells (bool): 1 or 0; only analyse imaged cells
+    isPrintOutHubs (bool): print out all the hubs defined in simulation
+    isInteractivePlot (bool): use python interactive plotting interface
+    cellAnalyse (int): index of cell to analyse
+"""
 
 # setup data
 try:
@@ -52,7 +60,7 @@ else:
 hubList = np.loadtxt(fileName,delimiter=',',dtype=int)
 
 # get only imaged cells (if applicable)
-if isImagedCells:
+try:
     imagedCells = []
     startName = "#imagedCells = "
     with open(fileName,"r") as fi:
@@ -61,14 +69,17 @@ if isImagedCells:
                 imagedCells = ln[len(startName):]
     imagedCells = [int(x.strip()) for x in imagedCells.split(',')]
     imagedHubs = []
-    startName = "#imagedHubs = "
-    with open(fileName,"r") as fi:
-        for ln in fi:
-            if ln.startswith(startName):
-                imagedHubs = ln[len(startName):]
-    imagedHubs = [int(x.strip()) for x in imagedHubs.split(',')]
-    #TODO: fix the index for those imaged cells only
-    hubList = imagedHubs
+    if isImagedCells:
+        startName = "#imagedHubs = "
+        with open(fileName,"r") as fi:
+            for ln in fi:
+                if ln.startswith(startName):
+                    imagedHubs = ln[len(startName):]
+        imagedHubs = [int(x.strip()) for x in imagedHubs.split(',')]
+        #TODO: fix the index for those imaged cells only
+        hubList = imagedHubs
+except Exception:
+    imagedCells = []
 
 startName = "#silencedCell = "
 with open(fileName,"r") as fi:
@@ -164,10 +175,11 @@ print("Its connecting cells connect to: ")
 nextLayerConnectedCells = []
 isNextLayerConnectedCellsHub = []
 for i in connectedCells:
-    temp = list(np.arange(ncells)[CoupledMatrix[:,i]>0])
+    temptemp = list(np.arange(ncells)[CoupledMatrix[:,i]>0])
+    temp = list(temptemp)
     temp2 = []
     temp.remove(cellAnalyse)
-    for j in temp:
+    for j in temptemp:
         if j in connectedCells:
             temp.remove(j)
     for j in temp:
@@ -184,7 +196,7 @@ fig = plt.figure(2)
 ax = fig.add_subplot(111, projection='3d')
 centreCoorData = np.mean(CoorData,0)
 if isImagedCells:
-    CoorDataMask = (np.sum((CoorData - centreCoorData)**2,1)<(dthres**2))
+    CoorDataMask = (np.sum((CoorData - centreCoorData)**2,1)<(isletsize**2))
 else:
     CoorDataMask = (np.sum((CoorData - centreCoorData)**2,1)>0)
 print "imagedCells: ", imagedCells
@@ -192,12 +204,29 @@ for i,(xs,ys,zs) in enumerate(CoorData[CoorDataMask,:]): #np.array(len(CoorData)
     ax.scatter(xs, ys, zs, c='b', marker='o')
     if i in imagedCells:
         ax.scatter(xs, ys, zs, c='r', marker='o')
+    if i == cellAnalyse:
+        ax.scatter(xs, ys, zs, c='g', marker='o')
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Z')
 
-# plot the analysing cell
-
+# plot cells around cellAnalyse
+secondLayer = [item for sublist in nextLayerConnectedCells for item in sublist]
+fig = plt.figure(3)
+ax = fig.add_subplot(111, projection='3d')
+CoorDataMask = np.arange(ncells)[(np.sum((CoorData - CoorData[cellAnalyse,:])**2,1)<((3*dthres)**2))]
+size = 60
+for i,(xs,ys,zs) in enumerate(CoorData[:,:]):
+    if i in CoorDataMask:
+        ax.scatter(xs, ys, zs, c='b', marker='o')
+        if i == cellAnalyse:
+            ax.scatter(xs, ys, zs, c='g', marker='o',s=size)
+        if i in connectedCells:
+            ax.scatter(xs, ys, zs, c='c', marker='o',s=size)
+        if i in secondLayer:
+            ax.scatter(xs, ys, zs, c='y', marker='o',s=size)
+        if i in hubList and i!=cellAnalyse:
+            ax.scatter(xs, ys, zs, c='r', marker='o',s=size)
 
 if isInteractivePlot:
     plt.show()
