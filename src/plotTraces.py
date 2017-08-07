@@ -24,6 +24,7 @@ fileDir = os.path.dirname(fileName)
 fileBase = os.path.basename(fileName)
 fileIdx = re.findall(".*model_(\d+)_morphology_(\d+)_seed_(\d+)_mode_(\d+)_.*",fileName)
 fileId = "model_%s_morphology_%s_seed_%s_mode_%s"%fileIdx[0]
+mode = int(fileIdx[0][3])
 shape = re.findall('.*_(\w+)x(\w+)\.dat',fileName)[0]
 shapeX = (int(shape[0]),int(shape[1]))
 if nBatch>0:
@@ -85,23 +86,25 @@ if isImagedCells:
     hubList = imagedHubs
 
 # main plot
+fig = plt.figure()
+ax = fig.add_subplot(111)
 aveX = np.zeros(X[0].shape)
 for i in xrange(len(X)):
     if isImagedCells:
         if (i not in hubList) and (i in imagedCells):
-            plt.plot(t, X[i], 'k', alpha=0.3)
+            ax.plot(t, X[i], 'k', alpha=0.3)
             aveX += X[i]
     else:
         if i not in hubList:
-            plt.plot(t, X[i], 'k', alpha=0.3)
+            ax.plot(t, X[i], 'k', alpha=0.3)
             aveX += X[i]
-plt.plot(t, X[i], 'k', alpha=0.3, label='non-hub')
+ax.plot(t, X[i], 'k', alpha=0.3, label='non-hub')
 for i in np.array(hubList)[np.array(hubList)>0]:
-    plt.plot(t, X[i], 'r')
+    ax.plot(t, X[i], 'r')
     aveX += X[i]
-plt.plot(t, X[i], 'r', label='hub')
+ax.plot(t, X[i], 'r', label='hub')
 aveX = aveX/float(shapeX[0]) if not isImagedCells else aveX/float(len(imagedCells))
-plt.plot(t, aveX, 'g', linewidth=3.0, label='average all')
+ax.plot(t, aveX, 'g', linewidth=3.0, label='average all')
 # plot the rest if splitted into batches
 if nBatch>0:
     for iBatch in range(nBatch):
@@ -112,25 +115,47 @@ if nBatch>0:
         for i in xrange(len(X)):
             if isImagedCells:
                 if (i not in hubList) and (i in imagedCells):
-                    plt.plot(t, X[i], 'k', alpha=0.3)
+                    ax.plot(t, X[i], 'k', alpha=0.3)
                     aveX += X[i]
             else:
                 if i not in hubList:
-                    plt.plot(t, X[i], 'k', alpha=0.3)
+                    ax.plot(t, X[i], 'k', alpha=0.3)
                     aveX += X[i]
         for i in np.array(hubList)[np.array(hubList)>0]:
-            plt.plot(t, X[i], 'r')
+            ax.plot(t, X[i], 'r')
             aveX += X[i]
-        plt.plot(t, X[i], 'r')
+        ax.plot(t, X[i], 'r')
         aveX = aveX/float(shapeX[0]) if not isImagedCells else aveX/float(len(imagedCells))
-        plt.plot(t, aveX, 'g', linewidth=3.0)
+        ax.plot(t, aveX, 'g', linewidth=3.0)
+# show where silencing is applied
+if mode!=0:
+    try:
+        import matplotlib.patches as patches
+        startName = "#silenceStart = "
+        with open(os.path.join(fileDir,fileId+'.log'),"r") as fi:
+            for ln in fi:
+                if ln.startswith(startName):
+                    temp = ln[len(startName):]
+        silenceStart = float(temp)
+        startName = "#silenceDur = "
+        with open(os.path.join(fileDir,fileId+'.log'),"r") as fi:
+            for ln in fi:
+                if ln.startswith(startName):
+                    temp = ln[len(startName):]
+        silenceDur = float(temp)
+        rect_y = (0.000475,0.000005) if "Ca" in fileName else (-5, 1)
+        ax.add_patch(patches.Rectangle( (silenceStart,rect_y[0]), silenceDur, rect_y[1] , alpha=0.6))
+    except Exception:
+        pass
 
 
 # plotting setup
-plt.xlabel("t [ms]")
-plt.ylabel(varName)
+ax.set_xlabel("t [ms]")
+ax.set_ylabel(varName)
 if "Ca" in fileName:
-    plt.ylim([0, 0.0005])
-#plt.title(title)
+    ax.set_ylim([0, 0.0005])
+else:
+    ax.set_ylim([-100.0, 0.0])
+#ax.set_title(title)
 plt.savefig(saveName)
 
