@@ -316,7 +316,15 @@ print("Dividing simulation into %d batches..."%nbatch)
 tremain = tstop%tbatch  # remaining simulation time after nbatch
 for i in xrange(nbatch):
     temptstop += tbatch  # tstop for current batch
-    #h.frecord_init()  # reuse all recording vectors
+    if False:
+        for ii in range(ncells):
+            vrec[ii].resize(0)
+            carec[ii].resize(0)
+            vrec[ii] = h.Vector(int(tbatch/Dt))
+            carec[ii] = h.Vector(int(tbatch/Dt))
+            vrec[ii].record(cell[ii].soma(0.5)._ref_v,Dt)
+            carec[ii].record(cell[ii].soma(0.5)._ref_cai,Dt)
+    h.frecord_init()  # reuse all recording vectors
     h.continuerun(temptstop)
     # exporting Ca time series
     tosave = modelSetup.convertSimOutput(carec,downSampling,reuse=True)
