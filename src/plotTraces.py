@@ -143,7 +143,10 @@ if mode!=0:
                 if ln.startswith(startName):
                     temp = ln[len(startName):]
         silenceDur = float(temp)
-        rect_y = (0.000475,0.000005) if "Ca" in fileName else (-5, 1)
+        if np.max(X)>0.0005:
+            rect_y = (0.00095,0.00001) if "Ca" in fileName else (-5, 1)
+        else:
+            rect_y = (0.000475,0.000005) if "Ca" in fileName else (-5, 1)
         ax.add_patch(patches.Rectangle( (silenceStart,rect_y[0]), silenceDur, rect_y[1] , alpha=0.6))
     except Exception:
         pass
@@ -153,7 +156,10 @@ if mode!=0:
 ax.set_xlabel("t [ms]")
 ax.set_ylabel(varName)
 if "Ca" in fileName:
-    ax.set_ylim([0, 0.0005])
+    if np.max(X)>0.0005:
+        ax.set_ylim([0, 0.001])
+    else:
+        ax.set_ylim([0, 0.0005])
 else:
     ax.set_ylim([-100.0, 0.0])
 #ax.set_title(title)
