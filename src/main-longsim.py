@@ -25,27 +25,27 @@ import modelSetup
 ######
 model = 2
 gjmodel = 2
-morphology = 3
-species = 0  # 0: mouse; 1: human; 2: cubic lattice
+morphology = 1
+species = 2  # 0: mouse; 1: human; 2: cubic lattice
 pyseed = 1
 isImitateExp = 1  # if True, simulate whole islet but only analyse imaged cells
 mode = 1  # 0: WT; 1: silent hubs; 2: silent non hubs
-silenceStart = 50e3
+silenceStart = 75e3#250e3#75e3
 silenceDur = 250e3
 silenceAmp = -0.005
-pHubs = 0.01  # percentage/fraction of hubs in islet
+pHubs = 0.07 # percentage/fraction of hubs in islet
 ##TODO need to do methodToPickHubs
 methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
-ggap = 1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
+ggap = 1/3.*1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
 ggaphub = 1/3.*1/6.*5.1*0.385*1e-4#1.0*0.00017e-1
-gjtau = 160.0
+gjtau = 100.0
 dthres = 17.5  # spatial cutoff distance to def GJ connection
 isletsize = 40  # islet size of interest (None for whole islet)
-hetVar = 0.05
-tstop = 350e3  # usually in [ms]
+hetVar = 0.0
+tstop = 575e3#750e3#575e3  # usually in [ms]
 dt = 0.1  # usually in [ms]
 downSampling = 1000  # down sample the output -> output_timestep = dt*downSampling
-tbatch = 25e3 # split simulation into batches; same unit as tstop
+tbatch = 5e3 # split simulation into batches; same unit as tstop
 
 if isImitateExp:
     isletsize = None # force to use whole islet
@@ -73,7 +73,8 @@ if model == 1:
     def defineBeta(cellList,i):
         # define beta cell
         cellList.append(h.betacell())
-        setHetero(cellList[i],HetMatrix,i)
+        if hetVar>0:
+            setHetero(cellList[i],HetMatrix,i)
     def defineBetaHub(cellList,i):
         # define beta hub cell
         cellList.append(h.betahub())
@@ -91,8 +92,9 @@ elif model == 2:
     def defineBeta(cellList,i):
         # define beta cell
         cellList.append(h.betacell())
-        setHetero(cellList[i],HetMatrix,i)
-        cellList[i].soma(0.5).gammatoset_katp = 7.0
+        if hetVar>0:
+            setHetero(cellList[i],HetMatrix,i)
+        cellList[i].soma(0.5).gammatoset_katp = 6.0
     def defineBetaHub(cellList,i):
         # define beta hub cell
         cellList.append(h.betacell())
@@ -161,7 +163,7 @@ random.shuffle(temp)
 hubsList = temp[0:numHubs]
 imagedHubs = list(set(hubsList).intersection(imagedCells))
 if len(imagedHubs) < int(pHubs*len(imagedCells)):
-    nMorehubs = len(imagedHubs) - int(pHubs*len(imagedCells))
+    nMorehubs = int(pHubs*len(imagedCells)) - len(imagedHubs)
     tempCellsToPick = [x for x in imagedCells if x not in imagedHubs]
     random.shuffle(tempCellsToPick)
     hubsList += tempCellsToPick[0:nMorehubs]
@@ -216,6 +218,7 @@ print "Defining cells..."
 # Introduce heterogeneity to each defined cell
 cell = []
 iclamp_hubs = []
+toPick = random.randint(0,len(hubsList))
 for i in range(ncells):
     if i not in hubsList:
         #cell.append(h.betacell())
@@ -229,7 +232,7 @@ for i in range(ncells):
                     f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
                 silenceCell(iclamp_hubs,cell[i],silenceStart,silenceDur,silenceAmp)
         else:
-            if (i in nonHubsToPickList) and (mode==2):
+            if (i == nonHubsToPickList[toPick]) and (mode==2):
                 print "silencing cell ",i
                 with open(outlog, 'a') as f:
                     f.write('#silencedCell = %d\n'%i)
@@ -241,7 +244,7 @@ for i in range(ncells):
         #cell[i].soma(0.5).nkatp_katp = -5.8
         defineBetaHub(cell,i)
         if isImitateExp:
-            if mode==1 and (i == imagedHubs[1]):
+            if mode==1 and i==imagedHubs[0]:
                 # I clamp hubs to silence them, compare results from Johnston et al., 2016
                 print "silencing cell ",i
                 with open(outlog, 'a') as f:
@@ -249,7 +252,7 @@ for i in range(ncells):
                     f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
                 silenceCell(iclamp_hubs,cell[i],silenceStart,silenceDur,silenceAmp)
         else:
-            if mode==1:
+            if mode==1 and i==hubsList[toPick]:
                 # I clamp hubs to silence them, compare results from Johnston et al., 2016
                 print "silencing cell ",i
                 with open(outlog, 'a') as f:
