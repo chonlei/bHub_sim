@@ -27,15 +27,16 @@ model = 2
 gjmodel = 2
 morphology = 1
 species = 2  # 0: mouse; 1: human; 2: cubic lattice
-pyseed = 1
+pyseed = 5
 isImitateExp = 1  # if True, simulate whole islet but only analyse imaged cells
 mode = 1  # 0: WT; 1: silent hubs; 2: silent non hubs
 silenceStart = 75e3#250e3#75e3
 silenceDur = 250e3
 silenceAmp = -0.005
-pHubs = 0.07 # percentage/fraction of hubs in islet
+pHubs = 0.015  # percentage/fraction of hubs in islet
 ##TODO need to do methodToPickHubs
 methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
+whichHub = 1  # indix of imaged hub/non-hub to silence
 ggap = 1/3.*1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
 ggaphub = 1/3.*1/6.*5.1*0.385*1e-4#1.0*0.00017e-1
 gjtau = 100.0
@@ -189,7 +190,7 @@ imagedNonHubs = []
 if isImitateExp:
     temp = [i for i in imagedCells if i not in imagedHubs]
     random.shuffle(temp)
-    imagedNonHubs = temp[0:int(pHubs*len(imagedCells))]
+    imagedNonHubs = temp[0:len(imagedHubs)]
 print(nonHubsToPickList)
 with open(outlog, 'a') as f:
     f.write('#nonHubsToPickList = ')
@@ -209,10 +210,13 @@ HetMatrix = np.zeros((len(HetDict)+1,ncells))
 def silenceCell(iclampList,cell,delay=250e3,dur=250e3,amp=-0.005):
     # iclamp cell to imitate cell silencing in experiments
     # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
-    iclampList.append(h.IClamp (0.5, sec = cell.soma) )
-    iclampList[-1].delay = delay
-    iclampList[-1].dur = dur
-    iclampList[-1].amp = amp
+    #iclampList.append(h.IClamp (0.5, sec = cell.soma) )
+    iclampList.append(h.SEClamp (0.5, sec = cell.soma) )
+    #iclampList[-1].delay = delay
+    iclampList[-1].dur1 = silenceStart
+    iclampList[-1].rs = 1e9
+    iclampList[-1].dur2 = dur
+    iclampList[-1].amp2 = -120.0 #amp
 print "Defining cells..."
 # Define as beta hub cell if in the hubsList
 # Introduce heterogeneity to each defined cell
@@ -225,7 +229,7 @@ for i in range(ncells):
         #setHetero(cell[i],HetMatrix,i)
         defineBeta(cell,i)
         if isImitateExp:
-            if (i == imagedNonHubs[0]) and (mode==2):
+            if (i == imagedNonHubs[whichHub]) and (mode==2):
                 print "silencing cell ",i
                 with open(outlog, 'a') as f:
                     f.write('#silencedCell = %d\n'%i)
@@ -244,7 +248,7 @@ for i in range(ncells):
         #cell[i].soma(0.5).nkatp_katp = -5.8
         defineBetaHub(cell,i)
         if isImitateExp:
-            if mode==1 and i==imagedHubs[0]:
+            if mode==1 and i==imagedHubs[whichHub]:
                 # I clamp hubs to silence them, compare results from Johnston et al., 2016
                 print "silencing cell ",i
                 with open(outlog, 'a') as f:
@@ -315,6 +319,9 @@ nbatch = int(tstop/tbatch)  # split simulation into nbatch
 print("Dividing simulation into %d batches..."%nbatch)
 tremain = tstop%tbatch  # remaining simulation time after nbatch
 for i in xrange(nbatch):
+    if temptstop >= silenceStart:
+        for iclamp in iclamp_hubs:
+            iclamp.rs = 0.001
     temptstop += tbatch  # tstop for current batch
     h.frecord_init()  # reuse all recording vectors
     h.continuerun(temptstop)
