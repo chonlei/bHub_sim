@@ -89,6 +89,7 @@ if isImagedCells:
 fig = plt.figure()
 ax = fig.add_subplot(111)
 aveX = np.zeros(X[0].shape)
+maxCa = 0
 for i in xrange(len(X)):
     if isImagedCells:
         if (i not in hubList) and (i in imagedCells):
@@ -105,6 +106,7 @@ for i in np.array(hubList)[np.array(hubList)>0]:
 ax.plot(t, X[i], 'r', label='hub')
 aveX = aveX/float(shapeX[0]) if not isImagedCells else aveX/float(len(imagedCells))
 ax.plot(t, aveX, 'g', linewidth=3.0, label='average all')
+maxCa = max(np.max(X),maxCa)
 # plot the rest if splitted into batches
 if nBatch>0:
     for iBatch in range(nBatch):
@@ -127,6 +129,8 @@ if nBatch>0:
         ax.plot(t, X[i], 'r')
         aveX = aveX/float(shapeX[0]) if not isImagedCells else aveX/float(len(imagedCells))
         ax.plot(t, aveX, 'g', linewidth=3.0)
+        maxCa = max(np.max(X),maxCa)
+
 # show where silencing is applied
 if mode!=0:
     try:
@@ -143,7 +147,7 @@ if mode!=0:
                 if ln.startswith(startName):
                     temp = ln[len(startName):]
         silenceDur = float(temp)
-        if np.max(X)>0.0005:
+        if maxCa>0.0005:
             rect_y = (0.00095,0.00001) if "Ca" in fileName else (-5, 1)
         else:
             rect_y = (0.000475,0.000005) if "Ca" in fileName else (-5, 1)
@@ -156,7 +160,7 @@ if mode!=0:
 ax.set_xlabel("t [ms]")
 ax.set_ylabel(varName)
 if "Ca" in fileName:
-    if np.max(X)>0.0005:
+    if maxCa>0.0005:
         ax.set_ylim([0, 0.001])
     else:
         ax.set_ylim([0, 0.0005])
