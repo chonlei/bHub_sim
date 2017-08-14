@@ -30,9 +30,9 @@ species = 2  # 0: mouse; 1: human; 2: cubic lattice
 pyseed = 5
 isImitateExp = 1  # if True, simulate whole islet but only analyse imaged cells
 mode = 1  # 0: WT; 1: silent hubs; 2: silent non hubs
-silenceStart = 75e3#250e3#75e3
+silenceStart = 250e3#75e3
 silenceDur = 250e3
-silenceAmp = -0.005
+silenceAmp = -100#mV  #-0.005#uA
 pHubs = 0.015  # percentage/fraction of hubs in islet
 ##TODO need to do methodToPickHubs
 methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
@@ -43,7 +43,7 @@ gjtau = 100.0
 dthres = 17.5  # spatial cutoff distance to def GJ connection
 isletsize = 40  # islet size of interest (None for whole islet)
 hetVar = 0.0
-tstop = 575e3#750e3#575e3  # usually in [ms]
+tstop = 750e3#575e3  # usually in [ms]
 dt = 0.1  # usually in [ms]
 downSampling = 1000  # down sample the output -> output_timestep = dt*downSampling
 tbatch = 5e3 # split simulation into batches; same unit as tstop
@@ -136,6 +136,8 @@ Total = (ncells*ncells)/2 - ncells # maximum number of gapjunctions that could b
 
 if isImitateExp==1:
     imagedCells = modelSetup.getImagedCellIdx(CoorData,topDir=2,imageDepth=10,Ncells=100,method=0)
+else:
+    imagedCells = []
 with open(outlog, 'a') as f:
     f.write('#imagedCells = ')
     f.write(','.join(map(str, imagedCells)))
@@ -163,7 +165,7 @@ temp = range(ncells)
 random.shuffle(temp)
 hubsList = temp[0:numHubs]
 imagedHubs = list(set(hubsList).intersection(imagedCells))
-if len(imagedHubs) < int(pHubs*len(imagedCells)):
+if isImitateExp and len(imagedHubs) < int(pHubs*len(imagedCells)):
     nMorehubs = int(pHubs*len(imagedCells)) - len(imagedHubs)
     tempCellsToPick = [x for x in imagedCells if x not in imagedHubs]
     random.shuffle(tempCellsToPick)
@@ -216,12 +218,13 @@ def silenceCell(iclampList,cell,delay=250e3,dur=250e3,amp=-0.005):
     iclampList[-1].dur1 = silenceStart
     iclampList[-1].rs = 1e9
     iclampList[-1].dur2 = dur
-    iclampList[-1].amp2 = -120.0 #amp
+    iclampList[-1].amp2 = -100.0 #amp
 print "Defining cells..."
 # Define as beta hub cell if in the hubsList
 # Introduce heterogeneity to each defined cell
 cell = []
 iclamp_hubs = []
+tempCoupledMatrix = CoupledMatrix + CoupledMatrix.T
 toPick = random.randint(0,len(hubsList))
 for i in range(ncells):
     if i not in hubsList:
@@ -248,7 +251,7 @@ for i in range(ncells):
         #cell[i].soma(0.5).nkatp_katp = -5.8
         defineBetaHub(cell,i)
         if isImitateExp:
-            if mode==1 and i==imagedHubs[whichHub]:
+            if mode==1 and (i==imagedHubs[whichHub] or i in tempCoupledMatrix[imagedHubs[whichHub],:]):
                 # I clamp hubs to silence them, compare results from Johnston et al., 2016
                 print "silencing cell ",i
                 with open(outlog, 'a') as f:
