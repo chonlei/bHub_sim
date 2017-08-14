@@ -24,25 +24,25 @@ import modelSetup
 ## Define model and setup
 ######
 model = 2
-gjmodel = 2
+gjmodel = 1
 morphology = 1
 species = 2  # 0: mouse; 1: human; 2: cubic lattice
-pyseed = 3
+pyseed = 4 
 isImitateExp = 1  # if True, simulate whole islet but only analyse imaged cells
 mode = 1  # 0: WT; 1: silent hubs; 2: silent non hubs
 silenceStart = 75e3#250e3#75e3
 silenceDur = 250e3
-silenceAmp = -0.005#-100#mV  #-0.005#uA
-pHubs = 0.01  # percentage/fraction of hubs in islet
+silenceAmp = -0.05#-100#mV  #-0.005#uA
+pHubs = 0.05  # percentage/fraction of hubs in islet
 ##TODO need to do methodToPickHubs
 methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
 whichHub = 0  # indix of imaged hub/non-hub to silence
-ggap = 1/3.*1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
-ggaphub = 1/3.*1/6.*5.1*0.385*1e-4#1.0*0.00017e-1
+ggap = 2./3.*1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
+ggaphub = 2./3.*1/6.*5.1*0.385*1e-4#1.0*0.00017e-1
 gjtau = 100.0
 dthres = 17.5  # spatial cutoff distance to def GJ connection
 isletsize = 40  # islet size of interest (None for whole islet)
-hetVar = 0.0
+hetVar = 0.1
 tstop = 575e3#750e3#575e3  # usually in [ms]
 dt = 0.1  # usually in [ms]
 downSampling = 1000  # down sample the output -> output_timestep = dt*downSampling
@@ -95,7 +95,7 @@ elif model == 2:
         cellList.append(h.betacell())
         if hetVar>0:
             setHetero(cellList[i],HetMatrix,i)
-        cellList[i].soma(0.5).gammatoset_katp = 6.0
+        cellList[i].soma(0.5).gammatoset_katp = 6.5
     def defineBetaHub(cellList,i):
         # define beta hub cell
         cellList.append(h.betacell())
@@ -164,9 +164,11 @@ numHubs = int(pHubs*ncells)
 temp = range(ncells)
 random.shuffle(temp)
 hubsList = temp[0:numHubs]
+#hubsList = [579,497,851,1352]
+#hubsList = [5,682,262,114,698,700]
 imagedHubs = list(set(hubsList).intersection(imagedCells))
-if isImitateExp and len(imagedHubs) < int(pHubs*len(imagedCells)):
-    nMorehubs = int(pHubs*len(imagedCells)) - len(imagedHubs)
+if isImitateExp and len(imagedHubs) < max(int(pHubs*len(imagedCells)),1):
+    nMorehubs = max(int(pHubs*len(imagedCells)),1) - len(imagedHubs)
     tempCellsToPick = [x for x in imagedCells if x not in imagedHubs]
     random.shuffle(tempCellsToPick)
     hubsList += tempCellsToPick[0:nMorehubs]
@@ -224,6 +226,7 @@ def silenceCell(iclampList,cell,delay=250e3,dur=250e3,amp=-0.005):
     # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
     iclampList.append(h.IClamp (0.5, sec = cell.soma) )
     iclampList[-1].delay = delay
+    iclampList[-1].dur = dur
     iclampList[-1].amp = amp
 
 print "Defining cells..."
@@ -239,7 +242,8 @@ for i in range(ncells):
         #setHetero(cell[i],HetMatrix,i)
         defineBeta(cell,i)
         if isImitateExp:
-            if (i == imagedNonHubs[whichHub]) and (mode==2):
+            if i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
+                #if (i == imagedNonHubs[whichHub]) and (mode==2):
                 print "silencing cell ",i
                 with open(outlog, 'a') as f:
                     f.write('#silencedCell = %d\n'%i)
@@ -258,7 +262,7 @@ for i in range(ncells):
         #cell[i].soma(0.5).nkatp_katp = -5.8
         defineBetaHub(cell,i)
         if isImitateExp:
-            if mode==1 and (i==imagedHubs[whichHub] or i in tempCoupledMatrix[imagedHubs[whichHub],:]):
+            if mode==1 and (i==imagedHubs[whichHub] or i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0])):
                 # I clamp hubs to silence them, compare results from Johnston et al., 2016
                 print "silencing cell ",i
                 with open(outlog, 'a') as f:
@@ -329,9 +333,9 @@ nbatch = int(tstop/tbatch)  # split simulation into nbatch
 print("Dividing simulation into %d batches..."%nbatch)
 tremain = tstop%tbatch  # remaining simulation time after nbatch
 for i in xrange(nbatch):
-    if temptstop >= np.inf:#silenceStart:
-        for iclamp in iclamp_hubs:
-            iclamp.rs = 0.001
+    #if temptstop >= np.inf:#silenceStart:
+    #    for iclamp in iclamp_hubs:
+    #        iclamp.rs = 0.001
     temptstop += tbatch  # tstop for current batch
     h.frecord_init()  # reuse all recording vectors
     h.continuerun(temptstop)
