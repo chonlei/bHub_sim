@@ -27,23 +27,23 @@ model = 2
 gjmodel = 2
 morphology = 1
 species = 2  # 0: mouse; 1: human; 2: cubic lattice
-pyseed = 5
+pyseed = 3
 isImitateExp = 1  # if True, simulate whole islet but only analyse imaged cells
 mode = 1  # 0: WT; 1: silent hubs; 2: silent non hubs
-silenceStart = 250e3#75e3
+silenceStart = 75e3#250e3#75e3
 silenceDur = 250e3
-silenceAmp = -100#mV  #-0.005#uA
-pHubs = 0.015  # percentage/fraction of hubs in islet
+silenceAmp = -0.005#-100#mV  #-0.005#uA
+pHubs = 0.01  # percentage/fraction of hubs in islet
 ##TODO need to do methodToPickHubs
 methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
-whichHub = 1  # indix of imaged hub/non-hub to silence
+whichHub = 0  # indix of imaged hub/non-hub to silence
 ggap = 1/3.*1/6.*5.1*0.385*1e-4#0.5*0.00017e-1
 ggaphub = 1/3.*1/6.*5.1*0.385*1e-4#1.0*0.00017e-1
 gjtau = 100.0
 dthres = 17.5  # spatial cutoff distance to def GJ connection
 isletsize = 40  # islet size of interest (None for whole islet)
 hetVar = 0.0
-tstop = 750e3#575e3  # usually in [ms]
+tstop = 575e3#750e3#575e3  # usually in [ms]
 dt = 0.1  # usually in [ms]
 downSampling = 1000  # down sample the output -> output_timestep = dt*downSampling
 tbatch = 5e3 # split simulation into batches; same unit as tstop
@@ -209,7 +209,7 @@ HetMatrix = np.zeros((len(HetDict)+1,ncells))
 #HetMatrix = np.loadtxt('HetMatrix-mouse40-3.txt')
 
 ##TODO: Add function to silent cells
-def silenceCell(iclampList,cell,delay=250e3,dur=250e3,amp=-0.005):
+def silenceCellV(iclampList,cell,delay=250e3,dur=250e3,amp=-100.0):
     # iclamp cell to imitate cell silencing in experiments
     # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
     #iclampList.append(h.IClamp (0.5, sec = cell.soma) )
@@ -218,7 +218,14 @@ def silenceCell(iclampList,cell,delay=250e3,dur=250e3,amp=-0.005):
     iclampList[-1].dur1 = silenceStart
     iclampList[-1].rs = 1e9
     iclampList[-1].dur2 = dur
-    iclampList[-1].amp2 = -100.0 #amp
+    iclampList[-1].amp2 = amp #amp
+def silenceCell(iclampList,cell,delay=250e3,dur=250e3,amp=-0.005):
+    # iclamp cell to imitate cell silencing in experiments
+    # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
+    iclampList.append(h.IClamp (0.5, sec = cell.soma) )
+    iclampList[-1].delay = delay
+    iclampList[-1].amp = amp
+
 print "Defining cells..."
 # Define as beta hub cell if in the hubsList
 # Introduce heterogeneity to each defined cell
@@ -322,7 +329,7 @@ nbatch = int(tstop/tbatch)  # split simulation into nbatch
 print("Dividing simulation into %d batches..."%nbatch)
 tremain = tstop%tbatch  # remaining simulation time after nbatch
 for i in xrange(nbatch):
-    if temptstop >= silenceStart:
+    if temptstop >= np.inf:#silenceStart:
         for iclamp in iclamp_hubs:
             iclamp.rs = 0.001
     temptstop += tbatch  # tstop for current batch
