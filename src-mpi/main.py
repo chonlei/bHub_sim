@@ -1,17 +1,12 @@
 #!/usr/bin/env python
 
-try:
-    from neuron import h
-except Exception:
-    raise Exception("Please properly install NEURON package: http://www.neuron.yale.edu/neuron/download")
-
-from mpi4py import MPI
-
 import os
 import sys
 sys.path.append("../src/")
 import modelSetup
 import simulator
+
+from mpi4py import MPI
 
 
 ## description of current simulation
@@ -70,6 +65,16 @@ modelParam = {'model' : 2, \
               'downSampling' : 1000, \
               'tbatch' : 5e3}
 
+# setup output directory
+#outputdir = modelSetup.outputMake()
+try:
+    outputdir = '../output/sim%s/'%sys.argv[1]
+    if not os.path.isdir(outputdir):
+        outputdir = '../output/sim_temp/'
+except Exception:
+    outputdir = '../output/sim_temp/'
+modelParam['parentout'] = outputdir
+
 
 def main(comm,modelParam,outputdir):
     # Get rank and size
@@ -84,9 +89,6 @@ def main(comm,modelParam,outputdir):
 
 
 if __name__ == "__main__":
-    # setup output directory
-    outputdir = modelSetup.outputMake()
-    modelParam['parentout'] = outputdir
     # log down some short note of current simulations
     # e.g. what is this simulation trying to test or what is changing.
     with open(os.path.join(outputdir,'logmsg.log'), 'w') as f:
