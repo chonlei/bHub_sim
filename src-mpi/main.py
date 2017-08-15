@@ -6,6 +6,8 @@ sys.path.append("../src/")
 import modelSetup
 import simulator
 
+from mpi4py import MPI
+
 
 ## description of current simulation
 logmsg = "First testing of running multiple simulations using mpi+neuron\n\nUsing cubic lattice; common seed; not varying gGJ and gamma;silence one fixed hub in the image plane\n\nAdd hub one by one."
@@ -65,10 +67,13 @@ modelParam = {'model' : 2, \
 
 # setup output directory
 #outputdir = modelSetup.outputMake()
-modelParam['parentout'] = '../output/sim0/'#outputdir
-
-
-from mpi4py import MPI
+try:
+    outputdir = '../output/sim%s/'%sys.argv[1]
+    if not os.path.isdir(outputdir):
+        outputdir = '../output/sim_temp/'
+except Exception:
+    outputdir = '../output/sim_temp/'
+modelParam['parentout'] = outputdir
 
 
 def main(comm,modelParam,outputdir):
