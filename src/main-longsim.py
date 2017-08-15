@@ -27,13 +27,13 @@ model = 2
 gjmodel = 1
 morphology = 1
 species = 2  # 0: mouse; 1: human; 2: cubic lattice
-pyseed = 4 
+pyseed = 7
 isImitateExp = 1  # if True, simulate whole islet but only analyse imaged cells
 mode = 1  # 0: WT; 1: silent hubs; 2: silent non hubs
 silenceStart = 75e3#250e3#75e3
 silenceDur = 250e3
-silenceAmp = -0.05#-100#mV  #-0.005#uA
-pHubs = 0.05  # percentage/fraction of hubs in islet
+silenceAmp = -0.005#-100#mV  #-0.005#uA
+pHubs = 0.01  # percentage/fraction of hubs in islet
 ##TODO need to do methodToPickHubs
 methodToPickHubs = 0  # 0: random; 1: top GJ links; 2: bottom GJ links
 whichHub = 0  # indix of imaged hub/non-hub to silence
@@ -242,8 +242,8 @@ for i in range(ncells):
         #setHetero(cell[i],HetMatrix,i)
         defineBeta(cell,i)
         if isImitateExp:
-            if i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
-                #if (i == imagedNonHubs[whichHub]) and (mode==2):
+            #if i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
+            if (i == imagedNonHubs[whichHub]) and (mode==2):
                 print "silencing cell ",i
                 with open(outlog, 'a') as f:
                     f.write('#silencedCell = %d\n'%i)
@@ -262,7 +262,8 @@ for i in range(ncells):
         #cell[i].soma(0.5).nkatp_katp = -5.8
         defineBetaHub(cell,i)
         if isImitateExp:
-            if mode==1 and (i==imagedHubs[whichHub] or i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0])):
+            if mode==1 and imagedHubs[whichHub]:
+                #or i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
                 # I clamp hubs to silence them, compare results from Johnston et al., 2016
                 print "silencing cell ",i
                 with open(outlog, 'a') as f:
