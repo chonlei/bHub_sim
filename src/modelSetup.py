@@ -24,6 +24,28 @@ def SetRandomSeed(pyseed):
     random.seed(pyseed)
 
 
+def outputMake(isTest=False):
+    """Set up the output folders and names
+    
+    This function create and return the output directory. Part of outputSetup() function.
+
+    Args:
+        isTest (bool): output folder name sim (False; default) or testsim (True)
+
+    Return:
+        outputdir (str): The (created) output file directory
+
+    """
+    out = '../output/'
+    idx = len([name for name in os.listdir(out) if os.path.isdir(out+name)])
+    outputdir = '../output/sim%d/'%idx if not isTest else '../output/testsim%d/'%idx
+    try:
+        os.makedirs(outputdir)
+    except Exception:
+        raise Exception("Cannot create directory %s"%outputdir)
+    return outputdir
+
+
 def outputSetup(model,morphology,pyseed,mode,isTest=False):
     """Set up the output folders and names
     
@@ -43,6 +65,33 @@ def outputSetup(model,morphology,pyseed,mode,isTest=False):
     out = '../output/'
     idx = len([name for name in os.listdir(out) if os.path.isdir(out+name)])
     outputdir = '../output/sim%d/'%idx if not isTest else '../output/testsim%d/'%idx
+    try:
+        os.makedirs(outputdir)
+    except Exception:
+        raise Exception("Cannot create directory %s"%outputdir)
+    outputidx = 'model_'+str(model)+'_morphology_'+str(morphology)+'_seed_'+str(pyseed)+'_mode_'+str(mode)
+    return outputidx, outputdir
+
+
+def outputSetup_sub(model,morphology,pyseed,mode,out,subidx):
+    """Set up the output folders and names
+    
+    This function create and return the output directory and output file name based on the simulation set up.
+
+    Args:
+        model (int): model id
+        morphology (int): morphology id
+        pyseed (int): The seed for np.random and random
+        mode (int): simulation mode
+        out (str): output directory output from outputSetup()
+        subidx (int): sub-index of the subsimulations
+
+    Return:
+        outputidx (str): The output file name (same as outputSetup())
+        outputdir (str): The (created) output file directory
+
+    """
+    outputdir = os.path.join(out,'subsim%d/'%subidx)
     try:
         os.makedirs(outputdir)
     except Exception:

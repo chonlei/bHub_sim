@@ -21,6 +21,8 @@ import sys
 sys.path.append("../src/")
 import modelSetup
 
+import pickle
+
 
 ######
 ## Define model and setup; for testing only
@@ -108,10 +110,19 @@ def main(modelParam=modelParam):
         isletsize = None # force to use whole islet
 
     # Create output directories and log file
-    outputidx, outputdir = modelSetup.outputSetup(model,morphology,pyseed,mode)
+    try:
+        parentout = modelParam['parentout']
+        subidx = modelParam['subidx']
+        outputidx, outputdir = modelSetup.outputSetup_sub(model,morphology,pyseed,mode,parentout,subidx)
+    except Exception:
+        outputidx, outputdir = modelSetup.outputSetup(model,morphology,pyseed,mode)
     outlog = path.join(outputdir, outputidx+'.log')
     outCa = path.join(outputdir, 'Ca_'+outputidx)
     outVm = path.join(outputdir, 'Vm_'+outputidx)
+    # save modelParam
+    with open(path.join(outputdir,'modelParam.pkl'), 'wb') as f:
+        pickle.dump(modelParam, f, pickle.HIGHEST_PROTOCOL)
+    # log model setup as txt file
     with open(outlog, 'w') as f:
         f.write('#model = %d \n#gjmodel = %d \n#morphology = %d \n#species = %d \n#pyseed = %d \n#isImitateExp = %d \n#mode = %d \n#silenceStart = %f \n#silenceDur = %f \n#silenceAmp = %f \n#pHubs = %f \n#methodToPickHubs = %d \n#ggap = %f \n#ggaphub = %f \n#gjtau = %f \n#dthres = %f \n#isletsize = '%(model,gjmodel,morphology,species,pyseed,isImitateExp,mode,silenceStart,silenceDur,silenceAmp,pHubs,methodToPickHubs,ggap,ggaphub,gjtau,dthres)+str(isletsize)+' \n')
         f.write('#hetVar = %f \n#tstop = %f \n#dt = %f \n#downSampling = %d \n#tbatch = %f \n\n'%(hetVar,tstop,dt,downSampling,tbatch))
@@ -213,13 +224,14 @@ def main(modelParam=modelParam):
     print("Starting system set-up...")
 
     # Define beta hubs cells
-    numHubs = int(pHubs*ncells)
+    numHubs = int(pHubs*ncells) if pHubs<=1 else pHubs
     temp = range(ncells)
     random.shuffle(temp)
     hubsList = temp[0:numHubs]
     imagedHubs = list(set(hubsList).intersection(imagedCells))
-    if isImitateExp and len(imagedHubs) < max(int(pHubs*len(imagedCells)),1):
-        nMorehubs = max(int(pHubs*len(imagedCells)),1) - len(imagedHubs)
+    numImHubs = int(pHubs*len(imagedCells)) if pHubs<=1 else len(imagedCells)/ncells*pHubs
+    if isImitateExp and len(imagedHubs) < max(numImHubs,1):
+        nMorehubs = max(numImHubs,1) - len(imagedHubs)
         tempCellsToPick = [x for x in imagedCells if x not in imagedHubs]
         random.shuffle(tempCellsToPick)
         hubsList += tempCellsToPick[0:nMorehubs]
