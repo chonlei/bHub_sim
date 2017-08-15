@@ -54,7 +54,7 @@ modelParam = {'model' : 2, \
               'isImitateExp' : 1, \
               'mode' : 1, \
               'silenceStart' : 75e3, \
-              'silenceDur' : 250e3, \
+              'silenceDur' : 150e3, \
               'silenceAmp' : -0.005, \
               'pHubs' : 0.01, \
               'methodToPickHubs' : 0 , \
@@ -65,7 +65,7 @@ modelParam = {'model' : 2, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.1, \
-              'tstop' : 575e3, \
+              'tstop' : 375e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
               'tbatch' : 5e3}
