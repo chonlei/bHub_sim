@@ -48,13 +48,13 @@ tbatch  # split simulation into batches; same unit as tstop
 """
 modelParam = {'model' : 2, \
               'gjmodel' : 1, \
-              'morphology' : 1, \
+              'morphology' : 0, \
               'species' : 2, \
               'pyseed' : 1, \
               'isImitateExp' : 1, \
               'mode' : 1, \
-              'silenceStart' : 75e3, \
-              'silenceDur' : 150e3, \
+              'silenceStart' : 75e2, \
+              'silenceDur' : 150e2, \
               'silenceAmp' : -0.005, \
               'pHubs' : 0.01, \
               'methodToPickHubs' : 0 , \
@@ -65,7 +65,7 @@ modelParam = {'model' : 2, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.1, \
-              'tstop' : 375e3, \
+              'tstop' : 375e2, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
               'tbatch' : 5e3}
