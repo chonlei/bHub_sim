@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 
-try:
-    from neuron import h
-except Exception:
-    raise Exception("Please properly install NEURON package: http://www.neuron.yale.edu/neuron/download")
-
 import os
 import sys
 sys.path.append("../src/")
@@ -69,8 +64,8 @@ modelParam = {'model' : 2, \
               'tbatch' : 5e3}
 
 # setup output directory
-outputdir = modelSetup.outputMake()
-modelParam['parentout'] = outputdir
+#outputdir = modelSetup.outputMake()
+modelParam['parentout'] = '../output/sim0/'#outputdir
 
 
 from mpi4py import MPI
