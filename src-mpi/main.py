@@ -52,12 +52,12 @@ modelParam = {'model' : 2, \
               'pHubs' : 0.01, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
-              'ggap' : 2./3.*1/6.*5.1*0.385*1e-4, \
-              'ggaphub' : 2./3.*1/6.*5.1*0.385*1e-4, \
+              'ggap' : 1.8/3.*1/6.*5.1*0.385*1e-4, \
+              'ggaphub' : 1.3/3.*1/6.*5.1*0.385*1e-4, \
               'gjtau' : 100.0, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
-              'hetVar' : 0.0, \
+              'hetVar' : 0.1, \
               'tstop' : 275e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
@@ -66,11 +66,14 @@ modelParam = {'model' : 2, \
 # setup output directory
 #outputdir = modelSetup.outputMake()
 try:
-    outputdir = '../output/sim%s/'%sys.argv[1]
+    outputdir = sys.argv[1]
     if not os.path.isdir(outputdir):
+        print("Cannot set %s as output directory"%outputdir)
         outputdir = '../output/sim_temp/'
 except Exception:
+    print("Cannot set %s as output directory"%outputdir)
     outputdir = '../output/sim_temp/'
+print("Output directory set as %s"%outputdir)
 modelParam['parentout'] = outputdir
 
 
