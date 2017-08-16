@@ -43,7 +43,7 @@ modelParam = {'model' : 2, \
               'gjmodel' : 1, \
               'morphology' : 1, \
               'species' : 2, \
-              'pyseed' : 1, \
+              'pyseed' : 3, \
               'isImitateExp' : 1, \
               'mode' : 1, \
               'silenceStart' : 75e3, \
@@ -57,7 +57,7 @@ modelParam = {'model' : 2, \
               'gjtau' : 100.0, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
-              'hetVar' : 0.01, \
+              'hetVar' : 0.0, \
               'tstop' : 275e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     # log down some short note of current simulations
     # e.g. what is this simulation trying to test or what is changing.
     with open(os.path.join(outputdir,'logmsg.log'), 'w') as f:
-        f.write("# SIMULATION DESCRIPTION")
+        f.write("# SIMULATION DESCRIPTION\n\n")
         f.write(logmsg)
     # main simulation
     main(MPI.COMM_WORLD,modelParam,outputdir)
