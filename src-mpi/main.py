@@ -83,7 +83,7 @@ def main(comm,modelParam,outputdir):
     rank = comm.Get_rank()
     modelParam['subidx'] = rank
     # setup what each sub simulation does
-    modelParam['pHubs'] = rank+2
+    modelParam['pHubs'] = 3*rank+3
     # check they are doing right thing
     #print("RANK %d of SIZE %d is doing the right job..."%(rank,size))
     simulator.main(modelParam)
