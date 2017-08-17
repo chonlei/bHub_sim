@@ -67,6 +67,8 @@ modelParam = {'model' : 2, \
               'whichHub' : 0 , \
               'ggap' : 2./3.*1/6.*5.1*0.385*1e-4, \
               'ggaphub' : 2./3.*1/6.*5.1*0.385*1e-4, \
+              'ggaphubvar' : 0, \
+              'ggapvar' : 0, \
               'gjtau' : 100.0, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
@@ -77,7 +79,7 @@ modelParam = {'model' : 2, \
               'tbatch' : 5e3}
 
 
-def main(modelParam=modelParam):
+def main(modelParam=modelParam, hubsList_temp=[]):
     ######
     ## Define model and setup
     ######
@@ -97,6 +99,14 @@ def main(modelParam=modelParam):
     whichHub = modelParam['whichHub']
     ggap = modelParam['ggap']
     ggaphub = modelParam['ggaphub']
+    try:
+        ggaphubvar = modelParam['ggaphubvar']
+    except Exception:
+        ggaphubvar = 0.0
+    try:
+        ggapvar = modelParam['ggapvar']
+    except Exception:
+        ggapvar = 0.0
     gjtau = modelParam['gjtau']
     dthres = modelParam['dthres']
     isletsize = modelParam['isletsize']
@@ -105,6 +115,12 @@ def main(modelParam=modelParam):
     dt = modelParam['dt']
     downSampling = modelParam['downSampling']
     tbatch = modelParam['tbatch']
+    try:
+        # model 1 e.g. {'beta':{} , 'betahub':{'hubkatp':-5.8}}
+        # model 2 e.g. {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None} , 'betahub':{'hubgkatp':10}}
+        model_kwargs = modelParam['model_kwargs']
+    except:
+        model_kwargs = { 'beta':{} , 'betahub':{} }
 
     if isImitateExp:
         isletsize = None # force to use whole islet
@@ -138,15 +154,15 @@ def main(modelParam=modelParam):
         setHetero = modelSetup.setHeteroHermann2007
         HetDict = modelSetup.HetDictHermann2007
         #h.load_file (pathToModel+"betahub.hoc")
-        def defineBeta(cellList,i):
+        def defineBeta(cellList,i,**kwargs):
             # define beta cell
             cellList.append(h.betacell())
             if hetVar>0:
                 setHetero(cellList[i],HetMatrix,i)
-        def defineBetaHub(cellList,i):
+        def defineBetaHub(cellList,i,hubkatp=-5.8):
             # define beta hub cell
             cellList.append(h.betahub())
-            cellList[i].soma(0.5).nkatp_katp = -5.8
+            cellList[i].soma(0.5).nkatp_katp = hubskatp
     elif model == 2:
         ## Created by Chon Lei
         ## The current version is based on the model from
@@ -157,16 +173,23 @@ def main(modelParam=modelParam):
         loadHetero = modelSetup.loadHeteroHermann2007
         setHetero = modelSetup.setHeteroHermann2007
         HetDict = modelSetup.HetDictHermann2007
-        def defineBeta(cellList,i):
+        def defineBeta(cellList,i,gkatp=(6.5,0.0),useDistribution=None):
             # define beta cell
             cellList.append(h.betacell())
             if hetVar>0:
                 setHetero(cellList[i],HetMatrix,i)
-            cellList[i].soma(0.5).gammatoset_katp = 6.5
-        def defineBetaHub(cellList,i):
+            if useDistribution == None:
+                cellList[i].soma(0.5).gammatoset_katp = gkatp[0]
+            elif useDistribution == 'sq':
+                cellList[i].soma(0.5).gammatoset_katp = np.random.uniform(gkatp[0],gkatp[1])
+            elif useDistribution == 'normal':
+                cellList[i].soma(0.5).gammatoset_katp = gkatp[0] + np.random.normal(0.0,1.0)*np.sqrt(gkatp[1])
+            else:
+                cellList[i].soma(0.5).gammatoset_katp = gkatp[0]
+        def defineBetaHub(cellList,i,hubgkatp=10.0):
             # define beta hub cell
             cellList.append(h.betacell())
-            cellList[i].soma(0.5).gammatoset_katp = 10.0
+            cellList[i].soma(0.5).gammatoset_katp = hubgkatp
 
     if gjmodel==1:
         pathToGJModel = "../models/gapjunction_pedersen2015/"
@@ -228,6 +251,8 @@ def main(modelParam=modelParam):
     temp = range(ncells)
     random.shuffle(temp)
     hubsList = temp[0:numHubs]
+    if hubsList_temp!=None and hubsList_temp!=[]:
+        hubsList = hubsList_temp
     imagedHubs = list(set(hubsList).intersection(imagedCells))
     numImHubs = int(pHubs*len(imagedCells)) if pHubs<=1 else len(imagedCells)/ncells*pHubs
     if isImitateExp and len(imagedHubs) < max(numImHubs,1):
@@ -299,7 +324,7 @@ def main(modelParam=modelParam):
     toPick = random.randint(0,len(hubsList))
     for i in range(ncells):
         if i not in hubsList:
-            defineBeta(cell,i)
+            defineBeta(cell,i,**model_kwargs['beta'])
             if isImitateExp:
                 #if i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
                 if (i == imagedNonHubs[whichHub]) and (mode==2):
@@ -316,7 +341,7 @@ def main(modelParam=modelParam):
                         f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
                     silenceCell(iclamp_hubs,cell[i],silenceStart,silenceDur,silenceAmp)
         else:
-            defineBetaHub(cell,i)
+            defineBetaHub(cell,i,**model_kwargs['betahub'])
             if isImitateExp:
                 if mode==1 and i==imagedHubs[whichHub]:
                     #or i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
@@ -334,14 +359,28 @@ def main(modelParam=modelParam):
                     silenceCell(iclamp_hubs,cell[i],silenceStart,silenceDur,silenceAmp)
 
 
+    # Declare heterogeneity GJ matrix
+    HetGjMatrix = np.zeros(CoupledMatrix.shape)
+    # Use a previously generated heterogeneity GJ matrix
+    #HetMatrix = np.loadtxt('')
+
+    #TODO can put this in modelSetup.py too
     print "Defining gap junction connections..."
     gap = []
     for i in range(ncells):
         for j in range(ncells):
             if CoupledMatrix[i,j] > 0 and ((i in hubsList) or (j in hubsList)):
-                gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, ggaphub*CoupledMatrix[i,j],gjtau))
+                if ggaphubvar > 0:
+                    HetGjMatrix[i,j] = ggaphub + np.random.normal(0.0,1.0)*np.sqrt(ggaphubvar)
+                else:
+                    HetGjMatrix[i,j] = ggaphub
+                gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j],gjtau))
             elif CoupledMatrix[i,j] > 0: #and ((i not in nonHubsToPickList) or (j not in nonHubsToPickList)):
-                gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, ggap*CoupledMatrix[i,j],gjtau))
+                if ggapvar > 0:
+                    HetGjMatrix[i,j] = ggap + np.random.normal(0.0,1.0)*np.sqrt(ggapvar)
+                else:
+                    HetGjMatrix[i,j] = ggap
+                gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j],gjtau))
 
 
     ######
