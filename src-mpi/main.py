@@ -30,6 +30,8 @@ methodToPickHubs  # 0: random; 1: top GJ links; 2: bottom GJ links
 whichHub # indix of imaged hub/non-hub to silence
 ggap 
 ggaphub 
+pggaphubstd  # fraction of ggaphub as std
+pggapstd  # fraction of ggap as std
 gjtau 
 dthres  # spatial cutoff distance to def GJ connection
 isletsize # islet size of interest (None for whole islet)
@@ -54,6 +56,8 @@ modelParam = {'model' : 2, \
               'whichHub' : 0 , \
               'ggap' : 1.75/3.*1/6.*5.1*0.385*1e-4, \
               'ggaphub' : 1.3/3.*1/6.*5.1*0.385*1e-4, \
+              'pggaphubstd' : 0, \
+              'pggapstd' : 0.7, \
               'gjtau' : 100.0, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \

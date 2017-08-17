@@ -43,6 +43,8 @@ methodToPickHubs  # 0: random; 1: top GJ links; 2: bottom GJ links
 whichHub # indix of imaged hub/non-hub to silence
 ggap 
 ggaphub 
+pggaphubstd
+pggapstd
 gjtau 
 dthres  # spatial cutoff distance to def GJ connection
 isletsize # islet size of interest (None for whole islet)
@@ -67,8 +69,8 @@ modelParam = {'model' : 2, \
               'whichHub' : 0 , \
               'ggap' : 2./3.*1/6.*5.1*0.385*1e-4, \
               'ggaphub' : 2./3.*1/6.*5.1*0.385*1e-4, \
-              'ggaphubvar' : 0, \
-              'ggapvar' : 0, \
+              'pggaphubstd' : 0, \
+              'pggapstd' : 0, \
               'gjtau' : 100.0, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
@@ -100,13 +102,13 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     ggap = modelParam['ggap']
     ggaphub = modelParam['ggaphub']
     try:
-        ggaphubvar = modelParam['ggaphubvar']
+        pggaphubstd = modelParam['pggaphubstd']
     except Exception:
-        ggaphubvar = 0.0
+        pggaphubstd = 0.0
     try:
-        ggapvar = modelParam['ggapvar']
+        pggapstd = modelParam['pggapstd']
     except Exception:
-        ggapvar = 0.0
+        pggapstd = 0.0
     gjtau = modelParam['gjtau']
     dthres = modelParam['dthres']
     isletsize = modelParam['isletsize']
@@ -370,14 +372,14 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     for i in range(ncells):
         for j in range(ncells):
             if CoupledMatrix[i,j] > 0 and ((i in hubsList) or (j in hubsList)):
-                if ggaphubvar > 0:
-                    HetGjMatrix[i,j] = ggaphub + np.random.normal(0.0,1.0)*np.sqrt(ggaphubvar)
+                if pggaphubstd > 0:
+                    HetGjMatrix[i,j] = max(ggaphub * (1.0 + np.random.normal(0.0,1.0)*pggaphubstd), 0)
                 else:
                     HetGjMatrix[i,j] = ggaphub
                 gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j],gjtau))
             elif CoupledMatrix[i,j] > 0: #and ((i not in nonHubsToPickList) or (j not in nonHubsToPickList)):
-                if ggapvar > 0:
-                    HetGjMatrix[i,j] = ggap + np.random.normal(0.0,1.0)*np.sqrt(ggapvar)
+                if pggapstd > 0:
+                    HetGjMatrix[i,j] = max(ggap * (1.0 + np.random.normal(0.0,1.0)*pggapstd), 0)
                 else:
                     HetGjMatrix[i,j] = ggap
                 gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j],gjtau))
