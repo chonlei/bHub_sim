@@ -55,9 +55,9 @@ modelParam = {'model' : 2, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
               'ggap' : 1.75/3.*1/6.*5.1*0.385*1e-4, \
-              'ggaphub' : 1.3/3.*1/6.*5.1*0.385*1e-4, \
+              'ggaphub' : 1./3.*1/6.*5.1*0.385*1e-4, \
               'pggaphubstd' : 0, \
-              'pggapstd' : 0.7, \
+              'pggapstd' : 0.35, \
               'gjtau' : 100.0, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
