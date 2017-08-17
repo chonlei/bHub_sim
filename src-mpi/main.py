@@ -35,7 +35,7 @@ pggapstd  # fraction of ggap as std
 gjtau 
 dthres  # spatial cutoff distance to def GJ connection
 isletsize # islet size of interest (None for whole islet)
-hetVar
+hetVar  # it is % of mean's standard deviation
 tstop # usually in [ms]
 dt   # usually in [ms]
 downSampling  # down sample the output -> output_timestep = dt*downSampling
@@ -55,7 +55,7 @@ modelParam = {'model' : 2, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
               'ggap' : 1.75/3.*1/6.*5.1*0.385*1e-4, \
-              'ggaphub' : 1./3.*1/6.*5.1*0.385*1e-4, \
+              'ggaphub' : 0.8/3.*1/6.*5.1*0.385*1e-4, \
               'pggaphubstd' : 0, \
               'pggapstd' : 0.35, \
               'gjtau' : 100.0, \
@@ -70,7 +70,7 @@ modelParam = {'model' : 2, \
 # model key word arguments
 # model 1 default: {'beta':{} , 'betahub':{'hubkatp':-5.8}}
 # model 2 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None} , 'betahub':{'hubgkatp':10}}
-modelParam['model_kwargs'] = { 'beta':{'gkatp':(6.0,8.0) , 'useDistribution':'sq'} , \
+modelParam['model_kwargs'] = { 'beta':{'gkatp':(4.0,7.0) , 'useDistribution':'sq'} , \
                                'betahub':{'hubgkatp':10} }
 
 # setup output directory
