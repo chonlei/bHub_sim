@@ -2,5 +2,9 @@ import sys
 sys.path.append("../src/")
 import modelSetup
 
-print(modelSetup.outputMake())
+try:
+    outdir = modelSetup.outputMake(sys.argv[1])
+except Exception:
+    outdir = modelSetup.outputMake()
+print(outdir)
 
