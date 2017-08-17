@@ -67,6 +67,12 @@ modelParam = {'model' : 2, \
               'downSampling' : 1000, \
               'tbatch' : 5e3}
 
+# model key word arguments
+# model 1 default: {'beta':{} , 'betahub':{'hubkatp':-5.8}}
+# model 2 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None} , 'betahub':{'hubgkatp':10}}
+modelParam['model_kwargs'] = { 'beta':{'gkatp':(6.0,8.0) , 'useDistribution':'sq'} , \
+                               'betahub':{'hubgkatp':10} }
+
 # setup output directory
 #outputdir = modelSetup.outputMake()
 try:
