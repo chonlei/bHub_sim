@@ -192,6 +192,17 @@ def main(modelParam=modelParam, hubsList_temp=[]):
             # define beta hub cell
             cellList.append(h.betacell())
             cellList[i].soma(0.5).gammatoset_katp = hubgkatp
+    elif model==3:
+        ## Created by Chon Lei
+        ## The current version is based on the model from
+        ## Cha et al. 2011 
+        ## Last updated: 2017
+        pathToModel = "../models/betacell_cha2011_v3/"
+        #TODO
+        modelSetup.setupHetDict(varp=hetVar)
+        loadHetero = modelSetup.loadHeteroHermann2007
+        setHetero = modelSetup.setHeteroHermann2007
+        HetDict = modelSetup.HetDictHermann2007
 
     if gjmodel==1:
         pathToGJModel = "../models/gapjunction_pedersen2015/"
