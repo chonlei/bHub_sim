@@ -55,8 +55,8 @@ modelParam = {'model' : 3, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
               'ggap' : 0.12, \
-              'ggaphub' : 0.12, \
-              'pggaphubstd' : 0.45, \
+              'ggaphub' : 0.22, \
+              'pggaphubstd' : 0.0, \
               'pggapstd' : 0.45, \
               'gjtau' : 100.0, \
               'dthres' : 17.5, \
