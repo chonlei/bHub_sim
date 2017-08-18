@@ -326,6 +326,22 @@ def setHeteroCha2011(b_cell,HetMatrix,i):
     b_cell.soma(0.5).totalATP_bcellcha = HetMatrix[7,i] = HetDictCha2011['atptot'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['atptot'][1] )
 
 
+def setOriginCha2011(b_cell):
+    # Passing b_cell, HetMatrix as a mutable object
+    # b_cell: neuron h object constants function soma(0.5)
+    # HetMatrix: matrix to store heterogeneity of cells
+    # i: index (id) of b_cell
+    b_cell.soma(0.5).GKto_bcellcha = HetDictCha2011['gkca'][0]
+    b_cell.soma(0.5).gKATP_bcellcha = HetDictCha2011['gkatp'][0]
+    b_cell.soma(0.5).PCaER_bcellcha = HetDictCha2011['pserca'][0]
+    b_cell.soma(0.5).Pleak_bcellcha = HetDictCha2011['prel'][0]
+    b_cell.soma(0.5).KRe_bcellcha = HetDictCha2011['kglc'][0]
+    b_cell.soma(0.5).Kfa_bcellcha = HetDictCha2011['kbox'][0]
+    b_cell.soma(0.5).Pop_bcellcha = HetDictCha2011['pop'][0]
+    b_cell.soma(0.5).totalATP_bcellcha = HetDictCha2011['atptot'][0]
+
+
+
 ## Define the CoupledMatrix if provided a coordinate data
 #  Procedure:
 #  - load the coordinate
