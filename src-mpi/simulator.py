@@ -38,17 +38,17 @@ mode # 0: WT; 1: silent hubs; 2: silent non hubs
 silenceStart  # I clamp hubs to silence them, compare results from Johnston et al., 2016
 silenceDur
 silenceAmp #-100#mV  #-0.005#uA
-pHubs  # percentage/fraction of hubs in islet
+pHubs  # percentage/fraction of hubs in islet (if <1) else number of hubs in islet (i.e. >1)
 methodToPickHubs  # 0: random; 1: top GJ links; 2: bottom GJ links
 whichHub # indix of imaged hub/non-hub to silence
-ggap # model 1,2: ~1/6.*5.1*0.385*1e-4; model 3: ~0.12 [nS]
+ggap  # model 1,2: ~1/6.*5.1*0.385*1e-4; model 3: ~0.12 [nS]
 ggaphub 
-pggaphubstd
-pggapstd
+pggaphubstd  # fraction of ggaphub as std
+pggapstd  # fraction of ggap as std
 gjtau 
 dthres  # spatial cutoff distance to def GJ connection
 isletsize # islet size of interest (None for whole islet)
-hetVar
+hetVar  # it is % of mean's standard deviation
 tstop # usually in [ms]
 dt   # usually in [ms]
 downSampling  # down sample the output -> output_timestep = dt*downSampling
@@ -201,9 +201,9 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         pathToModel = "../models/betacell_cha2011_vMetabolic/"
         #TODO
         modelSetup.setupHetDict(varp=hetVar)
-        loadHetero = modelSetup.loadHeteroHermann2007
-        setHetero = modelSetup.setHeteroHermann2007
-        HetDict = modelSetup.HetDictHermann2007
+        #loadHetero = modelSetup.setHeteroCha2011
+        setHetero = modelSetup.setHeteroCha2011
+        HetDict = modelSetup.HetDictCha2011
         def defineBeta(cellList,i,gkatp=(6.5,0.0),useDistribution=None,applytime=5e3):
             # define beta cell
             cellList.append(h.betacell())
