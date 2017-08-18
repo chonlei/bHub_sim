@@ -10,7 +10,7 @@ NEURON {
 	USEION k READ ki,ek WRITE ik
 	USEION ca READ cai,eca WRITE ica
 	USEION Jcaer WRITE Jcaeri VALENCE 0 :: NOT REALLY ION - should use POINTER
-        RANGE gammatoset, gammaapplytime
+        RANGE gammatoset, gammaapplytime, GKto, gKATP, PCaER, Pleak, KRe, Kfa, Pop, totalATP
 }
 
 PARAMETER {
@@ -87,10 +87,10 @@ PARAMETER {
 	kdd=0.01 
 	ktt=0.05
 	ktd=0.026
-	gKATP=2.31
+	gKATP:=2.31
 	
 	:***********IKto Parameters*************
-	GKto=2.13
+	GKto:=2.13
 	
 	:***********Na/Ca exchange Parameters*************
 	KdNao=87.5
@@ -125,23 +125,23 @@ PARAMETER {
 	
 	:**************Metabolism****************
 	Nt=10.0
-	totalATP=4.0
+	totalATP:=4.0
 	:ERcalciumdynamics(Jserca,Jout)
-	PCaER=0.096
+	PCaER:=0.096
 	KCarp=0.0005
 	
-	Pleak=0.46
+	Pleak:=0.46
 	
 	:GlycolysisAndOxidativephospholylation(ATP,MgADP,Re)
 	KmATP=0.5
 	hgl=2.5
 	Kg=13.
 	
-	Pop=0.0005
+	Pop:=0.0005
 	Kop=0.02
 	
-	KRe=0.000126
-	Kfa=0.0000063
+	KRe:=0.000126
+	Kfa:=0.0000063
 	Stoichi=2.5
 	Rvol=2.5
 	kATPCa=0.187
