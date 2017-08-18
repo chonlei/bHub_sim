@@ -28,7 +28,7 @@ silenceAmp #-100#mV  #-0.005#uA
 pHubs  # percentage/fraction of hubs in islet (if <1) else number of hubs in islet (i.e. >1)
 methodToPickHubs  # 0: random; 1: top GJ links; 2: bottom GJ links
 whichHub # indix of imaged hub/non-hub to silence
-ggap 
+ggap  # model 1,2: ~1/6.*5.1*0.385*1e-4; model 3: ~0.12 [nS]
 ggaphub 
 pggaphubstd  # fraction of ggaphub as std
 pggapstd  # fraction of ggap as std
@@ -41,7 +41,7 @@ dt   # usually in [ms]
 downSampling  # down sample the output -> output_timestep = dt*downSampling
 tbatch  # split simulation into batches; same unit as tstop
 """
-modelParam = {'model' : 2, \
+modelParam = {'model' : 3, \
               'gjmodel' : 1, \
               'morphology' : 1, \
               'species' : 2, \
@@ -54,9 +54,9 @@ modelParam = {'model' : 2, \
               'pHubs' : 0.01, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
-              'ggap' : 1.75/3.*1/6.*5.1*0.385*1e-4, \
-              'ggaphub' : 0.9/3.*1/6.*5.1*0.385*1e-4, \
-              'pggaphubstd' : 0, \
+              'ggap' : 0.12, \
+              'ggaphub' : 0.12, \
+              'pggaphubstd' : 0.45, \
               'pggapstd' : 0.45, \
               'gjtau' : 100.0, \
               'dthres' : 17.5, \
@@ -70,8 +70,9 @@ modelParam = {'model' : 2, \
 # model key word arguments
 # model 1 default: {'beta':{} , 'betahub':{'hubkatp':-5.8}}
 # model 2 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None} , 'betahub':{'hubgkatp':10}}
+# model 3 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None , 'applytime':5e3} , 'betahub':{'hubgkatp':10 , 'applytime':5e3}}
 modelParam['model_kwargs'] = { 'beta':{'gkatp':(5.0,7.0) , 'useDistribution':'sq'} , \
-                               'betahub':{'hubgkatp':10} }
+                               'betahub':{'hubgkatp':11} }
 
 # setup output directory
 #outputdir = modelSetup.outputMake()
