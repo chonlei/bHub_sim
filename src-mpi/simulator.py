@@ -62,7 +62,7 @@ modelParam = {'model' : 2, \
               'isImitateExp' : 1, \
               'mode' : 1, \
               'silenceStart' : 75e3, \
-              'silenceDur' : 250e3, \
+              'silenceDur' : 100e3, \
               'silenceAmp' : -0.005, \
               'pHubs' : 0.01, \
               'methodToPickHubs' : 0 , \
@@ -75,7 +75,7 @@ modelParam = {'model' : 2, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.1, \
-              'tstop' : 575e3, \
+              'tstop' : 275e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
               'tbatch' : 5e3}
@@ -203,6 +203,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         modelSetup.setupHetDict(varp=hetVar)
         #loadHetero = modelSetup.setHeteroCha2011
         setHetero = modelSetup.setHeteroCha2011
+        setOrigin = modelSetup.setOriginCha2011
         HetDict = modelSetup.HetDictCha2011
         def defineBeta(cellList,i,gkatp=(6.5,0.0),useDistribution=None,applytime=5e3):
             # define beta cell
@@ -221,6 +222,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         def defineBetaHub(cellList,i,hubgkatp=10.0,applytime=5e3):
             # define beta hub cell
             cellList.append(h.betacell())
+            setOrigin(cellList[i])
             cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
             cellList[i].soma(0.5).gammatoset_bcellcha = hubgkatp
 
