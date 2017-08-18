@@ -197,6 +197,15 @@ HetIndexHermann2007 = {0:'rho_NaV', \
                                         8:'rho_CaT', \
                                         9:'rho_PMCA'}
 
+HetIndexCha2011 = {0:'gkca', \
+                                1:'gkatp', \
+                                2:'pserca', \
+                                3:'prel', \
+                                4:'kglc', \
+                                5:'kbox', \
+                                6:'pop', \
+                                7:'atptot'}
+
 def setupHetDict(varp=0.05):
     global HetDictHermann2007
     HetDictHermann2007 = {'rho_NaV':(1.4, varp*1.4), \
@@ -209,6 +218,15 @@ def setupHetDict(varp=0.05):
                                         'rho_CaL':(0.7, varp*0.7), \
                                         'rho_CaT':(0.15, varp*0.15), \
                                         'rho_PMCA':(1100., varp*1100.)}
+    global HetDictCha2011
+    HetDictCha2011 = {'gkca':(2.13, varp), \
+                                'gkatp':(2.31, varp*2.5), \
+                                'pserca':(0.096, varp), \
+                                'prel':(0.46, varp), \
+                                'kglc':(0.000126, varp), \
+                                'kbox':(0.0000063, varp), \
+                                'pop':(0.0005, varp), \
+                                'atptot':(4.0, varp)}
 
 
 def setHeteroHermann2007(b_cell,HetMatrix,i):
@@ -291,6 +309,21 @@ def loadHeteroHermann2007(b_cell,HetMatrix,i):
 
     b_cell.soma(0.5).nkatp_katp = HetMatrix[10,i]
     b_cell.soma(0.5).kappa_KATP_jk = HetMatrix[10,i]
+
+
+def setHeteroCha2011(b_cell,HetMatrix,i):
+    # Passing b_cell, HetMatrix as a mutable object
+    # b_cell: neuron h object constants function soma(0.5)
+    # HetMatrix: matrix to store heterogeneity of cells
+    # i: index (id) of b_cell
+    b_cell.soma(0.5).GKto_bcell_cha = HetMatrix[0,i] = HetDictCha2011['gkca'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['gkca'][1] )
+    b_cell.soma(0.5).gKATP_bcell_cha = HetMatrix[1,i] = HetDictCha2011['gkatp'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['gkatp'][1] )
+    b_cell.soma(0.5).PCaER_bcell_cha = HetMatrix[2,i] = HetDictCha2011['pserca'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['pserca'][1] )
+    b_cell.soma(0.5).Pleak_bcell_cha = HetMatrix[3,i] = HetDictCha2011['prel'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['prel'][1] )
+    b_cell.soma(0.5).KRe_bcell_cha = HetMatrix[4,i] = HetDictCha2011['kglc'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['kglc'][1] )
+    b_cell.soma(0.5).Kfa_bcell_cha = HetMatrix[5,i] = HetDictCha2011['kbox'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['kbox'][1] )
+    b_cell.soma(0.5).Pop_bcell_cha = HetMatrix[6,i] = HetDictCha2011['pop'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['pop'][1] )
+    b_cell.soma(0.5).totalATP_bcell_cha = HetMatrix[7,i] = HetDictCha2011['atptot'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['atptot'][1] )
 
 
 ## Define the CoupledMatrix if provided a coordinate data
