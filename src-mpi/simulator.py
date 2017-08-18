@@ -207,22 +207,22 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         def defineBeta(cellList,i,gkatp=(6.5,0.0),useDistribution=None,applytime=5e3):
             # define beta cell
             cellList.append(h.betacell())
-            cellList[i].soma(0.5).gammaapplytime_bcell_cha = applytime
+            cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
             if hetVar>0:
                 setHetero(cellList[i],HetMatrix,i)
             if useDistribution == None:
-                cellList[i].soma(0.5).gammatoset_bcell_cha = gkatp[0]
+                cellList[i].soma(0.5).gammatoset_bcellcha = gkatp[0]
             elif useDistribution == 'sq':
-                cellList[i].soma(0.5).gammatoset_bcell_cha = np.random.uniform(gkatp[0],gkatp[1])
+                cellList[i].soma(0.5).gammatoset_bcellcha = np.random.uniform(gkatp[0],gkatp[1])
             elif useDistribution == 'normal':
-                cellList[i].soma(0.5).gammatoset_bcell_cha = gkatp[0] + np.random.normal(0.0,1.0)*np.sqrt(gkatp[1])
+                cellList[i].soma(0.5).gammatoset_bcellcha = gkatp[0] + np.random.normal(0.0,1.0)*np.sqrt(gkatp[1])
             else:
-                cellList[i].soma(0.5).gammatoset_bcell_cha = gkatp[0]
+                cellList[i].soma(0.5).gammatoset_bcellcha = gkatp[0]
         def defineBetaHub(cellList,i,hubgkatp=10.0,applytime=5e3):
             # define beta hub cell
-            cellList[i].soma(0.5).gammaapplytime_bcell_cha = applytime
             cellList.append(h.betacell())
-            cellList[i].soma(0.5).gammatoset_bcell_cha = hubgkatp
+            cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
+            cellList[i].soma(0.5).gammatoset_bcellcha = hubgkatp
 
     if gjmodel==1:
         pathToGJModel = "../models/gapjunction_pedersen2015/"
