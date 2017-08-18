@@ -41,7 +41,7 @@ silenceAmp #-100#mV  #-0.005#uA
 pHubs  # percentage/fraction of hubs in islet
 methodToPickHubs  # 0: random; 1: top GJ links; 2: bottom GJ links
 whichHub # indix of imaged hub/non-hub to silence
-ggap 
+ggap # model 1,2: ~1/6.*5.1*0.385*1e-4; model 3: ~0.12 [nS]
 ggaphub 
 pggaphubstd
 pggapstd
@@ -118,8 +118,8 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     downSampling = modelParam['downSampling']
     tbatch = modelParam['tbatch']
     try:
-        # model 1 e.g. {'beta':{} , 'betahub':{'hubkatp':-5.8}}
-        # model 2 e.g. {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None} , 'betahub':{'hubgkatp':10}}
+        # model 1 default: {'beta':{} , 'betahub':{'hubkatp':-5.8}}
+        # model 2,3 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None} , 'betahub':{'hubgkatp':10}}
         model_kwargs = modelParam['model_kwargs']
     except:
         model_kwargs = { 'beta':{} , 'betahub':{} }
@@ -195,9 +195,9 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     elif model==3:
         ## Created by Chon Lei
         ## The current version is based on the model from
-        ## Cha et al. 2011 
-        ## Last updated: 2017
-        pathToModel = "../models/betacell_cha2011_v3/"
+        ## Cha et al. 2011 The Journal of General Physiology
+        ## Last updated: 18/08/2017
+        pathToModel = "../models/betacell_cha2011_vMetabolic/"
         #TODO
         modelSetup.setupHetDict(varp=hetVar)
         loadHetero = modelSetup.loadHeteroHermann2007
