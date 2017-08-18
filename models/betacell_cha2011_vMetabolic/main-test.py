@@ -1,5 +1,7 @@
 from neuron import h
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pylab as plt
 
 ## 
@@ -15,7 +17,6 @@ import matplotlib.pylab as plt
 
 ## Import system setup files (.hoc files)
 h.load_file ("betacell.hoc")
-h.load_file("gapjunction.hoc")
 
 
 ## System set-up
@@ -23,8 +24,6 @@ print("*************************")
 print("Testing system: two coupled beta cells.")
 print("Starting system set-up...")
 betacell = h.betacell()
-betacell2 = h.betacell()
-g = h.gapjunction(betacell,betacell2,0.5,0.5,0.00017e-1)
 
 
 ## External stimulation
@@ -42,8 +41,6 @@ time.record(h._ref_t)
 
 vm1 = h.Vector()
 vm1.record (betacell.soma(0.5)._ref_v)
-vm2 = h.Vector()
-vm2.record (betacell2.soma(0.5)._ref_v)
 """
 atp = h.Vector()
 atp.record (betacell.soma(0.5)._ref_atpi)
@@ -62,7 +59,7 @@ k.record (betacell.soma(0.5)._ref_ki)
 ## Main simulation
 h.load_file("stdrun.hoc")
 h.init()
-h.v_init = -48.9045  #-69.8663703359279 or #-48.9045
+#h.v_init = -48.9045  #-69.8663703359279 or #-48.9045
 h.tstop = 25e4
 h.dt = 0.1
 h.steps_per_ms = 1./h.dt
@@ -81,13 +78,11 @@ time = np.array(time)
 plt.figure(1)
 vm1 = np.array(vm1)
 plt.plot(time, vm1, 'r-',label='cell1')
-vm2 = np.array(vm2)
-plt.plot(time, vm2, 'b-',label='cell2')
 plt.legend()
 plt.title("V", fontsize=20)
 plt.xlabel("time [ms]", fontsize=20)
 plt.ylabel("V [mV]", fontsize=20)
-
+plt.savefig("test.png")
 """
 plt.figure(2)
 atp = np.array(atp)
