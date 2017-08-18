@@ -55,9 +55,9 @@ modelParam = {'model' : 2, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
               'ggap' : 1.75/3.*1/6.*5.1*0.385*1e-4, \
-              'ggaphub' : 0.8/3.*1/6.*5.1*0.385*1e-4, \
+              'ggaphub' : 0.9/3.*1/6.*5.1*0.385*1e-4, \
               'pggaphubstd' : 0, \
-              'pggapstd' : 0.35, \
+              'pggapstd' : 0.45, \
               'gjtau' : 100.0, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
@@ -70,7 +70,7 @@ modelParam = {'model' : 2, \
 # model key word arguments
 # model 1 default: {'beta':{} , 'betahub':{'hubkatp':-5.8}}
 # model 2 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None} , 'betahub':{'hubgkatp':10}}
-modelParam['model_kwargs'] = { 'beta':{'gkatp':(4.0,7.0) , 'useDistribution':'sq'} , \
+modelParam['model_kwargs'] = { 'beta':{'gkatp':(5.0,7.0) , 'useDistribution':'sq'} , \
                                'betahub':{'hubgkatp':10} }
 
 # setup output directory
