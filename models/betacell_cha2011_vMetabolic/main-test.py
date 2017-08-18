@@ -24,7 +24,25 @@ print("*************************")
 print("Testing system: two coupled beta cells.")
 print("Starting system set-up...")
 betacell = h.betacell()
-
+varp = 0.1
+HetDictCha2011 = {'gkca':(2.13, varp), \
+                                'gkatp':(2.31, varp*2.5), \
+                                'pserca':(0.096, varp), \
+                                'prel':(0.46, varp), \
+                                'kglc':(0.000126, varp), \
+                                'kbox':(0.0000063, varp), \
+                                'pop':(0.0005, varp), \
+                                'atptot':(4.0, varp)}
+betacell.soma(0.5).GKto_bcellcha = HetDictCha2011['gkca'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['gkca'][1] )
+betacell.soma(0.5).gKATP_bcellcha = HetDictCha2011['gkatp'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['gkatp'][1] )
+betacell.soma(0.5).PCaER_bcellcha = HetDictCha2011['pserca'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['pserca'][1] )
+betacell.soma(0.5).Pleak_bcellcha =HetDictCha2011['prel'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['prel'][1] )
+betacell.soma(0.5).KRe_bcellcha = HetDictCha2011['kglc'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['kglc'][1] )
+betacell.soma(0.5).Kfa_bcellcha = HetDictCha2011['kbox'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['kbox'][1] )
+betacell.soma(0.5).Pop_bcellcha = HetDictCha2011['pop'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['pop'][1] )
+betacell.soma(0.5).totalATP_bcellcha = HetDictCha2011['atptot'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['atptot'][1] )
+betacell.soma(0.5).gammaapplytime_bcellcha = 5e2
+betacell.soma(0.5).gammatoset_bcellcha = 8.0
 
 ## External stimulation
 '''
