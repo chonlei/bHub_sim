@@ -119,7 +119,8 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     tbatch = modelParam['tbatch']
     try:
         # model 1 default: {'beta':{} , 'betahub':{'hubkatp':-5.8}}
-        # model 2,3 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None} , 'betahub':{'hubgkatp':10}}
+        # model 2 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None} , 'betahub':{'hubgkatp':10}}
+        # model 3 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None , 'applytime':5e3} , 'betahub':{'hubgkatp':10 , 'applytime':5e3}}
         model_kwargs = modelParam['model_kwargs']
     except:
         model_kwargs = { 'beta':{} , 'betahub':{} }
@@ -203,6 +204,25 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         loadHetero = modelSetup.loadHeteroHermann2007
         setHetero = modelSetup.setHeteroHermann2007
         HetDict = modelSetup.HetDictHermann2007
+        def defineBeta(cellList,i,gkatp=(6.5,0.0),useDistribution=None,applytime=5e3):
+            # define beta cell
+            cellList.append(h.betacell())
+            cellList[i].soma(0.5).gammaapplytime_bcell_cha = applytime
+            if hetVar>0:
+                setHetero(cellList[i],HetMatrix,i)
+            if useDistribution == None:
+                cellList[i].soma(0.5).gammatoset_bcell_cha = gkatp[0]
+            elif useDistribution == 'sq':
+                cellList[i].soma(0.5).gammatoset_bcell_cha = np.random.uniform(gkatp[0],gkatp[1])
+            elif useDistribution == 'normal':
+                cellList[i].soma(0.5).gammatoset_bcell_cha = gkatp[0] + np.random.normal(0.0,1.0)*np.sqrt(gkatp[1])
+            else:
+                cellList[i].soma(0.5).gammatoset_bcell_cha = gkatp[0]
+        def defineBetaHub(cellList,i,hubgkatp=10.0,applytime=5e3):
+            # define beta hub cell
+            cellList[i].soma(0.5).gammaapplytime_bcell_cha = applytime
+            cellList.append(h.betacell())
+            cellList[i].soma(0.5).gammatoset_bcell_cha = hubgkatp
 
     if gjmodel==1:
         pathToGJModel = "../models/gapjunction_pedersen2015/"
