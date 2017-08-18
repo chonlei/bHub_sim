@@ -75,10 +75,10 @@ modelParam = {'model' : 3, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.1, \
-              'tstop' : 575e2, \
+              'tstop' : 100e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
-              'tbatch' : 5e3}
+              'tbatch' : 50e3}
 
 
 def main(modelParam=modelParam, hubsList_temp=[]):
@@ -203,6 +203,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         modelSetup.setupHetDict(varp=hetVar)
         #loadHetero = modelSetup.setHeteroCha2011
         setHetero = modelSetup.setHeteroCha2011
+        setOrigin = modelSetup.setOriginCha2011
         HetDict = modelSetup.HetDictCha2011
         def defineBeta(cellList,i,gkatp=(8,0.0),useDistribution=None,applytime=5e3):
             # define beta cell
@@ -221,6 +222,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         def defineBetaHub(cellList,i,hubgkatp=10.0,applytime=5e3):
             # define beta hub cell
             cellList.append(h.betacell())
+            setOrigin(cellList[i])
             cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
             cellList[i].soma(0.5).gammatoset_bcellcha = hubgkatp
 
@@ -239,11 +241,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     random.seed(pyseed)
     np.random.seed(pyseed)
     modelSetup.SetRandomSeed(pyseed)
-
-    a = []
-    defineBeta(a, 0, **model_kwargs['beta'])
-    betacell = a[0]
-    """
+   
     ######
     ## Import system setup files (.hoc files and system matrix)
     ######
@@ -275,7 +273,11 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         h.load_file (pathToGJModel+"gapjunction.hoc")
     except Exception:
         raise Exception("Please make sure files has been compiled using \n$ nrnivmodl\n")
-
+    a = []
+    HetMatrix = np.zeros((10,10))
+    defineBetaHub(a, 0, **model_kwargs['betahub'])
+    betacell = a[0]
+    """
     ######
     ## System set-up
     ######
@@ -486,7 +488,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     print("Simulation completed! :)")
     print("*************************")
     vm1 = np.array(vm1)
-    plt.plot(time, vm1, 'r-',label='cell1')
+    plt.plot(vm1, 'r-',label='cell1')
     plt.legend()
     plt.title("V", fontsize=20)
     plt.xlabel("time [ms]", fontsize=20)
