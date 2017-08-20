@@ -36,7 +36,6 @@ PARAMETER {
 	
 	
 	:******************MAIN PARAMS******************
-	Glucose
         gammatoset
         gammaapplytime
 	
@@ -171,6 +170,9 @@ ASSIGNED {
 	cai		(mM)
 	Jcaeri
 	celsius		(degC)
+        
+        :*************Hub Param****************
+	Glucose
 	
 	:******************Cellular Parameters******************
 	Caer

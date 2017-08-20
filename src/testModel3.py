@@ -15,7 +15,7 @@ except Exception:
     raise Exception("Please properly install NEURON package: http://www.neuron.yale.edu/neuron/download")
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 import matplotlib.pylab as plt
 import random as random
 import os.path as path
@@ -61,24 +61,26 @@ modelParam = {'model' : 3, \
               'pyseed' : 1, \
               'isImitateExp' : 1, \
               'mode' : 1, \
-              'silenceStart' : 75e2, \
-              'silenceDur' : 250e2, \
-              'silenceAmp' : -0.005, \
+              'silenceStart' : 75e3, \
+              'silenceDur' : 100e3, \
+              'silenceAmp' : -0.50, \
               'pHubs' : 0.1, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
               'ggap' : 0., \
               'ggaphub' : 0., \
-              'pggaphubstd' : 0, \
-              'pggapstd' : 0, \
+              'pggaphubstd' : 0., \
+              'pggapstd' : 0., \
               'gjtau' : 100.0, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.1, \
-              'tstop' : 100e3, \
+              'tstop' : 275e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
-              'tbatch' : 50e3}
+              'tbatch' : 275e3}
+
+modelParam['model_kwargs'] = {'beta':{'gkatp':(6.0,8.0) , 'useDistribution':'sq' , 'applytime':50e3} , 'betahub':{'hubgkatp':12 , 'applytime':150e3}}
 
 
 def main(modelParam=modelParam, hubsList_temp=[]):
@@ -241,7 +243,8 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     random.seed(pyseed)
     np.random.seed(pyseed)
     modelSetup.SetRandomSeed(pyseed)
-   
+
+
     ######
     ## Import system setup files (.hoc files and system matrix)
     ######
@@ -276,6 +279,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     a = []
     HetMatrix = np.zeros((10,10))
     defineBetaHub(a, 0, **model_kwargs['betahub'])
+    #defineBeta(a, 0, **(model_kwargs['beta']))
     betacell = a[0]
     """
     ######
@@ -362,7 +366,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     toPick = random.randint(0,len(hubsList))
     for i in range(ncells):
         if i not in hubsList:
-            defineBeta(cell,i,**model_kwargs['beta'])
+            defineBeta(cell,i)#,**model_kwargs['beta'])
             if isImitateExp:
                 #if i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
                 if (i == imagedNonHubs[whichHub]) and (mode==2):
@@ -379,7 +383,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
                         f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
                     silenceCell(iclamp_hubs,cell[i],silenceStart,silenceDur,silenceAmp)
         else:
-            defineBetaHub(cell,i,**model_kwargs['betahub'])
+            defineBetaHub(cell,i)#,**model_kwargs['betahub'])
             if isImitateExp:
                 if mode==1 and i==imagedHubs[whichHub]:
                     #or i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
@@ -447,6 +451,8 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         carec[i].record(cell[i].soma(0.5)._ref_cai)"""
     vm1 = h.Vector()
     vm1.record (betacell.soma(0.5)._ref_v)
+    ca1 = h.Vector()
+    ca1.record (betacell.soma(0.5)._ref_cai)
 
     ######
     ## Main simulation
@@ -488,12 +494,18 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     print("Simulation completed! :)")
     print("*************************")
     vm1 = np.array(vm1)
+    ca1 = np.array(ca1)
     plt.plot(vm1, 'r-',label='cell1')
     plt.legend()
-    plt.title("V", fontsize=20)
     plt.xlabel("time [ms]", fontsize=20)
     plt.ylabel("V [mV]", fontsize=20)
-    plt.savefig("test.png")
+    plt.figure(2)
+    plt.plot(ca1, 'r-',label='cell1')
+    plt.legend()
+    plt.xlabel("time [ms]", fontsize=20)
+    plt.ylabel(r"[Ca]$_i$ [mM]", fontsize=20)
+    #plt.savefig("test.png")
+    plt.show()
 
 
     ######

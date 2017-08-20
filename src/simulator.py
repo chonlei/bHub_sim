@@ -63,22 +63,24 @@ modelParam = {'model' : 3, \
               'mode' : 1, \
               'silenceStart' : 75e3, \
               'silenceDur' : 100e3, \
-              'silenceAmp' : -0.005, \
+              'silenceAmp' : -80.0, \
               'pHubs' : 0.1, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
               'ggap' : 0.12, \
               'ggaphub' : 0.12, \
-              'pggaphubstd' : 0.45, \
-              'pggapstd' : 0.45, \
+              'pggaphubstd' : 0.7, \
+              'pggapstd' : 0.7, \
               'gjtau' : 100.0, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.1, \
-              'tstop' : 275e3, \
+              'tstop' : 575e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
               'tbatch' : 5e3}
+
+modelParam['model_kwargs'] = {'beta':{'gkatp':(5.5,6.9) , 'useDistribution':'sq' , 'applytime':5e3} , 'betahub':{'hubgkatp':11 , 'applytime':5e3}}
 
 
 def main(modelParam=modelParam, hubsList_temp=[]):
@@ -205,7 +207,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         setHetero = modelSetup.setHeteroCha2011
         setOrigin = modelSetup.setOriginCha2011
         HetDict = modelSetup.HetDictCha2011
-        def defineBeta(cellList,i,gkatp=(8,0.0),useDistribution=None,applytime=5e3):
+        def defineBeta(cellList,i,gkatp=(6.0,0.0),useDistribution=None,applytime=5e3):
             # define beta cell
             cellList.append(h.betacell())
             cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
@@ -334,7 +336,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     #HetMatrix = np.loadtxt('HetMatrix-mouse40-3.txt')
 
     ##TODO: Add function to silent cells
-    def silenceCellV(iclampList,cell,delay=250e3,dur=250e3,amp=-100.0):
+    def silenceCell(iclampList,cell,delay=250e3,dur=250e3,amp=-100.0):
         # vclamp cell to imitate cell silencing in experiments
         iclampList.append(h.SEClamp (0.5, sec = cell.soma) )
         iclampList[-1].dur1 = silenceStart
@@ -342,7 +344,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         iclampList[-1].dur2 = dur
         iclampList[-1].amp2 = amp
     
-    def silenceCell(iclampList,cell,delay=250e3,dur=250e3,amp=-0.005):
+    def silenceCellI(iclampList,cell,delay=250e3,dur=250e3,amp=-0.005):
         # iclamp cell to imitate cell silencing in experiments
         # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
         iclampList.append(h.IClamp (0.5, sec = cell.soma) )
@@ -359,7 +361,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     toPick = random.randint(0,len(hubsList))
     for i in range(ncells):
         if i not in hubsList:
-            defineBeta(cell,i,**model_kwargs['beta'])
+            defineBeta(cell,i,**(model_kwargs['beta']))
             if isImitateExp:
                 #if i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
                 if (i == imagedNonHubs[whichHub]) and (mode==2):
@@ -376,7 +378,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
                         f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
                     silenceCell(iclamp_hubs,cell[i],silenceStart,silenceDur,silenceAmp)
         else:
-            defineBetaHub(cell,i,**model_kwargs['betahub'])
+            defineBetaHub(cell,i,**(model_kwargs['betahub']))
             if isImitateExp:
                 if mode==1 and i==imagedHubs[whichHub]:
                     #or i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
@@ -399,6 +401,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     # Use a previously generated heterogeneity GJ matrix
     #HetMatrix = np.loadtxt('')
 
+    
     #TODO can put this in modelSetup.py too
     print "Defining gap junction connections..."
     gap = []
@@ -458,9 +461,9 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     print("Dividing simulation into %d batches..."%nbatch)
     tremain = tstop%tbatch  # remaining simulation time after nbatch
     for i in xrange(nbatch):
-        #if temptstop >= np.inf:#silenceStart:
-        #    for iclamp in iclamp_hubs:
-        #        iclamp.rs = 0.001
+        if temptstop >= silenceStart:
+            for iclamp in iclamp_hubs:
+                iclamp.rs = 0.001
         temptstop += tbatch  # tstop for current batch
         h.frecord_init()  # reuse all recording vectors
         h.continuerun(temptstop)
