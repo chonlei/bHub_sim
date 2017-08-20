@@ -14,6 +14,8 @@ try:
 except Exception:
     raise Exception("Please properly install NEURON package: http://www.neuron.yale.edu/neuron/download")
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pylab as plt
 import random as random
 import os.path as path
@@ -205,7 +207,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         setHetero = modelSetup.setHeteroCha2011
         setOrigin = modelSetup.setOriginCha2011
         HetDict = modelSetup.HetDictCha2011
-        def defineBeta(cellList,i,gkatp=(6.5,0.0),useDistribution=None,applytime=5e3):
+        def defineBeta(cellList,i,gkatp=(6.0,0.0),useDistribution=None,applytime=5e3):
             # define beta cell
             cellList.append(h.betacell())
             cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
@@ -359,7 +361,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     toPick = random.randint(0,len(hubsList))
     for i in range(ncells):
         if i not in hubsList:
-            defineBeta(cell,i,**model_kwargs['beta'])
+            defineBeta(cell,i,**(model_kwargs['beta']))
             if isImitateExp:
                 #if i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
                 if (i == imagedNonHubs[whichHub]) and (mode==2):
@@ -376,7 +378,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
                         f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
                     silenceCell(iclamp_hubs,cell[i],silenceStart,silenceDur,silenceAmp)
         else:
-            defineBetaHub(cell,i,**model_kwargs['betahub'])
+            defineBetaHub(cell,i,**(model_kwargs['betahub']))
             if isImitateExp:
                 if mode==1 and i==imagedHubs[whichHub]:
                     #or i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
@@ -458,7 +460,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     print("Dividing simulation into %d batches..."%nbatch)
     tremain = tstop%tbatch  # remaining simulation time after nbatch
     for i in xrange(nbatch):
-        #if temptstop >= np.inf:#silenceStart:
+        #if temptstop >= silenceStart:
         #    for iclamp in iclamp_hubs:
         #        iclamp.rs = 0.001
         temptstop += tbatch  # tstop for current batch
