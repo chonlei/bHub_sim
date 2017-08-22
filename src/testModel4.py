@@ -15,7 +15,7 @@ except Exception:
     raise Exception("Please properly install NEURON package: http://www.neuron.yale.edu/neuron/download")
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 import matplotlib.pylab as plt
 import random as random
 import os.path as path
@@ -54,34 +54,33 @@ dt   # usually in [ms]
 downSampling  # down sample the output -> output_timestep = dt*downSampling
 tbatch  # split simulation into batches; same unit as tstop
 """
-modelParam = {'model' : 3, \
-              'gjmodel' : 2, \
+modelParam = {'model' : 4, \
+              'gjmodel' : 1, \
               'morphology' : 0, \
               'species' : 2, \
               'pyseed' : 1, \
               'isImitateExp' : 1, \
               'mode' : 1, \
               'silenceStart' : 75e3, \
-              'silenceDur' : 400e3, \
-              'silenceAmp' : -5.0, \
-              'pHubs' : 0.8, \
+              'silenceDur' : 100e3, \
+              'silenceAmp' : -1.0, \
+              'pHubs' : 0.25, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
-              'ggap' : 0.12, \
-              'ggaphub' : 0.12, \
-              'pggaphubstd' : 0.7, \
-              'pggapstd' : 0.7, \
+              'ggap' : 0., \
+              'ggaphub' : 0., \
+              'pggaphubstd' : 0., \
+              'pggapstd' : 0., \
               'gjtau' : 100.0, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.1, \
-              'tstop' : 575e3, \
+              'tstop' : 275e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
-              'tbatch' : 5e3}
+              'tbatch' : 275e3}
 
-#modelParam['model_kwargs'] = {'beta':{'gamma':(0.75,0.0) , 'useDistribution':None , 'applytime':0e3} , 'betahub':{'hubgamma':1.0 , 'applytime':0e3}}
-modelParam['model_kwargs'] = {'beta':{'gkatp':(5.5,6.9) , 'useDistribution':'sq' , 'applytime':0e3} , 'betahub':{'hubgkatp':11.0 , 'applytime':0e3}}
+modelParam['model_kwargs'] = {'beta':{'gamma':(0.5,0.0) , 'useDistribution':None , 'applytime':50e3} , 'betahub':{'hubgamma':1.0 , 'applytime':150e3}}
 
 
 def main(modelParam=modelParam, hubsList_temp=[]):
@@ -310,7 +309,13 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         h.load_file (pathToGJModel+"gapjunction.hoc")
     except Exception:
         raise Exception("Please make sure files has been compiled using \n$ nrnivmodl\n")
-
+    a = []
+    HetMatrix = np.zeros((10,10))
+    defineBetaHub(a, 0, **model_kwargs['betahub'])
+    defineBeta(a, 1, **(model_kwargs['beta']))
+    betacellh = a[0]
+    betacell = a[1]
+    """
     ######
     ## System set-up
     ######
@@ -395,7 +400,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     toPick = random.randint(0,len(hubsList))
     for i in range(ncells):
         if i not in hubsList:
-            defineBeta(cell,i,**(model_kwargs['beta']))
+            defineBeta(cell,i)#,**model_kwargs['beta'])
             if isImitateExp:
                 #if i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
                 if (i == imagedNonHubs[whichHub]) and (mode==2):
@@ -412,7 +417,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
                         f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
                     silenceCell(iclamp_hubs,cell[i],silenceStart,silenceDur,silenceAmp)
         else:
-            defineBetaHub(cell,i,**(model_kwargs['betahub']))
+            defineBetaHub(cell,i)#,**model_kwargs['betahub'])
             if isImitateExp:
                 if mode==1 and i==imagedHubs[whichHub]:
                     #or i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
@@ -435,7 +440,6 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     # Use a previously generated heterogeneity GJ matrix
     #HetMatrix = np.loadtxt('')
 
-    
     #TODO can put this in modelSetup.py too
     print "Defining gap junction connections..."
     gap = []
@@ -453,7 +457,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
                 else:
                     HetGjMatrix[i,j] = ggap
                 gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j],gjtau))
-
+    """
 
     ######
     ## External stimulation
@@ -465,7 +469,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     stimulus.amp = 0.5
     """
 
-
+    """
     ######
     ## System recorder initalisation
     ######
@@ -478,8 +482,15 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         vrec.append(h.Vector())
         carec.append(h.Vector())
         vrec[i].record(cell[i].soma(0.5)._ref_v)
-        carec[i].record(cell[i].soma(0.5)._ref_cai)
-
+        carec[i].record(cell[i].soma(0.5)._ref_cai)"""
+    vm1 = h.Vector()
+    vm1.record (betacellh.soma(0.5)._ref_v)
+    ca1 = h.Vector()
+    ca1.record (betacellh.soma(0.5)._ref_cai)
+    vm2 = h.Vector()
+    vm2.record (betacell.soma(0.5)._ref_v)
+    ca2 = h.Vector()
+    ca2.record (betacell.soma(0.5)._ref_cai)
 
     ######
     ## Main simulation
@@ -495,43 +506,48 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     print("Dividing simulation into %d batches..."%nbatch)
     tremain = tstop%tbatch  # remaining simulation time after nbatch
     for i in xrange(nbatch):
-        #if temptstop >= silenceStart:
+        #if temptstop >= np.inf:#silenceStart:
         #    for iclamp in iclamp_hubs:
         #        iclamp.rs = 0.001
-        if temptstop > 150e3:
-            for iclamp in iclamp_hubs:
-                iclamp.amp = -10.0
-        if temptstop > 200e3:
-            for iclamp in iclamp_hubs:
-                iclamp.amp = -20.0
-        if temptstop > 250e3:
-            for iclamp in iclamp_hubs:
-                iclamp.amp = -30.0
-        #if temptstop > 300e3:
-        #    for iclamp in iclamp_hubs:
-        #        iclamp.amp = -40.0
         temptstop += tbatch  # tstop for current batch
         h.frecord_init()  # reuse all recording vectors
         h.continuerun(temptstop)
         # exporting Ca time series
-        tosave = modelSetup.convertSimOutput(carec,downSampling,reuse=True)
-        modelSetup.savedat(outCa,tosave,'Ca',outlog,idx=i)
+        #tosave = modelSetup.convertSimOutput(carec,downSampling,reuse=True)
+        #modelSetup.savedat(outCa,tosave,'Ca',outlog,idx=i)
         # exporting Vm time series
-        tosave = modelSetup.convertSimOutput(vrec,downSampling,reuse=True)
-        modelSetup.savedat(outVm,tosave,'Vm',outlog,idx=i)
+        #tosave = modelSetup.convertSimOutput(vrec,downSampling,reuse=True)
+        #modelSetup.savedat(outVm,tosave,'Vm',outlog,idx=i)
         print("Finished section %d out of %d."%(i+1,nbatch))
     if tremain > 0:
         print("Running final section...")
         h.frecord_init()  # reuse all recording vectors
         h.continuerun(tstop)  # run until the end
         # exporting Ca time series
-        tosave = modelSetup.convertSimOutput(carec,downSampling,reuse=True)
-        modelSetup.savedat(outCa,tosave,'Ca',outlog,idx=i+1)
+        #tosave = modelSetup.convertSimOutput(carec,downSampling,reuse=True)
+        #modelSetup.savedat(outCa,tosave,'Ca',outlog,idx=i+1)
         # exporting Vm time series
-        tosave = modelSetup.convertSimOutput(vrec,downSampling,reuse=True)
-        modelSetup.savedat(outVm,tosave,'Vm',outlog,idx=i+1)
+        #tosave = modelSetup.convertSimOutput(vrec,downSampling,reuse=True)
+        #modelSetup.savedat(outVm,tosave,'Vm',outlog,idx=i+1)
     print("Simulation completed! :)")
     print("*************************")
+    vm1 = np.array(vm1)
+    ca1 = np.array(ca1)
+    vm2 = np.array(vm2)
+    ca2 = np.array(ca2)
+    plt.plot(vm1, 'r-',label='cell_h')
+    plt.plot(vm2, 'b-',label='cell')
+    plt.legend()
+    plt.xlabel("time [ms]", fontsize=20)
+    plt.ylabel("V [mV]", fontsize=20)
+    plt.figure(2)
+    plt.plot(ca1, 'r-',label='cell_h')
+    plt.plot(ca2, 'b-',label='cell')
+    plt.legend()
+    plt.xlabel("time [ms]", fontsize=20)
+    plt.ylabel(r"[Ca]$_i$ [mM]", fontsize=20)
+    #plt.savefig("test.png")
+    plt.show()
 
 
     ######

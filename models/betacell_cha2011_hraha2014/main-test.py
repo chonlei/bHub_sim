@@ -1,5 +1,7 @@
 from neuron import h
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pylab as plt
 
 ## 
@@ -15,7 +17,6 @@ import matplotlib.pylab as plt
 
 ## Import system setup files (.hoc files)
 h.load_file ("betacell.hoc")
-h.load_file("gapjunction.hoc")
 
 
 ## System set-up
@@ -23,9 +24,25 @@ print("*************************")
 print("Testing system: two coupled beta cells.")
 print("Starting system set-up...")
 betacell = h.betacell()
-betacell2 = h.betacell()
-g = h.gapjunction(betacell,betacell2,0.5,0.5,0.00017e-1)
-
+varp = 0.1
+HetDictCha2011 = {'gkca':(2.13, varp), \
+                                'gkatp':(2.31, varp*2.5), \
+                                'pserca':(0.096, varp), \
+                                'prel':(0.46, varp), \
+                                'kglc':(0.000126, varp), \
+                                'kbox':(0.0000063, varp), \
+                                'pop':(0.0005, varp), \
+                                'atptot':(4.0, varp)}
+betacell.soma(0.5).GKto_bcellcha = HetDictCha2011['gkca'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['gkca'][1] )
+betacell.soma(0.5).gKATP_bcellcha = HetDictCha2011['gkatp'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['gkatp'][1] )
+betacell.soma(0.5).PCaER_bcellcha = HetDictCha2011['pserca'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['pserca'][1] )
+betacell.soma(0.5).Pleak_bcellcha =HetDictCha2011['prel'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['prel'][1] )
+betacell.soma(0.5).KRe_bcellcha = HetDictCha2011['kglc'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['kglc'][1] )
+betacell.soma(0.5).Kfa_bcellcha = HetDictCha2011['kbox'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['kbox'][1] )
+betacell.soma(0.5).Pop_bcellcha = HetDictCha2011['pop'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['pop'][1] )
+betacell.soma(0.5).totalATP_bcellcha = HetDictCha2011['atptot'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011['atptot'][1] )
+betacell.soma(0.5).gammaapplytime_bcellcha = 5e2
+betacell.soma(0.5).gammatoset_bcellcha = 8.0
 
 ## External stimulation
 '''
@@ -42,8 +59,6 @@ time.record(h._ref_t)
 
 vm1 = h.Vector()
 vm1.record (betacell.soma(0.5)._ref_v)
-vm2 = h.Vector()
-vm2.record (betacell2.soma(0.5)._ref_v)
 """
 atp = h.Vector()
 atp.record (betacell.soma(0.5)._ref_atpi)
@@ -62,7 +77,7 @@ k.record (betacell.soma(0.5)._ref_ki)
 ## Main simulation
 h.load_file("stdrun.hoc")
 h.init()
-h.v_init = -48.9045  #-69.8663703359279 or #-48.9045
+#h.v_init = -48.9045  #-69.8663703359279 or #-48.9045
 h.tstop = 25e4
 h.dt = 0.1
 h.steps_per_ms = 1./h.dt
@@ -81,13 +96,11 @@ time = np.array(time)
 plt.figure(1)
 vm1 = np.array(vm1)
 plt.plot(time, vm1, 'r-',label='cell1')
-vm2 = np.array(vm2)
-plt.plot(time, vm2, 'b-',label='cell2')
 plt.legend()
 plt.title("V", fontsize=20)
 plt.xlabel("time [ms]", fontsize=20)
 plt.ylabel("V [mV]", fontsize=20)
-
+plt.savefig("test.png")
 """
 plt.figure(2)
 atp = np.array(atp)
