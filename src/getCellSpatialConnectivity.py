@@ -80,6 +80,7 @@ try:
         hubList = imagedHubs
 except Exception:
     imagedCells = []
+print hubList
 
 startName = "#silencedCell = "
 with open(fileName,"r") as fi:
@@ -227,6 +228,6 @@ for i,(xs,ys,zs) in enumerate(CoorData[:,:]):
             ax.scatter(xs, ys, zs, c='y', marker='o',s=size)
     if i in hubList and i!=cellAnalyse:
         ax.scatter(xs, ys, zs, c='r', marker='o',s=size)
-
+plt.savefig("temp.png")
 if isInteractivePlot:
     plt.show()
