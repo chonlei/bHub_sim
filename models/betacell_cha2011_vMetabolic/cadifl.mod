@@ -33,9 +33,9 @@ STATE {
 }
 
 BREAKPOINT {
-        if ( cai < 0 ) { cai = 0 }
+        if ( cai < 0.000001 ) { cai = 0.000001 }
 	SOLVE conc METHOD sparse
-        if ( cai < 0 ) { cai = 0 }
+        if ( cai < 0.000001 ) { cai = 0.000001 }
 }
 
 KINETIC conc {

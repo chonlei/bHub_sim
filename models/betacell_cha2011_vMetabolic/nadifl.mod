@@ -30,9 +30,9 @@ STATE {
 }
 
 BREAKPOINT {
-        if ( nai < 0 ) { nai = 0 }
+        if ( nai < 0.001 ) { nai = 0.001 }
 	SOLVE conc METHOD sparse
-        if ( nai < 0 ) { nai = 0 }
+        if ( nai < 0.001 ) { nai = 0.001 }
 }
 
 KINETIC conc {
