@@ -83,7 +83,7 @@ modelParam = {'model' : 2, \
               'tbatch' : 5e3}
 
 
-def main(modelParam=modelParam, hubsList_temp=[]):
+def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
     ######
     ## Define model and setup
     ######
@@ -461,7 +461,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         else:
             defineBetaHub(cell,i,**(model_kwargs['betahub']))
             if isImitateExp:
-                if mode==1 and i==imagedHubs[whichHub]:
+                if mode==1 and i in hubsList[:tempParam]:#i==imagedHubs[whichHub]:
                     #or i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
                     print "silencing cell ",i
                     with open(outlog, 'a') as f:

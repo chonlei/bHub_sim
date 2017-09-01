@@ -8,7 +8,7 @@ from mpi4py import MPI
 
 
 ## description of current simulation
-logmsg = "First testing of running multiple simulations using mpi+neuron\n\nUsing cubic lattice; common seed; not varying gGJ and gamma;silence one fixed hub in the image plane\n\nAdd hub one by one."
+logmsg = "First testing of running multiple simulations using mpi+neuron\n\nUsing mouse 1; (real) common seed; not varying gGJ and gamma; 5% hubs; silence n hubs in the islet\n\nn = 1, 2, 3...."
 
 
 ######
@@ -95,10 +95,11 @@ def main(comm,modelParam,outputdir):
     rank = comm.Get_rank()
     modelParam['subidx'] = rank
     # setup what each sub simulation does
-    modelParam['pHubs'] = 3*rank+3
+    #modelParam['pHubs'] = 3*rank+3
+    tempParam = rank+1
     # check they are doing right thing
     #print("RANK %d of SIZE %d is doing the right job..."%(rank,size))
-    simulator.main(modelParam)
+    simulator.main(modelParam,tempParam=tempParam)
 
 
 if __name__ == "__main__":
