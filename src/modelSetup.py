@@ -206,6 +206,14 @@ HetIndexCha2011 = {0:'gkca', \
                                 6:'pop', \
                                 7:'atptot'}
 
+HetIndexCha2011all= {0:'gkatp', \
+                                1:'gcav', \
+                                2:'gbnsc', \
+                                3:'gkdr', \
+                                4:'gkto', \
+                                5:'gksk'} 
+
+
 def setupHetDict(varp=0.05):
     global HetDictHermann2007
     HetDictHermann2007 = {'rho_NaV':(1.4, varp*1.4), \
@@ -227,6 +235,13 @@ def setupHetDict(varp=0.05):
                                 'kbox':(0.0000063, varp), \
                                 'pop':(0.0005, varp), \
                                 'atptot':(4.0, varp)}
+    global HetDictCha2011all
+    HetDictCha2011all = {'gkatp':(2.31, varp), \
+                         'gcav':(48.9,varp), \
+                         'gbnsc':(0.00396,varp), \
+                         'gkdr':(2.1,varp), \
+                         'gkto':(2.13,varp), \
+                         'gksk':(0.2,varp)}
 
 
 def setHeteroHermann2007(b_cell,HetMatrix,i):
@@ -339,6 +354,33 @@ def setOriginCha2011(b_cell):
     b_cell.soma(0.5).Kfa_bcellcha = HetDictCha2011['kbox'][0]
     b_cell.soma(0.5).Pop_bcellcha = HetDictCha2011['pop'][0]
     b_cell.soma(0.5).totalATP_bcellcha = HetDictCha2011['atptot'][0]
+
+
+def setHeteroCha2011all(b_cell,HetMatrix,i):
+    # Passing b_cell, HetMatrix as a mutable object
+    # b_cell: neuron h object constants function soma(0.5)
+    # HetMatrix: matrix to store heterogeneity of cells
+    # i: index (id) of b_cell
+    b_cell.soma(0.5).gKATP_bcellcha = HetMatrix[0,i] = HetDictCha2011all['gkatp'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011all['gkatp'][1] )
+    b_cell.soma(0.5).PCaL_bcellcha = HetMatrix[1,i] = HetDictCha2011all['gcav'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011all['gcav'][1] )
+    b_cell.soma(0.5).pIbNSC_bcellcha = HetMatrix[2,i] = HetDictCha2011all['gbnsc'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011all['gbnsc'][1] )
+    b_cell.soma(0.5).pKDr_bcellcha = HetMatrix[3,i] = HetDictCha2011all['gkdr'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011all['gkdr'][1] )
+    b_cell.soma(0.5).GKto_bcellcha = HetMatrix[4,i] = HetDictCha2011all['gkto'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011all['gkto'][1] )
+    b_cell.soma(0.5).PKslow_bcellcha = HetMatrix[5,i] = HetDictCha2011all['gksk'][0]*( 1.0 + np.random.normal(0.0,1.0)*HetDictCha2011all['gksk'][1] )
+
+
+def setOriginCha2011all(b_cell):
+    # Passing b_cell, HetMatrix as a mutable object
+    # b_cell: neuron h object constants function soma(0.5)
+    # HetMatrix: matrix to store heterogeneity of cells
+    # i: index (id) of b_cell
+    b_cell.soma(0.5).gKATP_bcellcha =  HetDictCha2011all['gkatp'][0]
+    b_cell.soma(0.5).PCaL_bcellcha =  HetDictCha2011all['gcav'][0]
+    b_cell.soma(0.5).pIbNSC_bcellcha = HetDictCha2011all['gbnsc'][0]
+    b_cell.soma(0.5).pKDr_bcellcha =  HetDictCha2011all['gkdr'][0]
+    b_cell.soma(0.5).GKto_bcellcha = HetDictCha2011all['gkto'][0]
+    b_cell.soma(0.5).PKslow_bcellcha =  HetDictCha2011all['gksk'][0]
+
 
 
 

@@ -80,7 +80,7 @@ modelParam = {'model' : 4, \
               'downSampling' : 1000, \
               'tbatch' : 275e3}
 
-modelParam['model_kwargs'] = {'beta':{'gamma':(0.5,0.0) , 'useDistribution':None , 'applytime':50e3} , 'betahub':{'hubgamma':1.0 , 'applytime':150e3}}
+modelParam['model_kwargs'] = {'beta':{'gamma':(0.985,0.0) , 'useDistribution':None , 'applytime':50e3} , 'betahub':{'hubgamma':1.0 , 'applytime':150e3}}
 
 
 def main(modelParam=modelParam, hubsList_temp=[]):
