@@ -123,9 +123,14 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         # model 1 default: {'beta':{} , 'betahub':{'hubkatp':-5.8}}
         # model 2 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None} , 'betahub':{'hubgkatp':10}}
         # model 3 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None , 'applytime':5e3} , 'betahub':{'hubgkatp':10 , 'applytime':5e3}}
+        # model 4 default: {'beta':{'gamma':(0.5,0.0) , 'useDistribution':None , 'applytime':5e3} , 'betahub':{'hubgamma':1.0 , 'applytime':5e3}}
         model_kwargs = modelParam['model_kwargs']
     except:
         model_kwargs = { 'beta':{} , 'betahub':{} }
+    try:
+        p_connect = modelParam['p_connect']
+    except:
+        p_connect = 0.7#1.0
 
     if isImitateExp:
         isletsize = None # force to use whole islet
@@ -213,6 +218,8 @@ def main(modelParam=modelParam, hubsList_temp=[]):
             cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
             if hetVar>0:
                 setHetero(cellList[i],HetMatrix,i)
+            else:
+                setOrigin(cellList[i])
             if useDistribution == None:
                 cellList[i].soma(0.5).gammatoset_bcellcha = gkatp[0]
             elif useDistribution == 'sq':
@@ -227,6 +234,80 @@ def main(modelParam=modelParam, hubsList_temp=[]):
             setOrigin(cellList[i])
             cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
             cellList[i].soma(0.5).gammatoset_bcellcha = hubgkatp
+    elif model==4:
+        ## Created by Chon Lei
+        ## The current version is based on the model from
+        ## Cha et al. 2011 The Journal of General Physiology and Hraha et al. 2014 PLOS Computational Biology
+        ## Last updated: 21/08/2017
+        pathToModel = "../models/betacell_cha2011_hraha2014/"
+        #TODO
+        modelSetup.setupHetDict(varp=hetVar)
+        #loadHetero = modelSetup.setHeteroCha2011
+        setHetero = modelSetup.setHeteroCha2011
+        setOrigin = modelSetup.setOriginCha2011
+        HetDict = modelSetup.HetDictCha2011
+        def defineBeta(cellList,i,gamma=(0.5,0.0),useDistribution=None,applytime=5e3):
+            # define beta cell
+            cellList.append(h.betacell())
+            cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
+            if hetVar>0:
+                setHetero(cellList[i],HetMatrix,i)
+            else:
+                setOrigin(cellList[i])
+            if useDistribution == None:
+                cellList[i].soma(0.5).gammamut_bcellcha = gamma[0]
+            elif useDistribution == 'sq':
+                cellList[i].soma(0.5).gammamut_bcellcha = np.random.uniform(gamma[0],gamma[1])
+            elif useDistribution == 'normal':
+                cellList[i].soma(0.5).gammamut_bcellcha = gamma[0] + np.random.normal(0.0,1.0)*np.sqrt(gamma[1])
+            else:
+                cellList[i].soma(0.5).gammamut_bcellcha = gamma[0]
+        def defineBetaHub(cellList,i,hubgamma=1.0,applytime=5e3):
+            # define beta hub cell
+            cellList.append(h.betacell())
+            setOrigin(cellList[i])
+            cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
+            cellList[i].soma(0.5).gammamut_bcellcha = hubgamma
+    elif model==5:
+        ## Created by Chon Lei
+        ## The current version is based on the model from
+        ## Cha et al. 2011 The Journal of General Physiology and Hraha et al. 2014 PLOS Computational Biology
+        ## Last updated: 21/08/2017
+        pathToModel = "../models/betacell_cha2011_vMetabolic2/"
+        #TODO
+        modelSetup.setupHetDict(varp=hetVar)
+        #loadHetero = modelSetup.setHeteroCha2011
+        setHetero = modelSetup.setHeteroCha2011all
+        setOrigin = modelSetup.setOriginCha2011all
+        HetDict = modelSetup.HetDictCha2011all
+        def defineBeta(cellList,i,glu=(0.5,0.0),useDistribution=None,applytime=5e3):
+            # define beta cell
+            cellList.append(h.betacell())
+            cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
+            if hetVar>0:
+                setHetero(cellList[i],HetMatrix,i)
+            else:
+                setOrigin(cellList[i])
+            if useDistribution == None:
+                cellList[i].soma(0.5).gammatoset_bcellcha = glu[0]
+            elif useDistribution == 'sq':
+                cellList[i].soma(0.5).gammatoset_bcellcha = np.random.uniform(glu[0],glu[1])
+            elif useDistribution == 'normal':
+                cellList[i].soma(0.5).gammatoset_bcellcha = glu[0] + np.random.normal(0.0,1.0)*np.sqrt(glu[1])
+            else:
+                cellList[i].soma(0.5).gammatoset_bcellcha = glu[0]
+            cellList[i].soma(0.5).gKATP_bcellcha = 2.31*1.5 + np.random.normal(0.0,1.0)*2.31*hetVar
+            #cellList[i].soma(0.5).PCaL_bcellcha = 48.9*0.7 + np.random.normal(0.0,1.0)*48.9*hetVar
+        def defineBetaHub(cellList,i,hubglu=1.0,applytime=5e3):
+            # define beta hub cell
+            cellList.append(h.betacell())
+            setOrigin(cellList[i])
+            cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
+            cellList[i].soma(0.5).gammatoset_bcellcha = hubglu
+            cellList[i].soma(0.5).gKATP_bcellcha = 2.31*0.5 + np.random.normal(0.0,1.0)*2.31*hetVar
+            #cellList[i].soma(0.5).PCaL_bcellcha = 48.9*1.5 + np.random.normal(0.0,1.0)*48.9*hetVar
+
+
 
     if gjmodel==1:
         pathToGJModel = "../models/gapjunction_pedersen2015/"
@@ -252,6 +333,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     # process CoorData to be acceptable format in modelSetup.genCoupleMatrix()
     CoorData = CoorData[CoorData[:,0]==11][:,1:4]
     CoupledMatrix = modelSetup.genCoupleMatrix(CoorData,dthres,isletsize,True)
+    tempCoupledMatrix = CoupledMatrix + CoupledMatrix.T
     ncells = CoupledMatrix.shape[0]
     nSpatialLinks = np.sum(CoupledMatrix+CoupledMatrix.T,1)
     if ncells != CoupledMatrix.shape[1]:
@@ -357,7 +439,6 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     # Introduce heterogeneity to each defined cell
     cell = []
     iclamp_hubs = []
-    tempCoupledMatrix = CoupledMatrix + CoupledMatrix.T
     toPick = random.randint(0,len(hubsList))
     for i in range(ncells):
         if i not in hubsList:
@@ -401,18 +482,20 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     # Use a previously generated heterogeneity GJ matrix
     #HetMatrix = np.loadtxt('')
 
+    
     #TODO can put this in modelSetup.py too
     print "Defining gap junction connections..."
     gap = []
     for i in range(ncells):
         for j in range(ncells):
-            if CoupledMatrix[i,j] > 0 and ((i in hubsList) or (j in hubsList)):
+            a = np.random.rand()
+            if CoupledMatrix[i,j] > 0 and ((i in hubsList) or (j in hubsList)) and a<p_connect:
                 if pggaphubstd > 0:
                     HetGjMatrix[i,j] = max(ggaphub * (1.0 + np.random.normal(0.0,1.0)*pggaphubstd), 0)
                 else:
                     HetGjMatrix[i,j] = ggaphub
                 gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j],gjtau))
-            elif CoupledMatrix[i,j] > 0: #and ((i not in nonHubsToPickList) or (j not in nonHubsToPickList)):
+            elif CoupledMatrix[i,j] > 0 and a<p_connect: #and ((i not in nonHubsToPickList) or (j not in nonHubsToPickList)):
                 if pggapstd > 0:
                     HetGjMatrix[i,j] = max(ggap * (1.0 + np.random.normal(0.0,1.0)*pggapstd), 0)
                 else:
