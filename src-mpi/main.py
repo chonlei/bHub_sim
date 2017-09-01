@@ -42,27 +42,27 @@ downSampling  # down sample the output -> output_timestep = dt*downSampling
 tbatch  # split simulation into batches; same unit as tstop
 """
 modelParam = {'model' : 3, \
-              'gjmodel' : 1, \
+              'gjmodel' : 2, \
               'morphology' : 1, \
               'species' : 2, \
-              'pyseed' : 3, \
+              'pyseed' : 4, \
               'isImitateExp' : 1, \
               'mode' : 1, \
-              'silenceStart' : 75e3, \
-              'silenceDur' : 100e3, \
-              'silenceAmp' : -0.005, \
+              'silenceStart' : 250e3, \
+              'silenceDur' : 250e3, \
+              'silenceAmp' : -20.0, \
               'pHubs' : 0.01, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
-              'ggap' : 0.12, \
-              'ggaphub' : 0.22, \
-              'pggaphubstd' : 0.0, \
+              'ggap' : 0.8, \
+              'ggaphub' : 0.24, \
+              'pggaphubstd' : 0.1, \
               'pggapstd' : 0.7, \
               'gjtau' : 100.0, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.1, \
-              'tstop' : 375e3, \
+              'tstop' : 750e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
               'tbatch' : 5e3}
@@ -71,7 +71,7 @@ modelParam = {'model' : 3, \
 # model 1 default: {'beta':{} , 'betahub':{'hubkatp':-5.8}}
 # model 2 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None} , 'betahub':{'hubgkatp':10}}
 # model 3 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None , 'applytime':5e3} , 'betahub':{'hubgkatp':10 , 'applytime':5e3}}
-modelParam['model_kwargs'] = { 'beta':{'gkatp':(5.5,6.9) , 'useDistribution':'sq'} , \
+modelParam['model_kwargs'] = { 'beta':{'gkatp':(6.5,7.5) , 'useDistribution':'sq'} , \
                                'betahub':{'hubgkatp':11} }
 
 # setup output directory
