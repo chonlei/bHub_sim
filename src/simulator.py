@@ -21,6 +21,7 @@ import random as random
 import os.path as path
 import modelSetup
 
+import sys
 import pickle
 
 
@@ -54,34 +55,36 @@ dt   # usually in [ms]
 downSampling  # down sample the output -> output_timestep = dt*downSampling
 tbatch  # split simulation into batches; same unit as tstop
 """
-modelParam = {'model' : 3, \
+modelParam = {'model' : 5, \
               'gjmodel' : 2, \
               'morphology' : 0, \
               'species' : 2, \
-              'pyseed' : 1, \
+              'pyseed' : 11, \
               'isImitateExp' : 1, \
               'mode' : 1, \
-              'silenceStart' : 75e3, \
-              'silenceDur' : 400e3, \
-              'silenceAmp' : -5.0, \
-              'pHubs' : 0.8, \
+              'silenceStart' : 250e3, \
+              'silenceDur' : 250e3, \
+              'silenceAmp' : -100.0, \
+              'pHubs' : 0.01, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
-              'ggap' : 0.12, \
-              'ggaphub' : 0.12, \
+              'ggap' : 0.17, \
+              'ggaphub' : 0.17, \
               'pggaphubstd' : 0.7, \
               'pggapstd' : 0.7, \
-              'gjtau' : 100.0, \
+              'gjtau' : 500.0, \
+              'p_connect': 0.7, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
-              'hetVar' : 0.1, \
-              'tstop' : 575e3, \
+              'hetVar' : 0.2, \
+              'tstop' : 500e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
               'tbatch' : 5e3}
 
-#modelParam['model_kwargs'] = {'beta':{'gamma':(0.75,0.0) , 'useDistribution':None , 'applytime':0e3} , 'betahub':{'hubgamma':1.0 , 'applytime':0e3}}
-modelParam['model_kwargs'] = {'beta':{'gkatp':(5.5,6.9) , 'useDistribution':'sq' , 'applytime':0e3} , 'betahub':{'hubgkatp':11.0 , 'applytime':0e3}}
+#modelParam['model_kwargs'] = {'beta':{'gamma':(0.985,0.0) , 'useDistribution':None , 'applytime':0e3} , 'betahub':{'hubgamma':1.0 , 'applytime':0e3}}
+#modelParam['model_kwargs'] = {'beta':{'gkatp':(6.5,6.5) , 'useDistribution':'sq' , 'applytime':0e3} , 'betahub':{'hubgkatp':11.0 , 'applytime':0e3}}
+modelParam['model_kwargs'] = {'beta':{'glu':(6.0,6.5) , 'useDistribution':'sq' , 'applytime':0e3} , 'betahub':{'hubglu':11.0 , 'applytime':0e3}}
 
 
 def main(modelParam=modelParam, hubsList_temp=[]):
@@ -128,6 +131,10 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         model_kwargs = modelParam['model_kwargs']
     except:
         model_kwargs = { 'beta':{} , 'betahub':{} }
+    try:
+        p_connect = modelParam['p_connect']
+    except:
+        p_connect = 0.7#1.0
 
     if isImitateExp:
         isletsize = None # force to use whole islet
@@ -215,6 +222,8 @@ def main(modelParam=modelParam, hubsList_temp=[]):
             cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
             if hetVar>0:
                 setHetero(cellList[i],HetMatrix,i)
+            else:
+                setOrigin(cellList[i])
             if useDistribution == None:
                 cellList[i].soma(0.5).gammatoset_bcellcha = gkatp[0]
             elif useDistribution == 'sq':
@@ -247,6 +256,8 @@ def main(modelParam=modelParam, hubsList_temp=[]):
             cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
             if hetVar>0:
                 setHetero(cellList[i],HetMatrix,i)
+            else:
+                setOrigin(cellList[i])
             if useDistribution == None:
                 cellList[i].soma(0.5).gammamut_bcellcha = gamma[0]
             elif useDistribution == 'sq':
@@ -261,6 +272,46 @@ def main(modelParam=modelParam, hubsList_temp=[]):
             setOrigin(cellList[i])
             cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
             cellList[i].soma(0.5).gammamut_bcellcha = hubgamma
+    elif model==5:
+        ## Created by Chon Lei
+        ## The current version is based on the model from
+        ## Cha et al. 2011 The Journal of General Physiology and Hraha et al. 2014 PLOS Computational Biology
+        ## Last updated: 21/08/2017
+        pathToModel = "../models/betacell_cha2011_vMetabolic2/"
+        #TODO
+        modelSetup.setupHetDict(varp=hetVar)
+        #loadHetero = modelSetup.setHeteroCha2011
+        setHetero = modelSetup.setHeteroCha2011all
+        setOrigin = modelSetup.setOriginCha2011all
+        HetDict = modelSetup.HetDictCha2011all
+        def defineBeta(cellList,i,glu=(0.5,0.0),useDistribution=None,applytime=5e3):
+            # define beta cell
+            cellList.append(h.betacell())
+            cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
+            if hetVar>0:
+                setHetero(cellList[i],HetMatrix,i)
+            else:
+                setOrigin(cellList[i])
+            if useDistribution == None:
+                cellList[i].soma(0.5).gammatoset_bcellcha = glu[0]
+            elif useDistribution == 'sq':
+                cellList[i].soma(0.5).gammatoset_bcellcha = np.random.uniform(glu[0],glu[1])
+            elif useDistribution == 'normal':
+                cellList[i].soma(0.5).gammatoset_bcellcha = glu[0] + np.random.normal(0.0,1.0)*np.sqrt(glu[1])
+            else:
+                cellList[i].soma(0.5).gammatoset_bcellcha = glu[0]
+            #cellList[i].soma(0.5).gKATP_bcellcha = 2.31*1.5 + np.random.normal(0.0,1.0)*2.31*hetVar
+            #cellList[i].soma(0.5).PCaL_bcellcha = 48.9*0.7 + np.random.normal(0.0,1.0)*48.9*hetVar
+        def defineBetaHub(cellList,i,hubglu=1.0,applytime=5e3):
+            # define beta hub cell
+            cellList.append(h.betacell())
+            setOrigin(cellList[i])
+            cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
+            cellList[i].soma(0.5).gammatoset_bcellcha = hubglu
+            #cellList[i].soma(0.5).gKATP_bcellcha = 2.31*0.5 + np.random.normal(0.0,1.0)*2.31*hetVar
+            #cellList[i].soma(0.5).PCaL_bcellcha = 48.9*1.5 + np.random.normal(0.0,1.0)*48.9*hetVar
+
+
 
     if gjmodel==1:
         pathToGJModel = "../models/gapjunction_pedersen2015/"
@@ -286,6 +337,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     # process CoorData to be acceptable format in modelSetup.genCoupleMatrix()
     CoorData = CoorData[CoorData[:,0]==11][:,1:4]
     CoupledMatrix = modelSetup.genCoupleMatrix(CoorData,dthres,isletsize,True)
+    tempCoupledMatrix = CoupledMatrix + CoupledMatrix.T
     ncells = CoupledMatrix.shape[0]
     nSpatialLinks = np.sum(CoupledMatrix+CoupledMatrix.T,1)
     if ncells != CoupledMatrix.shape[1]:
@@ -324,9 +376,35 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     hubsList = temp[0:numHubs]
     if hubsList_temp!=None and hubsList_temp!=[]:
         hubsList = hubsList_temp
+    if False:
+        truehub = hubsList[0]
+        #truehub2 = hubsList[1]
+        hubsList = [truehub]
+        hubsList += list(np.arange(ncells)[tempCoupledMatrix[:,truehub]>0])
+        #hubsList += [truehub2]
+        #hubsList += list(np.arange(ncells)[tempCoupledMatrix[:,truehub2]>0])
+    if False:
+        # pick #link and dist
+        tmpList = []
+        print hubsList
+        for hubtmp in hubsList:
+            if np.sum(tempCoupledMatrix[:,hubtmp])==6:
+                tmpList.append(hubtmp)
+        hubsList = tmpList[:]
+        print hubsList
+        for iii in range(len(tmpList)-1):
+            for jjj in range(iii+1,len(tmpList)):
+                #print np.sqrt(np.sum((CoorData[tmpList[iii]]-CoorData[tmpList[jjj]])**2))
+                if np.sqrt(np.sum((CoorData[tmpList[iii]]-CoorData[tmpList[jjj]])**2))>(2.1*dthres) and (iii in hubsList):
+                    try:
+                        print jjj
+                        hubsList.remove(tmpList[jjj])
+                    except:
+                        pass
+        hubsList = hubsList[0:numHubs]
     imagedHubs = list(set(hubsList).intersection(imagedCells))
     numImHubs = int(pHubs*len(imagedCells)) if pHubs<=1 else len(imagedCells)/ncells*pHubs
-    if isImitateExp and len(imagedHubs) < max(numImHubs,1):
+    if isImitateExp and len(imagedHubs) < max(numImHubs,1) and True:
         nMorehubs = max(numImHubs,1) - len(imagedHubs)
         tempCellsToPick = [x for x in imagedCells if x not in imagedHubs]
         random.shuffle(tempCellsToPick)
@@ -335,6 +413,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     # Use a previously generated indices
     # Uncomment this to set specific hubs
     #hubsList = [self_def_list]
+    #imagedHubs = hubsList[:]
     print(hubsList)
     with open(outlog, 'a') as f:
         f.write('#hubsList = \n')
@@ -347,6 +426,11 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     # Randomly pick some non-hubs cells
     numNonHubsToPick = numHubs
     temp = [i for i in range(ncells) if i not in hubsList]
+    if True:
+        aroundHub = []
+        for hubhub in hubsList:
+            aroundHub += list(np.arange(ncells)[tempCoupledMatrix[:,hubhub]>0])
+        temp = [i for i in temp if i not in aroundHub]
     random.shuffle(temp)
     nonHubsToPickList = temp[0:numNonHubsToPick]
     imagedNonHubs = []
@@ -370,7 +454,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     #HetMatrix = np.loadtxt('HetMatrix-mouse40-3.txt')
 
     ##TODO: Add function to silent cells
-    def silenceCellV(iclampList,cell,delay=250e3,dur=250e3,amp=-100.0):
+    def silenceCell(iclampList,cell,delay=250e3,dur=250e3,amp=-100.0):
         # vclamp cell to imitate cell silencing in experiments
         iclampList.append(h.SEClamp (0.5, sec = cell.soma) )
         iclampList[-1].dur1 = silenceStart
@@ -378,7 +462,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         iclampList[-1].dur2 = dur
         iclampList[-1].amp2 = amp
     
-    def silenceCell(iclampList,cell,delay=250e3,dur=250e3,amp=-0.005):
+    def silenceCellI(iclampList,cell,delay=250e3,dur=250e3,amp=-0.005):
         # iclamp cell to imitate cell silencing in experiments
         # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
         iclampList.append(h.IClamp (0.5, sec = cell.soma) )
@@ -391,21 +475,22 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     # Introduce heterogeneity to each defined cell
     cell = []
     iclamp_hubs = []
-    tempCoupledMatrix = CoupledMatrix + CoupledMatrix.T
     toPick = random.randint(0,len(hubsList))
     for i in range(ncells):
         if i not in hubsList:
             defineBeta(cell,i,**(model_kwargs['beta']))
             if isImitateExp:
                 #if i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
-                if (i == imagedNonHubs[whichHub]) and (mode==2):
+                #if (i == imagedNonHubs[whichHub]) and (mode==2):
+                #if False and (i in imagedCells[:50]):
+                if mode==2 and i in nonHubsToPickList[:]:
                     print "silencing cell ",i
                     with open(outlog, 'a') as f:
                         f.write('#silencedCell = %d\n'%i)
                         f.write('#cell%d_nSpatialLinks = %d\n'%(i,nSpatialLinks[i]))
                     silenceCell(iclamp_hubs,cell[i],silenceStart,silenceDur,silenceAmp)
             else:
-                if (i == nonHubsToPickList[toPick]) and (mode==2):
+                if (i in nonHubsToPickList[:]) and (mode==2):
                     print "silencing cell ",i
                     with open(outlog, 'a') as f:
                         f.write('#silencedCell = %d\n'%i)
@@ -414,7 +499,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         else:
             defineBetaHub(cell,i,**(model_kwargs['betahub']))
             if isImitateExp:
-                if mode==1 and i==imagedHubs[whichHub]:
+                if mode==1 and (i in hubsList[:4]):#i==imagedHubs[whichHub]:
                     #or i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
                     print "silencing cell ",i
                     with open(outlog, 'a') as f:
@@ -441,13 +526,19 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     gap = []
     for i in range(ncells):
         for j in range(ncells):
-            if CoupledMatrix[i,j] > 0 and ((i in hubsList) or (j in hubsList)):
+            a = np.random.rand()
+            if CoupledMatrix[i,j] > 0 and ((i in hubsList) or (j in hubsList)) and a<p_connect:
                 if pggaphubstd > 0:
                     HetGjMatrix[i,j] = max(ggaphub * (1.0 + np.random.normal(0.0,1.0)*pggaphubstd), 0)
                 else:
                     HetGjMatrix[i,j] = ggaphub
+                if False:
+                    if i in hubsList:
+                        HetGjMatrix[i,j] = ggaphub*7.0/np.sum(tempCoupledMatrix[:,i]>0) * (1.0 + np.random.normal(0.0,1.0)*pggaphubstd)
+                    else:
+                        HetGjMatrix[i,j] = ggaphub*7.0/np.sum(tempCoupledMatrix[:,j]>0) * (1.0 + np.random.normal(0.0,1.0)*pggaphubstd)
                 gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j],gjtau))
-            elif CoupledMatrix[i,j] > 0: #and ((i not in nonHubsToPickList) or (j not in nonHubsToPickList)):
+            elif CoupledMatrix[i,j] > 0 and a<p_connect: #and ((i not in nonHubsToPickList) or (j not in nonHubsToPickList)):
                 if pggapstd > 0:
                     HetGjMatrix[i,j] = max(ggap * (1.0 + np.random.normal(0.0,1.0)*pggapstd), 0)
                 else:
@@ -495,18 +586,18 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     print("Dividing simulation into %d batches..."%nbatch)
     tremain = tstop%tbatch  # remaining simulation time after nbatch
     for i in xrange(nbatch):
-        #if temptstop >= silenceStart:
+        if temptstop >= silenceStart:
+           for iclamp in iclamp_hubs:
+                iclamp.rs = 0.001
+        #if temptstop > 150e3:
         #    for iclamp in iclamp_hubs:
-        #        iclamp.rs = 0.001
-        if temptstop > 150e3:
-            for iclamp in iclamp_hubs:
-                iclamp.amp = -10.0
-        if temptstop > 200e3:
-            for iclamp in iclamp_hubs:
-                iclamp.amp = -20.0
-        if temptstop > 250e3:
-            for iclamp in iclamp_hubs:
-                iclamp.amp = -30.0
+        #        iclamp.amp = -10.0
+        #if temptstop > 200e3:
+        #    for iclamp in iclamp_hubs:
+        #        iclamp.amp = -20.0
+        #if temptstop > 250e3:
+        #    for iclamp in iclamp_hubs:
+        #        iclamp.amp = -30.0
         #if temptstop > 300e3:
         #    for iclamp in iclamp_hubs:
         #        iclamp.amp = -40.0
@@ -554,7 +645,16 @@ def main(modelParam=modelParam, hubsList_temp=[]):
 
 
 if __name__== '__main__':
+    try:
+        print("Loading external model parameters from %s"%sys.argv[1])
+        modelParam = pickle.load(open(sys.argv[1],'rb'))
+    except Exception:
+        print("Cannot read external model parameters...\nUsing default parameters...\n\n")
+    #modelParam['pHubs'] = 0.05
+    modelParam['whichHub'] = 3
+    #modelParam['ggaphub'] = 0.4
+    #modelParam['silenceAmp'] = -30.0
     # just try to run main(), but not expecting to be used in this way
-    main()
+    main(modelParam)
 
 ## 
