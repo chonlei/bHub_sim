@@ -418,7 +418,7 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
     #HetMatrix = np.loadtxt('HetMatrix-mouse40-3.txt')
 
     ##TODO: Add function to silent cells
-    def silenceCellV(iclampList,cell,delay=250e3,dur=250e3,amp=-100.0):
+    def silenceCell(iclampList,cell,delay=250e3,dur=250e3,amp=-100.0):
         # vclamp cell to imitate cell silencing in experiments
         iclampList.append(h.SEClamp (0.5, sec = cell.soma) )
         iclampList[-1].dur1 = silenceStart
@@ -426,7 +426,7 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
         iclampList[-1].dur2 = dur
         iclampList[-1].amp2 = amp
     
-    def silenceCell(iclampList,cell,delay=250e3,dur=250e3,amp=-0.005):
+    def silenceCellI(iclampList,cell,delay=250e3,dur=250e3,amp=-0.005):
         # iclamp cell to imitate cell silencing in experiments
         # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
         iclampList.append(h.IClamp (0.5, sec = cell.soma) )
@@ -543,9 +543,9 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
     print("Dividing simulation into %d batches..."%nbatch)
     tremain = tstop%tbatch  # remaining simulation time after nbatch
     for i in xrange(nbatch):
-        #if temptstop >= silenceStart:
-        #    for iclamp in iclamp_hubs:
-        #        iclamp.rs = 0.001
+        if temptstop >= silenceStart:
+            for iclamp in iclamp_hubs:
+                iclamp.rs = 0.001
         temptstop += tbatch  # tstop for current batch
         h.frecord_init()  # reuse all recording vectors
         h.continuerun(temptstop)
