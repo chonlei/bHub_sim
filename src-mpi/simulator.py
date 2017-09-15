@@ -296,7 +296,7 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
                 cellList[i].soma(0.5).gammatoset_bcellcha = glu[0] + np.random.normal(0.0,1.0)*np.sqrt(glu[1])
             else:
                 cellList[i].soma(0.5).gammatoset_bcellcha = glu[0]
-            cellList[i].soma(0.5).gKATP_bcellcha = 2.31*1.5 + np.random.normal(0.0,1.0)*2.31*hetVar
+            #cellList[i].soma(0.5).gKATP_bcellcha = 2.31*1.5 + np.random.normal(0.0,1.0)*2.31*hetVar
             #cellList[i].soma(0.5).PCaL_bcellcha = 48.9*0.7 + np.random.normal(0.0,1.0)*48.9*hetVar
         def defineBetaHub(cellList,i,hubglu=1.0,applytime=5e3):
             # define beta hub cell
@@ -304,7 +304,7 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
             setOrigin(cellList[i])
             cellList[i].soma(0.5).gammaapplytime_bcellcha = applytime
             cellList[i].soma(0.5).gammatoset_bcellcha = hubglu
-            cellList[i].soma(0.5).gKATP_bcellcha = 2.31*0.5 + np.random.normal(0.0,1.0)*2.31*hetVar
+            #cellList[i].soma(0.5).gKATP_bcellcha = 2.31*0.5 + np.random.normal(0.0,1.0)*2.31*hetVar
             #cellList[i].soma(0.5).PCaL_bcellcha = 48.9*1.5 + np.random.normal(0.0,1.0)*48.9*hetVar
 
 
