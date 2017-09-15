@@ -10,7 +10,7 @@ NEURON {
 	USEION k READ ki,ek WRITE ik
 	USEION ca READ cai,eca WRITE ica
 	USEION Jcaer WRITE Jcaeri VALENCE 0 :: NOT REALLY ION - should use POINTER
-        RANGE gammatoset, gammaapplytime, gKATP, PCaL, pIbNSC, pKDr, GKto, PKslow
+        RANGE gammatoset, gammaapplytime, gKATP, PCaL, pIbNSC, pKDr, GKto, PKslow, P_PMCA, Pii
 }
 
 PARAMETER {
@@ -68,7 +68,7 @@ PARAMETER {
 	pKDr:=2.1
 	
 	:***********ICapump Parameters*************
-	P_PMCA=1.56
+	P_PMCA:=1.56
 	K_PMCA=0.00014
 	
 	:***********ISOC Parameters*************
@@ -101,7 +101,7 @@ PARAMETER {
 	AmpINaCa=204.0
 	
 	:***********Na/Kpump Parameters*************
-	Pii=1.9
+	Pii:=1.9
 	Proton=0.0001
 	Kd_MgATP=0.6
 	Kd_Nao0=26.8
