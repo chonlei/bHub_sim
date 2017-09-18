@@ -372,6 +372,32 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
     hubsList = temp[0:numHubs]
     if hubsList_temp!=None and hubsList_temp!=[]:
         hubsList = hubsList_temp
+    if False:
+        truehub = hubsList[0]
+        #truehub2 = hubsList[1]
+        hubsList = [truehub]
+        hubsList += list(np.arange(ncells)[tempCoupledMatrix[:,truehub]>0])
+        #hubsList += [truehub2]
+        #hubsList += list(np.arange(ncells)[tempCoupledMatrix[:,truehub2]>0])
+    if False:
+        # pick #link and dist
+        tmpList = []
+        print hubsList
+        for hubtmp in hubsList:
+            if np.sum(tempCoupledMatrix[:,hubtmp])==6:
+                tmpList.append(hubtmp)
+        hubsList = tmpList[:]
+        print hubsList
+        for iii in range(len(tmpList)-1):
+            for jjj in range(iii+1,len(tmpList)):
+                #print np.sqrt(np.sum((CoorData[tmpList[iii]]-CoorData[tmpList[jjj]])**2))
+                if np.sqrt(np.sum((CoorData[tmpList[iii]]-CoorData[tmpList[jjj]])**2))>(2.1*dthres) and (iii in hubsList):
+                    try:
+                        print jjj
+                        hubsList.remove(tmpList[jjj])
+                    except:
+                        pass
+        hubsList = hubsList[0:numHubs]
     imagedHubs = list(set(hubsList).intersection(imagedCells))
     numImHubs = int(pHubs*len(imagedCells)) if pHubs<=1 else len(imagedCells)/ncells*pHubs
     if isImitateExp and len(imagedHubs) < max(numImHubs,1):
@@ -395,6 +421,11 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
     # Randomly pick some non-hubs cells
     numNonHubsToPick = numHubs
     temp = [i for i in range(ncells) if i not in hubsList]
+    if True:
+        aroundHub = []
+        for hubhub in hubsList:
+            aroundHub += list(np.arange(ncells)[tempCoupledMatrix[:,hubhub]>0])
+        temp = [i for i in temp if i not in aroundHub]
     random.shuffle(temp)
     nonHubsToPickList = temp[0:numNonHubsToPick]
     imagedNonHubs = []
@@ -418,7 +449,7 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
     #HetMatrix = np.loadtxt('HetMatrix-mouse40-3.txt')
 
     ##TODO: Add function to silent cells
-    def silenceCellV(iclampList,cell,delay=250e3,dur=250e3,amp=-100.0):
+    def silenceCell(iclampList,cell,delay=250e3,dur=250e3,amp=-100.0):
         # vclamp cell to imitate cell silencing in experiments
         iclampList.append(h.SEClamp (0.5, sec = cell.soma) )
         iclampList[-1].dur1 = silenceStart
@@ -426,7 +457,7 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
         iclampList[-1].dur2 = dur
         iclampList[-1].amp2 = amp
     
-    def silenceCell(iclampList,cell,delay=250e3,dur=250e3,amp=-0.005):
+    def silenceCellI(iclampList,cell,delay=250e3,dur=250e3,amp=-0.005):
         # iclamp cell to imitate cell silencing in experiments
         # all spiking: -0.0005; all stay -120mV: -0.005; all stay -72mV: -0.001; all stay -90mV: -0.002;
         iclampList.append(h.IClamp (0.5, sec = cell.soma) )
@@ -445,7 +476,9 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
             defineBeta(cell,i,**(model_kwargs['beta']))
             if isImitateExp:
                 #if i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
-                if (i == nonHubsToPickList[:tempParam]) and (mode==2):
+                #if (i == imagedNonHubs[whichHub]) and (mode==2):
+                #if False and (i in imagedCells[:50]):
+                if mode==2 and i in nonHubsToPickList[:tempParam]:
                     print "silencing cell ",i
                     with open(outlog, 'a') as f:
                         f.write('#silencedCell = %d\n'%i)
@@ -494,6 +527,11 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
                     HetGjMatrix[i,j] = max(ggaphub * (1.0 + np.random.normal(0.0,1.0)*pggaphubstd), 0)
                 else:
                     HetGjMatrix[i,j] = ggaphub
+                if False:
+                    if i in hubsList:
+                        HetGjMatrix[i,j] = ggaphub*7.0/np.sum(tempCoupledMatrix[:,i]>0) * (1.0 + np.random.normal(0.0,1.0)*pggaphubstd)
+                    else:
+                        HetGjMatrix[i,j] = ggaphub*7.0/np.sum(tempCoupledMatrix[:,j]>0) * (1.0 + np.random.normal(0.0,1.0)*pggaphubstd)
                 gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j],gjtau))
             elif CoupledMatrix[i,j] > 0 and a<p_connect: #and ((i not in nonHubsToPickList) or (j not in nonHubsToPickList)):
                 if pggapstd > 0:
@@ -543,9 +581,21 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
     print("Dividing simulation into %d batches..."%nbatch)
     tremain = tstop%tbatch  # remaining simulation time after nbatch
     for i in xrange(nbatch):
-        #if temptstop >= silenceStart:
+        if temptstop >= silenceStart:
+           for iclamp in iclamp_hubs:
+                iclamp.rs = 0.001
+        #if temptstop > 150e3:
         #    for iclamp in iclamp_hubs:
-        #        iclamp.rs = 0.001
+        #        iclamp.amp = -10.0
+        #if temptstop > 200e3:
+        #    for iclamp in iclamp_hubs:
+        #        iclamp.amp = -20.0
+        #if temptstop > 250e3:
+        #    for iclamp in iclamp_hubs:
+        #        iclamp.amp = -30.0
+        #if temptstop > 300e3:
+        #    for iclamp in iclamp_hubs:
+        #        iclamp.amp = -40.0
         temptstop += tbatch  # tstop for current batch
         h.frecord_init()  # reuse all recording vectors
         h.continuerun(temptstop)

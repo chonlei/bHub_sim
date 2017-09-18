@@ -63,7 +63,7 @@ modelParam = {'model' : 5, \
               'pggaphubstd' : 0.7, \
               'pggapstd' : 0.7, \
               'gjtau' : 400.0, \
-              'p_connect': 0.7, \
+              'p_connect': 1.0, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.2, \
