@@ -8,7 +8,7 @@ from mpi4py import MPI
 
 
 ## description of current simulation
-logmsg = "First testing of running multiple simulations using mpi+neuron\n\nUsing mouse 1; (real) common seed; not varying gGJ and gamma; 5% hubs; silence n hubs in the islet\n\nn = 1, 2, 3...."
+logmsg = "First testing of running multiple simulations using mpi+neuron\n\nUsing mouse 1; (real) common seed; 1.5% hubs; silence n hubs in the islet\n\nn = 1, 2, 3...."#add each time 3 hubs from 12 to 3*3*16+12 hubs; silence first 10 hubs."#; not varying gGJ and gamma; 5% hubs; silence n hubs in the islet\n\nn = 1, 2, 3...."
 
 
 ######
@@ -41,24 +41,28 @@ dt   # usually in [ms]
 downSampling  # down sample the output -> output_timestep = dt*downSampling
 tbatch  # split simulation into batches; same unit as tstop
 """
+try:
+    pyseed = int(sys.argv[2])
+except Exception:
+    pyseed = 4
 modelParam = {'model' : 5, \
               'gjmodel' : 2, \
               'morphology' : 1, \
               'species' : 0, \
-              'pyseed' : 3, \
+              'pyseed' : pyseed, \
               'isImitateExp' : 1, \
-              'mode' : 1, \
+              'mode' : 2, \
               'silenceStart' : 300e3, \
               'silenceDur' : 250e3, \
-              'silenceAmp' : -30.0, \
-              'pHubs' : 0.05, \
+              'silenceAmp' : -100.0, \
+              'pHubs' : 0.02, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
-              'ggap' : 0.25, \
-              'ggaphub' : 0.25, \
-              'pggaphubstd' : 0.1, \
-              'pggapstd' : 0.6, \
-              'gjtau' : 500.0, \
+              'ggap' : 0.12, \
+              'ggaphub' : 0.12, \
+              'pggaphubstd' : 0.7, \
+              'pggapstd' : 0.7, \
+              'gjtau' : 400.0, \
               'p_connect': 0.7, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
@@ -72,7 +76,7 @@ modelParam = {'model' : 5, \
 # model 1 default: {'beta':{} , 'betahub':{'hubkatp':-5.8}}
 # model 2 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None} , 'betahub':{'hubgkatp':10}}
 # model 3 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None , 'applytime':5e3} , 'betahub':{'hubgkatp':10 , 'applytime':5e3}}
-modelParam['model_kwargs'] = {'beta':{'glu':(5.0,8.0) , 'useDistribution':'sq' , 'applytime':50e3} , \
+modelParam['model_kwargs'] = {'beta':{'glu':(6.0,6.5) , 'useDistribution':'sq' , 'applytime':50e3} , \
                               'betahub':{'hubglu':11.0 , 'applytime':50e3}}
 
 # setup output directory
@@ -95,7 +99,7 @@ def main(comm,modelParam,outputdir):
     rank = comm.Get_rank()
     modelParam['subidx'] = rank
     # setup what each sub simulation does
-    #modelParam['pHubs'] = 3*rank+3
+    #modelParam['pHubs'] = 12*rank+3
     tempParam = rank+1
     # check they are doing right thing
     #print("RANK %d of SIZE %d is doing the right job..."%(rank,size))
