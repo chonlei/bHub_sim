@@ -445,7 +445,7 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
             defineBeta(cell,i,**(model_kwargs['beta']))
             if isImitateExp:
                 #if i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
-                if (i == imagedNonHubs[whichHub]) and (mode==2):
+                if (i == nonHubsToPickList[:tempParam]) and (mode==2):
                     print "silencing cell ",i
                     with open(outlog, 'a') as f:
                         f.write('#silencedCell = %d\n'%i)

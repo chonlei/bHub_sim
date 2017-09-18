@@ -8,7 +8,7 @@ from mpi4py import MPI
 
 
 ## description of current simulation
-logmsg = "First testing of running multiple simulations using mpi+neuron\n\nUsing mouse 1; (real) common seed; add each time 3 hubs from 12 to 3*3*16+12 hubs; silence first 10 hubs."#; not varying gGJ and gamma; 5% hubs; silence n hubs in the islet\n\nn = 1, 2, 3...."
+logmsg = "First testing of running multiple simulations using mpi+neuron\n\nUsing mouse 1; (real) common seed; 1.5% hubs; silence n hubs in the islet\n\nn = 1, 2, 3...."#add each time 3 hubs from 12 to 3*3*16+12 hubs; silence first 10 hubs."#; not varying gGJ and gamma; 5% hubs; silence n hubs in the islet\n\nn = 1, 2, 3...."
 
 
 ######
@@ -46,24 +46,24 @@ try:
 except Exception:
     pyseed = 4
 modelParam = {'model' : 5, \
-              'gjmodel' : 1, \
+              'gjmodel' : 2, \
               'morphology' : 1, \
               'species' : 0, \
               'pyseed' : pyseed, \
               'isImitateExp' : 1, \
-              'mode' : 1, \
+              'mode' : 2, \
               'silenceStart' : 300e3, \
               'silenceDur' : 250e3, \
               'silenceAmp' : -100.0, \
-              'pHubs' : 0.05, \
+              'pHubs' : 0.02, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
-              'ggap' : 0.1, \
-              'ggaphub' : 0.1, \
+              'ggap' : 0.12, \
+              'ggaphub' : 0.12, \
               'pggaphubstd' : 0.7, \
               'pggapstd' : 0.7, \
-              'gjtau' : 500.0, \
-              'p_connect': 1.0, \
+              'gjtau' : 400.0, \
+              'p_connect': 0.7, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.2, \
@@ -99,8 +99,8 @@ def main(comm,modelParam,outputdir):
     rank = comm.Get_rank()
     modelParam['subidx'] = rank
     # setup what each sub simulation does
-    modelParam['pHubs'] = 12*rank+3
-    tempParam = 10#rank+1
+    #modelParam['pHubs'] = 12*rank+3
+    tempParam = rank+1
     # check they are doing right thing
     #print("RANK %d of SIZE %d is doing the right job..."%(rank,size))
     simulator.main(modelParam,tempParam=tempParam)
