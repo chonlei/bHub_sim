@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #SBATCH --job-name=neuron-mpi
-#SBATCH --time=100:00:00
-#SBATCH --nodes=3
+#SBATCH --time=10:00:00
+#SBATCH --nodes=2
 #SBATCH --ntasks-per-node=16
 #SBATCH --partition=compute
 
@@ -22,5 +22,5 @@ cd ${HOME}/bHub_sim/src-mpi
 # create output directory
 outputdir=$(python outputSetup.py ${DATA}/output/ >&1)
 # run main simulations
-mpirun $MPI_HOSTS python main.py ${outputdir}
+mpirun $MPI_HOSTS python main.py ${outputdir} 3 2 1
 
