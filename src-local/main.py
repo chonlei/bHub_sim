@@ -116,6 +116,7 @@ def main(modelParam,outputdir,subidx):
     tempParam = subidx*6 #rank+1 #(12*rank+30)/2 #
     # check they are doing right thing
     #print("RANK %d of SIZE %d is doing the right job..."%(rank,size))
+    print modelParam['subidx'], modelParam['parentout']
     simulator.main(modelParam,tempParam=tempParam)
 
 
