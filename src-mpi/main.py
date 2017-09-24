@@ -45,29 +45,38 @@ try:
     pyseed = int(sys.argv[2])
 except Exception:
     pyseed = 4
+try:
+    modee = int(sys.argv[3])
+except Exception:
+    modee = 1
+try:
+    archi = int(sys.argv[4])
+except Exception:
+    archi = 1
+
 modelParam = {'model' : 5, \
-              'gjmodel' : 2, \
-              'morphology' : 1, \
+              'gjmodel' : 1, \
+              'morphology' : archi, \
               'species' : 0, \
               'pyseed' : pyseed, \
               'isImitateExp' : 1, \
-              'mode' : 2, \
-              'silenceStart' : 300e3, \
+              'mode' : modee, \
+              'silenceStart' : 150e3, \
               'silenceDur' : 250e3, \
               'silenceAmp' : -100.0, \
-              'pHubs' : 0.02, \
+              'pHubs' : 0.2, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
-              'ggap' : 0.12, \
-              'ggaphub' : 0.12, \
+              'ggap' : 0.02, \
+              'ggaphub' : 0.02, \
               'pggaphubstd' : 0.7, \
               'pggapstd' : 0.7, \
               'gjtau' : 400.0, \
-              'p_connect': 1.0, \
+              'p_connect': 1, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.2, \
-              'tstop' : 800e3, \
+              'tstop' : 400e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
               'tbatch' : 5e3}
@@ -76,7 +85,7 @@ modelParam = {'model' : 5, \
 # model 1 default: {'beta':{} , 'betahub':{'hubkatp':-5.8}}
 # model 2 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None} , 'betahub':{'hubgkatp':10}}
 # model 3 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None , 'applytime':5e3} , 'betahub':{'hubgkatp':10 , 'applytime':5e3}}
-modelParam['model_kwargs'] = {'beta':{'glu':(6.0,6.5) , 'useDistribution':'sq' , 'applytime':50e3} , \
+modelParam['model_kwargs'] = {'beta':{'glu':(6.0,7.0) , 'useDistribution':'sq' , 'applytime':50e3} , \
                               'betahub':{'hubglu':11.0 , 'applytime':50e3}}
 
 # setup output directory
@@ -99,8 +108,8 @@ def main(comm,modelParam,outputdir):
     rank = comm.Get_rank()
     modelParam['subidx'] = rank
     # setup what each sub simulation does
-    #modelParam['pHubs'] = 12*rank+3
-    tempParam = rank+1
+    #modelParam['pHubs'] = 10*rank
+    tempParam = rank*6 #rank+1 #(12*rank+30)/2 #
     # check they are doing right thing
     #print("RANK %d of SIZE %d is doing the right job..."%(rank,size))
     simulator.main(modelParam,tempParam=tempParam)

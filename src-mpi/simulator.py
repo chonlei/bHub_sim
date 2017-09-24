@@ -421,7 +421,7 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
     # Randomly pick some non-hubs cells
     numNonHubsToPick = numHubs
     temp = [i for i in range(ncells) if i not in hubsList]
-    if True:
+    if False:
         aroundHub = []
         for hubhub in hubsList:
             aroundHub += list(np.arange(ncells)[tempCoupledMatrix[:,hubhub]>0])
@@ -453,7 +453,7 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
         # vclamp cell to imitate cell silencing in experiments
         iclampList.append(h.SEClamp (0.5, sec = cell.soma) )
         iclampList[-1].dur1 = silenceStart
-        iclampList[-1].rs = 1e9
+        iclampList[-1].rs = 1e30
         iclampList[-1].dur2 = dur
         iclampList[-1].amp2 = amp
     
@@ -478,7 +478,7 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
                 #if i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
                 #if (i == imagedNonHubs[whichHub]) and (mode==2):
                 #if False and (i in imagedCells[:50]):
-                if mode==2 and i in nonHubsToPickList[:tempParam]:
+                if mode==2 and (i in nonHubsToPickList[:tempParam]):
                     print "silencing cell ",i
                     with open(outlog, 'a') as f:
                         f.write('#silencedCell = %d\n'%i)
@@ -532,13 +532,13 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
                         HetGjMatrix[i,j] = ggaphub*7.0/np.sum(tempCoupledMatrix[:,i]>0) * (1.0 + np.random.normal(0.0,1.0)*pggaphubstd)
                     else:
                         HetGjMatrix[i,j] = ggaphub*7.0/np.sum(tempCoupledMatrix[:,j]>0) * (1.0 + np.random.normal(0.0,1.0)*pggaphubstd)
-                gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j],gjtau))
+                gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j]))#,gjtau))
             elif CoupledMatrix[i,j] > 0 and a<p_connect: #and ((i not in nonHubsToPickList) or (j not in nonHubsToPickList)):
                 if pggapstd > 0:
                     HetGjMatrix[i,j] = max(ggap * (1.0 + np.random.normal(0.0,1.0)*pggapstd), 0)
                 else:
                     HetGjMatrix[i,j] = ggap
-                gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j],gjtau))
+                gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j]))#,gjtau))
 
 
     ######
