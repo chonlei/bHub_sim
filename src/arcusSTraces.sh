@@ -13,11 +13,11 @@ for subidx in $( seq 0 $2 )
 do
 	echo plotting subidx $subidx
 	# python plotTraces.py $pathtofiles/sim$1/subsim$subidx/$3 $4 $5
-	python getS.py $pathtofiles/sim$1/subsim$subidx/$3 $4 $5
+	python getS.py $pathtofiles/sim$1/subsim$subidx/$3 $4 $5 $subidx
 	#mv $pathtofiles/sim$1/subsim$subidx/image* $pathtofiles/sim$1/$out/sim${subidx}i.png
 	#mv $pathtofiles/sim$1/subsim$subidx/whole* $pathtofiles/sim$1/$out/sim${subidx}w.png
 done
 echo DONE
 
 python quickplot.py temp.txt $2
-rm -rf temp.txt
+# rm -rf temp.txt

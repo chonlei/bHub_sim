@@ -160,6 +160,11 @@ if mode!=0:
         pass
 
 ####################################
+idxx=int(sys.argv[4])
+np.savetxt("tmp%d.txt"%idxx,XX)
+
+
+
 sStartIdx = int(silenceStart/tstep)
 sEndIdx = int((silenceStart+silenceDur)/tstep)
 skipIdx = int(75*1000/tstep)
@@ -171,9 +176,9 @@ minxx1 = np.min(XX1)
 XX0 -= minxx0
 XX1 -= minxx1
 outpercent = np.mean(XX1)/np.mean(XX0)
-
 with open("temp.txt", 'a') as f:
     f.write("%f \n"%outpercent)
+print sStartIdx,sEndIdx,skipIdx,gStartIdx
 
 # plotting setup
 #ax.set_xlabel("t [ms]")
