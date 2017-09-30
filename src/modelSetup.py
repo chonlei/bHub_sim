@@ -24,7 +24,7 @@ def SetRandomSeed(pyseed):
     random.seed(pyseed)
 
 
-def outputMake(out='../output/',isTest=False):
+def outputMake(out='../output/',idx=None,isTest=False):
     """Set up the output folders and names
     
     This function create and return the output directory. Part of outputSetup() function.
@@ -36,7 +36,8 @@ def outputMake(out='../output/',isTest=False):
         outputdir (str): The (created) output file directory
 
     """
-    idx = len([name for name in os.listdir(out) if os.path.isdir(out+name)])
+    if idx==None:
+        idx = len([name for name in os.listdir(out) if os.path.isdir(out+name)])
     outputdir = path.join(out,'sim%d/'%idx if not isTest else 'testsim%d/'%idx)
     try:
         os.makedirs(outputdir)
