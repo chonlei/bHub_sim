@@ -240,13 +240,8 @@ ax.set_ylim([-75.0, 2.5])
 ax2.set_ylim([0.05, 0.5])
 ax3.set_ylim([0.05, 0.5])
 ax.set_xlim([0.0, 200])
-'''
-# add legend
-legend = plt.legend()  #plt.legend(["case1", "case2", "case4"])#, loc=4);
-frame = legend.get_frame()
-frame.set_facecolor('0.9')
-frame.set_edgecolor('0.9')
-'''
+
+
 plt.savefig("../figures/trace-%d_0.png"%CASE,bbox_inches='tight')
 plt.savefig("../figures/trace-%d_0.pdf"%CASE,format='pdf',bbox_inches='tight')
 
