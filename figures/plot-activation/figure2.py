@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import glob
 import sys
 
-CASE = [1,2,4]
-colour = ['r','c','k']
+CASE = [1,2,3,4,5]
+colour = ['r','c','b','k','g']
 
 ## figure setup
 params = {
