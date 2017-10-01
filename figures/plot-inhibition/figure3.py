@@ -6,7 +6,7 @@ import sys
 try:
     CASE = int(sys.argv[1])
 except Exception:
-    CASE = None
+    CASE = 6
     #raise Exception("Enter case idx to plot as arg")
 SUBCASE = ['hub','follower']
 colour = ['r','k']
