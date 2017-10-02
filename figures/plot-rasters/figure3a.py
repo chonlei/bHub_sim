@@ -140,7 +140,7 @@ if nBatch>0:
                     aveX += X[i]
 Xall[Xall>0.2] = 1
 Xall[Xall<1] = 0
-ax.imshow(Xall,cmap='Greys',aspect='auto')
+ax.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,99,0])
 
 
 
@@ -201,7 +201,7 @@ if nBatch>0:
 
 Xall[Xall>0.2] = 1
 Xall[Xall<1] = 0
-ax2.imshow(Xall,cmap='Greys',aspect='auto')
+ax2.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,99,0])
 
 
 
@@ -210,16 +210,16 @@ ax2.imshow(Xall,cmap='Greys',aspect='auto')
 
 # plotting setup
 ax2.set_xlabel("t [s]")
-ax.set_ylabel(r"[Ca]$_i$")
-ax2.set_ylabel(r"[Ca]$_i$")
+ax.set_ylabel(r"cell index")
+ax2.set_ylabel(r"cell index")
 
 #ax.set_ylim([0.05, 0.45])
 #ax2.set_ylim([0.05, 0.45])
 #ax.set_xlim([0.0, 200])
 
 
-plt.savefig("../figures/trace-%d_1.png"%CASE,bbox_inches='tight')
-plt.savefig("../figures/trace-%d_1.pdf"%CASE,format='pdf',bbox_inches='tight')
+plt.savefig("../figures/raster-%d.png"%CASE,bbox_inches='tight')
+plt.savefig("../figures/raster-%d.pdf"%CASE,format='pdf',bbox_inches='tight')
 
 plt.show()
 

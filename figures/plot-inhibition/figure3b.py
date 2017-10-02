@@ -6,10 +6,10 @@ import sys
 try:
     CASE = int(sys.argv[1])
 except Exception:
-    CASE = 1
+    CASE = 61
     #raise Exception("Enter case idx to plot as arg")
 SUBCASE = ['hub','follower']
-colour = ['r','k']
+colour = ['tab:red','tab:grey']
 
 ## figure setup
 params = {
@@ -29,6 +29,8 @@ ax = fig.add_subplot(1, 1, 1)
 ## axis setup
 ax.set_xlabel(r"%hub inhibited")
 ax.set_ylabel(r"%activity")
+ax.set_xlim([-5, 125])
+ax.set_ylim([-5, 105])
 
 
 for (idx,subcase) in enumerate(SUBCASE):
@@ -38,7 +40,15 @@ for (idx,subcase) in enumerate(SUBCASE):
         trace = np.loadtxt(sim)
         trace[:,1] = trace[:,1]/trace[0,1]*100.0  # normalise
         ax.plot(trace[:,0],trace[:,1],c=colour[idx])
-    ax.plot(trace[:,0],trace[:,1],c=colour[idx],label='%s'%subcase)
+    ax.plot(trace[:,0],trace[:,1],c=colour[idx],lw=2,label='%s'%subcase)
+    if subcase=='hub':
+        # plot IC50
+        idx = (i for i,v in enumerate(trace[:,0]) if v>50.0).next()
+        ax.plot((-10.0, trace[idx,0]), (trace[idx,1], trace[idx,1]), 'k--', lw=2)
+        ax.plot((trace[idx,0], trace[idx,0]), (-10.0, trace[idx,1]), 'k--', lw=2)
+
+
+
 
 # add legend
 legend = plt.legend()  #plt.legend(["case1", "case2", "case4"])#, loc=4);
