@@ -63,7 +63,7 @@ except Exception:
     nBatch = 78 #len(glob.glob("case%s/*"%CASE)) - 3
 
 if fileName == None:
-    allfiles=glob.glob("case%s/*"%CASE)
+    allfiles=glob.glob("../plot-traces/case%s/*"%CASE)
     fileName = [a for a in allfiles if "_p_1_" in a][0]
 fileDir = os.path.dirname(fileName)
 fileBase = os.path.basename(fileName)

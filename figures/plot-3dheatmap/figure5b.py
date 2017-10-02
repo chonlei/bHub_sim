@@ -35,7 +35,7 @@ ax.set_ylabel(r"y [$\mu$m]")
 ax.set_zlabel(r"z [$\mu$m]")
 
 
-CASE=5
+CASE=101
 iBatch = 67
 
 ###############################################################################
@@ -100,12 +100,12 @@ X = np.memmap(fileNameBatch[iBatch], dtype='float64', mode='r', shape=shapeX)*10
 
 
 ###############################################################################
-morphology = 1
+morphology = 5
 pathToFile = "./"
-coorDataFile = "Mouse 40-%d"%morphology
+coorDataFile = "H4-1-%d"%morphology
 CoorData = np.loadtxt(pathToFile+coorDataFile+".txt")
 # proceed CoorData to be acceptable format in genCoupleMatrix()
-CoorData = CoorData[CoorData[:,0]==11][:,1:4]
+CoorData = CoorData[CoorData[:,0]==2][:,1:4]
 centreCoorData = np.mean(CoorData,0)
 CoorData = CoorData - centreCoorData
 
@@ -113,7 +113,7 @@ CoorData = CoorData - centreCoorData
 xs,ys,zs = CoorData.T
 values = X[:,0]
 
-p = ax.scatter3D(xs, ys, zs=zs, c=values, cmap='hot', s=30)
+p = ax.scatter3D(-zs, ys, zs=xs, c=values, cmap='hot', s=30)
 
 cb = fig.colorbar(p, ax=ax)
 cb.set_label(r'[Ca]$_i$ [$\mu$M]')

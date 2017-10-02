@@ -7,7 +7,7 @@ import sys
 import os
 import glob
 
-CASE=77
+CASE=101
 
 
 ## figure setup
