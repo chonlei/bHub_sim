@@ -7,7 +7,7 @@ import sys
 import os
 import glob
 
-CASE=5
+CASE=77
 
 
 ## figure setup
@@ -38,7 +38,7 @@ except Exception:
 try:
     nBatch = int(sys.argv[3])
 except Exception:
-    nBatch = 78 #len(glob.glob("case%s/*"%CASE)) - 3
+    nBatch = 65 #len(glob.glob("case%s/*"%CASE)) - 3
 
 if fileName == None:
     allfiles=glob.glob("case%s/*"%CASE)

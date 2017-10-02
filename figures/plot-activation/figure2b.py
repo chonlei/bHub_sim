@@ -4,7 +4,7 @@ import glob
 import sys
 
 CASE = [1,2,3,4,5]
-colour = ['r','c','b','k','g']
+colour = ['tab:blue','tab:orange','tab:green','tab:red','tab:purple']#['r','c','b','k','g']
 
 ## figure setup
 params = {
@@ -23,7 +23,7 @@ ax = fig.add_subplot(1, 1, 1)
 
 ## axis setup
 ax.set_xlabel(r"%cells as hub")
-ax.set_ylabel(r"activity [$\mu$M]")
+ax.set_ylabel(r"[Ca]$_i$ activity [$\mu$M]")
 
 for (idx,subcase) in enumerate(CASE):
     loc = "case%d/"%(subcase)  # location of files
@@ -31,6 +31,8 @@ for (idx,subcase) in enumerate(CASE):
     for sim in FILES:
         trace = np.loadtxt(sim)
         trace[:,1] = trace[:,1]*1000.
+        trace[:,0] += 1./750.
+        trace = np.insert(trace, 0, 0, axis=0)
         #trace[:,1] = trace[:,1]/trace[0,1]*100.0  # normalise
         ax.plot(trace[:,0],trace[:,1],c=colour[idx])
     ax.plot(trace[:,0],trace[:,1],c=colour[idx],label='case%d'%subcase)
