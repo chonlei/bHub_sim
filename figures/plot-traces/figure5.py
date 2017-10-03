@@ -115,19 +115,19 @@ maxCa = 0
 for i in xrange(len(X)):
     if isImagedCells:
         if (i not in hubList) and (i in imagedCells):
-            ax.plot(t/1000., X[i], 'k', alpha=0.3)
+            ax.plot(t/1000., X[i], 'tab:grey', alpha=0.3)
             aveX += X[i]
     else:
         if i not in hubList:
-            ax.plot(t/1000., X[i], 'k', alpha=0.3)
+            ax.plot(t/1000., X[i], 'tab:grey', alpha=0.3)
             aveX += X[i]
-ax.plot(t/1000., X[i], 'k', alpha=0.3, label='non-hub')
+ax.plot(t/1000., X[i], 'tab:grey', alpha=0.3, label='non-hub')
 for i in np.array(hubList)[np.array(hubList)>0]:
-    ax.plot(t/1000., X[i], 'r')
+    ax.plot(t/1000., X[i], 'tab:red')
     aveX += X[i]
-ax.plot(t/1000., X[i], 'r', label='hub')
+ax.plot(t/1000., X[i], 'tab:red', label='hub')
 aveX = aveX/float(shapeX[0]) if not isImagedCells else aveX/float(len(imagedCells))
-ax.plot(t/1000., aveX, 'g', linewidth=3.0, label='average all')
+ax.plot(t/1000., aveX, 'tab:green', linewidth=3.0, label='average all')
 maxCa = max(np.max(X),maxCa)
 # plot the rest if splitted into batches
 if nBatch>0:
@@ -139,13 +139,13 @@ if nBatch>0:
         for i in xrange(len(X)):
             if isImagedCells:
                 if (i not in hubList) and (i in imagedCells):
-                    ax.plot(t/1000., X[i], 'k', alpha=0.3)
+                    ax.plot(t/1000., X[i], 'tab:grey', alpha=0.3)
                     aveX += X[i]
         for i in np.array(hubList)[np.array(hubList)>0]:
-            ax.plot(t/1000., X[i], 'r')
+            ax.plot(t/1000., X[i], 'tab:red')
             aveX += X[i]
         aveX = aveX/float(shapeX[0]) if not isImagedCells else aveX/float(len(imagedCells))
-        ax.plot(t/1000., aveX, 'g', linewidth=3.0)
+        ax.plot(t/1000., aveX, 'tab:green', linewidth=3.0)
 
 
 
@@ -221,13 +221,13 @@ if nBatch>0:
         for i in xrange(len(X)):
             if isImagedCells:
                 if (i not in hubList) and (i in imagedCells):
-                    ax2.plot(t/1000., X[i], 'k', alpha=0.3)
+                    ax2.plot(t/1000., X[i], 'tab:grey', alpha=0.3)
                     aveX += X[i]
         for i in np.array(hubList)[np.array(hubList)>0]:
-            ax2.plot(t/1000., X[i], 'r')
+            ax2.plot(t/1000., X[i], 'tab:red')
             aveX += X[i]
         aveX = aveX/float(shapeX[0]) if not isImagedCells else aveX/float(len(imagedCells))
-        ax2.plot(t/1000., aveX, 'g', linewidth=3.0)
+        ax2.plot(t/1000., aveX, 'tab:green', linewidth=3.0)
 
 
 
