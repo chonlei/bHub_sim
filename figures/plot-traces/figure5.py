@@ -7,7 +7,8 @@ import sys
 import os
 import glob
 
-CASE=101
+CASE=5
+CASE2=1
 
 
 ## figure setup
@@ -18,12 +19,12 @@ params = {
    'xtick.labelsize': 12,
    'ytick.labelsize': 12,
    'text.usetex': False,
-   'figure.figsize': [4.5, 4.5]
+   'figure.figsize': [9, 4.5]
    }
 plt.rcParams.update(params)
 
-fig = plt.figure(figsize=(18, 4.5))
-ax = fig.add_subplot(1, 1, 1)
+f, (ax, ax2) = plt.subplots(2, sharex=True, sharey=False)
+f.subplots_adjust(hspace=0)
 
 
 # setup data
@@ -38,7 +39,7 @@ except Exception:
 try:
     nBatch = int(sys.argv[3])
 except Exception:
-    nBatch = 65 #len(glob.glob("case%s/*"%CASE)) - 3
+    nBatch = 75 #len(glob.glob("case%s/*"%CASE)) - 3
 
 if fileName == None:
     allfiles=glob.glob("case%s/*"%CASE)
@@ -140,19 +141,96 @@ if nBatch>0:
                 if (i not in hubList) and (i in imagedCells):
                     ax.plot(t/1000., X[i], 'k', alpha=0.3)
                     aveX += X[i]
-            else:
-                if i not in hubList:
-                    ax.plot(t/1000., X[i], 'k', alpha=0.3)
-                    aveX += X[i]
         for i in np.array(hubList)[np.array(hubList)>0]:
             ax.plot(t/1000., X[i], 'r')
             aveX += X[i]
-        ax.plot(t/1000., X[i], 'r')
         aveX = aveX/float(shapeX[0]) if not isImagedCells else aveX/float(len(imagedCells))
         ax.plot(t/1000., aveX, 'g', linewidth=3.0)
-        maxCa = max(np.max(X),maxCa)
 
-maxCa=0
+
+
+
+
+###############################################################################
+if True:
+    allfiles=glob.glob("case%s/*"%CASE2)
+    fileName = [a for a in allfiles if "_p_0_" in a][0]
+fileDir = os.path.dirname(fileName)
+fileBase = os.path.basename(fileName)
+fileIdx = re.findall(".*model_(\d+)_morphology_(\d+)_seed_(\d+)_mode_(\d+)_.*",fileName)
+fileId = "model_%s_morphology_%s_seed_%s_mode_%s"%fileIdx[0]
+mode = int(fileIdx[0][3])
+shape = re.findall('.*_(\w+)x(\w+)\.dat',fileName)[0]
+shapeX = (int(shape[0]),int(shape[1]))
+nBatch += 1
+if nBatch>0:
+    filePrefix,startBatch = re.findall("(.*)_p_(\d+)_.*",fileName)[0]
+    fileNameBatch = []
+    shapeXBatch = []
+    for i in range(1,nBatch+1):
+        getBatch = int(startBatch)+i
+        tempfilename = glob.glob(filePrefix+"_p_%d_*"%getBatch)[0]
+        tempshape = re.findall('.*_(\w+)x(\w+)\.dat',tempfilename)[0]
+        shapeXBatch.append((int(tempshape[0]),int(tempshape[1])))
+        fileNameBatch.append(tempfilename)
+#varName = r"[Ca]$_i$ [$\mu$M]" if "Ca" in fileName else r"$V_m$ [mV]"
+
+             
+# hubList (if have)
+try:
+    hubList = np.loadtxt(os.path.join(fileDir,fileId+'.log'),delimiter=',',dtype=int)
+except Exception:
+    hubList = []
+
+# get only imaged cells (if applicable)
+if isImagedCells:
+    imagedCells = []
+    startName = "#imagedCells = "
+    with open(os.path.join(fileDir,fileId+'.log'),"r") as fi:
+        for ln in fi:
+            if ln.startswith(startName):
+                imagedCells = ln[len(startName):]
+    imagedCells = [int(x.strip()) for x in imagedCells.split(',')]
+    imagedHubs = []
+    startName = "#imagedHubs = "
+    with open(os.path.join(fileDir,fileId+'.log'),"r") as fi:
+        for ln in fi:
+            if ln.startswith(startName):
+                imagedHubs = ln[len(startName):]
+    imagedHubs = [int(x.strip()) for x in imagedHubs.split(',')]
+    hubList = imagedHubs
+
+
+####################################
+# main plot
+t = [0]
+# main plot
+aveX = np.zeros(X[0].shape)
+maxCa = 0
+# plot the rest if splitted into batches
+Xall = np.zeros((len(imagedCells),shapeXBatch[0][1]*nBatch))
+tall = np.zeros(shapeXBatch[0][1]*nBatch)
+if nBatch>0:
+    for iBatch in range(nBatch):
+        counter = 0
+        shapeX = shapeXBatch[iBatch]
+        X = np.memmap(fileNameBatch[iBatch], dtype='float64', mode='r', shape=shapeX)*1000.
+        t = np.arange(t[-1],t[-1]+shapeX[1]*tstep,tstep)  # account dt
+        tall[iBatch*shapeX[1]:(iBatch+1)*shapeX[1]] = t
+        aveX = np.zeros(X[0].shape)
+        for i in xrange(len(X)):
+            if isImagedCells:
+                if (i not in hubList) and (i in imagedCells):
+                    ax2.plot(t/1000., X[i], 'k', alpha=0.3)
+                    aveX += X[i]
+        for i in np.array(hubList)[np.array(hubList)>0]:
+            ax2.plot(t/1000., X[i], 'r')
+            aveX += X[i]
+        aveX = aveX/float(shapeX[0]) if not isImagedCells else aveX/float(len(imagedCells))
+        ax2.plot(t/1000., aveX, 'g', linewidth=3.0)
+
+
+
 
 # show where silencing is applied
 if mode!=0:
@@ -174,23 +252,19 @@ if mode!=0:
         if maxCa>0.0005:
             rect_y = (0.95,0.01) if "Ca" in fileName else (-5, 1)
         else:
-            rect_y = (0.485,0.005) if "Ca" in fileName else (-5, 1)
+            rect_y = (0.5,0.015) if "Ca" in fileName else (-5, 1)
         ax.add_patch(patches.Rectangle( (silenceStart,rect_y[0]), silenceDur, rect_y[1] , alpha=0.6))
     except Exception:
         pass
 
 
 # plotting setup
-ax.set_xlabel("t [s]")
+ax2.set_xlabel("t [s]")
 ax.set_ylabel(varName)
+ax2.set_ylabel(varName)
+ax.set_ylim([0.05, 0.55])
+ax2.set_ylim([0.05, 0.55])
 
-if "Ca" in fileName:
-    if maxCa>0.0005:
-        ax.set_ylim([0, 1.0])
-    else:
-        ax.set_ylim([0, 0.5])
-else:
-    ax.set_ylim([-100.0, 0.0])
 
 ax.set_xlim([0.0, 350])
 '''
@@ -200,8 +274,8 @@ frame = legend.get_frame()
 frame.set_facecolor('0.9')
 frame.set_edgecolor('0.9')
 '''
-plt.savefig("../figures/trace-%d.png"%CASE,bbox_inches='tight')
-plt.savefig("../figures/trace-%d.pdf"%CASE,format='pdf',bbox_inches='tight')
+plt.savefig("../figures/trace2-%d.png"%CASE,bbox_inches='tight')
+plt.savefig("../figures/trace2-%d.pdf"%CASE,format='pdf',bbox_inches='tight')
 
 plt.show()
 
