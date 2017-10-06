@@ -317,7 +317,7 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
     if species==0:
         pathToMorphology = "../morphologies/mouse/Mouse 40-%d.txt"%morphology
     elif species==1:
-        pathToMorphology = ""
+        pathToMorphology = "../morphologies/human/H4-1-%d.txt"%morphology
     elif species==2:
         pathToMorphology = "../morphologies/cubic_lattice/cubic%d.txt"%morphology
 
@@ -331,7 +331,10 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
     ######
     CoorData = np.loadtxt(pathToMorphology)
     # process CoorData to be acceptable format in modelSetup.genCoupleMatrix()
-    CoorData = CoorData[CoorData[:,0]==11][:,1:4]
+    if species==1 and morphology>3:
+        CoorData = CoorData[CoorData[:,0]==2][:,1:4]
+    else:
+        CoorData = CoorData[CoorData[:,0]==11][:,1:4]
     CoupledMatrix = modelSetup.genCoupleMatrix(CoorData,dthres,isletsize,True)
     tempCoupledMatrix = CoupledMatrix + CoupledMatrix.T
     ncells = CoupledMatrix.shape[0]
@@ -532,13 +535,13 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
                         HetGjMatrix[i,j] = ggaphub*7.0/np.sum(tempCoupledMatrix[:,i]>0) * (1.0 + np.random.normal(0.0,1.0)*pggaphubstd)
                     else:
                         HetGjMatrix[i,j] = ggaphub*7.0/np.sum(tempCoupledMatrix[:,j]>0) * (1.0 + np.random.normal(0.0,1.0)*pggaphubstd)
-                gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j]))#,gjtau))
+                gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j],gjtau))
             elif CoupledMatrix[i,j] > 0 and a<p_connect: #and ((i not in nonHubsToPickList) or (j not in nonHubsToPickList)):
                 if pggapstd > 0:
                     HetGjMatrix[i,j] = max(ggap * (1.0 + np.random.normal(0.0,1.0)*pggapstd), 0)
                 else:
                     HetGjMatrix[i,j] = ggap
-                gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j]))#,gjtau))
+                gap.append(h.gapjunction(cell[i], cell[j], 0.5, 0.5, HetGjMatrix[i,j]*CoupledMatrix[i,j],gjtau))
 
 
     ######

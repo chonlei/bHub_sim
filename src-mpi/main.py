@@ -53,23 +53,47 @@ try:
     archi = int(sys.argv[4])
 except Exception:
     archi = 1
+try:
+    gjm = int(sys.argv[5])
+except Exception:
+    gjm = 1
+try:
+    gjhub = float(sys.argv[6])
+except Exception:
+    gjhub = 0.02
+try:
+    gjnonhub = float(sys.argv[7])
+except Exception:
+    gjnonhub = 0.02
+try:
+    mor = int(sys.argv[8])
+except Exception:
+    mor = 0
+try:
+    isAct = int(sys.argv[9])
+except Exception:
+    isAct = 1
+try:
+    stepsizer = int(sys.argv[9])
+except Exception:
+    stepsizer = 5
 
 modelParam = {'model' : 5, \
-              'gjmodel' : 1, \
+              'gjmodel' : gjm, \
               'morphology' : archi, \
-              'species' : 0, \
+              'species' : mor, \
               'pyseed' : pyseed, \
               'isImitateExp' : 1, \
               'mode' : modee, \
               'silenceStart' : 150e3, \
               'silenceDur' : 250e3, \
               'silenceAmp' : -100.0, \
-              'pHubs' : 0.2, \
+              'pHubs' : 0.1, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
-              'ggap' : 0.02, \
-              'ggaphub' : 0.02, \
-              'pggaphubstd' : 0.7, \
+              'ggap' : gjnonhub, \
+              'ggaphub' : gjhub, \
+              'pggaphubstd' : 0.1, \
               'pggapstd' : 0.7, \
               'gjtau' : 400.0, \
               'p_connect': 1, \
@@ -85,6 +109,7 @@ modelParam = {'model' : 5, \
 # model 1 default: {'beta':{} , 'betahub':{'hubkatp':-5.8}}
 # model 2 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None} , 'betahub':{'hubgkatp':10}}
 # model 3 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None , 'applytime':5e3} , 'betahub':{'hubgkatp':10 , 'applytime':5e3}}
+#modelParam['model_kwargs'] = {'beta':{'gkatp':(6.0,7.0) , 'useDistribution':'sq'} , 'betahub':{'hubgkatp':11.0}}
 modelParam['model_kwargs'] = {'beta':{'glu':(6.0,7.0) , 'useDistribution':'sq' , 'applytime':50e3} , \
                               'betahub':{'hubglu':11.0 , 'applytime':50e3}}
 
@@ -108,8 +133,11 @@ def main(comm,modelParam,outputdir):
     rank = comm.Get_rank()
     modelParam['subidx'] = rank
     # setup what each sub simulation does
-    #modelParam['pHubs'] = 10*rank
-    tempParam = rank*6 #rank+1 #(12*rank+30)/2 #
+    if isAct == 1:
+        modelParam['pHubs'] = 10*rank
+        modelParam['silenceStart'] = 350e3
+        modelParam['tstop'] = 360e3
+    tempParam = rank*stepsizer #rank+1 #(12*rank+30)/2 #
     # check they are doing right thing
     #print("RANK %d of SIZE %d is doing the right job..."%(rank,size))
     simulator.main(modelParam,tempParam=tempParam)
