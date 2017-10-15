@@ -20,16 +20,16 @@ MPI_HOSTS=" -np "$SLURM_NTASKS" -hosts "$HOST_LIST""
 cd ${HOME}/bHub_sim/src-mpi
 
 # create output directory
-$OUTPUTINDEX=1
+OUTPUTINDEX=1
 outputdir=$(python outputSetup.py ${DATA}/output/ ${OUTPUTINDEX} >&1)
 # run main simulations
-$SEED=1
-$MODE=1
-$ISLET=1
-$GJMODEL=2
-$GJHUB=0.05
-$GJNONHUB=0.01
-$SPECIES=0
-$ISACT=0
-$NHUB=3
+SEED=1
+MODE=1
+ISLET=1
+GJMODEL=2
+GJHUB=0.05
+GJNONHUB=0.01
+SPECIES=0
+ISACT=0
+NHUB=3
 mpirun $MPI_HOSTS python main.py ${outputdir} $SEED $MODE $ISLET $GJMODEL $GJHUB $GJNONHUB $SPECIES $ISACT $NHUB
