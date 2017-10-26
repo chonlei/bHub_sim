@@ -6,7 +6,7 @@
 # $4 : isImitateExp
 # $5 : number of simulation batches
 
-pathtofiles="/home/scratch/output_bHub_arcus"
+pathtofiles="/data/coml-islet-simulations/univ4198-islet/output"
 out="outplot"
 #mkdir $pathtofiles/sim$1/$out
 for subidx in $( seq 0 $2 )
