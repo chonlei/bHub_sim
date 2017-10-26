@@ -74,7 +74,7 @@ try:
 except Exception:
     isAct = 1
 try:
-    stepsizer = int(sys.argv[9])
+    stepsizer = int(sys.argv[10])
 except Exception:
     stepsizer = 5
 
