@@ -5,6 +5,7 @@
 # $3 : first Ca .dat file
 # $4 : isImitateExp
 # $5 : number of simulation batches
+# $6 : number of hub per increment
 
 pathtofiles="/data/coml-islet-simulations/univ4198-islet/output"
 out="outplot"
@@ -13,7 +14,7 @@ for subidx in $( seq 0 $2 )
 do
 	echo plotting subidx $subidx
 	# python plotTraces.py $pathtofiles/sim$1/subsim$subidx/$3 $4 $5
-	python getS2.py $pathtofiles/sim$1/subsim$subidx/$3 $4 $5 $subidx $1
+	python getS2.py $pathtofiles/sim$1/subsim$subidx/$3 $4 $5 $subidx $1 $6
 	#mv $pathtofiles/sim$1/subsim$subidx/image* $pathtofiles/sim$1/$out/sim${subidx}i.png
 	#mv $pathtofiles/sim$1/subsim$subidx/whole* $pathtofiles/sim$1/$out/sim${subidx}w.png
 done

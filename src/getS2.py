@@ -161,6 +161,7 @@ if mode!=0:
 
 ####################################
 idxx=int(sys.argv[4])
+stepsizehub=int(sys.argv[6])
 #np.savetxt("tmp%d.txt"%idxx,XX)
 
 
@@ -177,7 +178,7 @@ minxx1 = np.min(XX1)
 XX1 -= minxx1
 outpercent = np.mean(XX1)
 
-inhibPer = idxx*6./np.float(len(hubList))*100.
+inhibPer = idxx*stepsizehub/np.float(len(hubList))*100.
 nameid = sys.argv[5]
 with open("sim%s.txt"%nameid, 'a') as f:
     f.write("%f %f \n"%(inhibPer,outpercent))
