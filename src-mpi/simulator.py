@@ -331,10 +331,10 @@ def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
     ######
     CoorData = np.loadtxt(pathToMorphology)
     # process CoorData to be acceptable format in modelSetup.genCoupleMatrix()
-    if species==1 and morphology>3:
-        CoorData = CoorData[CoorData[:,0]==2][:,1:4]
-    else:
-        CoorData = CoorData[CoorData[:,0]==11][:,1:4]
+    #if species==1 and morphology>3:
+    #    CoorData = CoorData[CoorData[:,0]==2][:,1:4]
+    #else:
+    CoorData = CoorData[CoorData[:,0]==11][:,1:4] # assume all use `11' as beta cell
     CoupledMatrix = modelSetup.genCoupleMatrix(CoorData,dthres,isletsize,True)
     tempCoupledMatrix = CoupledMatrix + CoupledMatrix.T
     ncells = CoupledMatrix.shape[0]
