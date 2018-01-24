@@ -138,9 +138,11 @@ if nBatch>0:
                 if i not in hubList:
                     ax.plot(t/1000., X[i], 'k', alpha=0.3)
                     aveX += X[i]
+
+np.savetxt('figure3a_raw_top.txt', Xall)
 Xall[Xall>0.2] = 1
 Xall[Xall<1] = 0
-np.savetxt('figure3a_top.txt', Xall.astype(int), fmt='%i')
+np.savetxt('figure3a_raster_top.txt', Xall.astype(int), fmt='%i')
 ax.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,99,0])
 
 
@@ -200,9 +202,10 @@ if nBatch>0:
                     ax.plot(t/1000., X[i], 'k', alpha=0.3)
                     aveX += X[i]
 
+np.savetxt('figure3a_raw_bottom.txt', Xall)
 Xall[Xall>0.2] = 1
 Xall[Xall<1] = 0
-np.savetxt('figure3a_bottom.txt', Xall.astype(int), fmt='%i')
+np.savetxt('figure3a_raster_bottom.txt', Xall.astype(int), fmt='%i')
 ax2.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,99,0])
 
 
