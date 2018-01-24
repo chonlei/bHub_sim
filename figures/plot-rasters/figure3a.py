@@ -140,6 +140,7 @@ if nBatch>0:
                     aveX += X[i]
 Xall[Xall>0.2] = 1
 Xall[Xall<1] = 0
+np.savetxt('figure3a_top.txt', Xall.astype(int), fmt='%i')
 ax.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,99,0])
 
 
@@ -201,6 +202,7 @@ if nBatch>0:
 
 Xall[Xall>0.2] = 1
 Xall[Xall<1] = 0
+np.savetxt('figure3a_bottom.txt', Xall.astype(int), fmt='%i')
 ax2.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,99,0])
 
 
