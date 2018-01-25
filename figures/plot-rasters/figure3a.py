@@ -38,7 +38,7 @@ except Exception:
 try:
     isImagedCells = bool(int(sys.argv[2]))
 except Exception:
-    isImagedCells = True
+    isImagedCells = False
 try:
     nBatch = int(sys.argv[3])
 except Exception:
@@ -92,6 +92,7 @@ except Exception:
     hubList = []
 
 # get only imaged cells (if applicable)
+imagedCells = range(shapeX[0])
 if isImagedCells:
     imagedCells = []
     startName = "#imagedCells = "
@@ -135,15 +136,15 @@ if nBatch>0:
                     Xall[counter,iBatch*shapeX[1]:(iBatch+1)*shapeX[1]] = X[i]
                     counter+=1
             else:
-                if i not in hubList:
-                    ax.plot(t/1000., X[i], 'k', alpha=0.3)
-                    aveX += X[i]
+                if True:
+                    Xall[counter,iBatch*shapeX[1]:(iBatch+1)*shapeX[1]] = X[i]
+                    counter+=1
 
 np.savetxt('figure3a_raw_top.txt', Xall)
 Xall[Xall>0.2] = 1
 Xall[Xall<1] = 0
 np.savetxt('figure3a_raster_top.txt', Xall.astype(int), fmt='%i')
-ax.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,99,0])
+ax.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,500,0])
 
 
 
@@ -198,15 +199,15 @@ if nBatch>0:
                     Xall[counter,iBatch*shapeX[1]:(iBatch+1)*shapeX[1]] = X[i]
                     counter+=1
             else:
-                if i not in hubList:
-                    ax.plot(t/1000., X[i], 'k', alpha=0.3)
-                    aveX += X[i]
+                if True:
+                    Xall[counter,iBatch*shapeX[1]:(iBatch+1)*shapeX[1]] = X[i]
+                    counter+=1
 
 np.savetxt('figure3a_raw_bottom.txt', Xall)
 Xall[Xall>0.2] = 1
 Xall[Xall<1] = 0
 np.savetxt('figure3a_raster_bottom.txt', Xall.astype(int), fmt='%i')
-ax2.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,99,0])
+ax2.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,500,0])
 
 
 
