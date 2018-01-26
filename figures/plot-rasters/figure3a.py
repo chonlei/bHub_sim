@@ -8,7 +8,7 @@ import os
 import glob
 
 CASE=6
-CASE2=61
+CASE2=1801260107#61
 
 
 ## figure setup
@@ -25,7 +25,7 @@ plt.rcParams.update(params)
 
 #fig = plt.figure(figsize=(13.5, 4.5))
 #ax = fig.add_subplot(1, 1, 1)
-f, (ax, ax2) = plt.subplots(2, sharex=True, sharey=False)
+f, (ax, ax2, ax3) = plt.subplots(3, sharex=True, sharey=False)
 f.subplots_adjust(hspace=0)
 
 
@@ -149,7 +149,7 @@ ax.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,5
 
 
 
-
+## During inhibition
 ###############################################################################
 if True:
     allfiles=glob.glob("case%s/*"%CASE2)
@@ -203,11 +203,76 @@ if nBatch>0:
                     Xall[counter,iBatch*shapeX[1]:(iBatch+1)*shapeX[1]] = X[i]
                     counter+=1
 
+np.savetxt('figure3a_raw_middle.txt', Xall)
+Xall[Xall>0.2] = 1
+Xall[Xall<1] = 0
+np.savetxt('figure3a_raster_middle.txt', Xall.astype(int), fmt='%i')
+ax2.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,500,0])
+
+
+
+
+
+## Recovery
+###############################################################################
+if True:
+    allfiles=glob.glob("case%s/*"%CASE2)
+    fileName = [a for a in allfiles if "_p_118_" in a][0]
+fileDir = os.path.dirname(fileName)
+fileBase = os.path.basename(fileName)
+fileIdx = re.findall(".*model_(\d+)_morphology_(\d+)_seed_(\d+)_mode_(\d+)_.*",fileName)
+fileId = "model_%s_morphology_%s_seed_%s_mode_%s"%fileIdx[0]
+mode = int(fileIdx[0][3])
+shape = re.findall('.*_(\w+)x(\w+)\.dat',fileName)[0]
+shapeX = (int(shape[0]),int(shape[1]))
+#nBatch += 1
+if nBatch>0:
+    filePrefix,startBatch = re.findall("(.*)_p_(\d+)_.*",fileName)[0]
+    fileNameBatch = []
+    shapeXBatch = []
+    for i in range(1,nBatch+1):
+        getBatch = int(startBatch)+i
+        tempfilename = glob.glob(filePrefix+"_p_%d_*"%getBatch)[0]
+        tempshape = re.findall('.*_(\w+)x(\w+)\.dat',tempfilename)[0]
+        shapeXBatch.append((int(tempshape[0]),int(tempshape[1])))
+        fileNameBatch.append(tempfilename)
+#varName = r"[Ca]$_i$ [$\mu$M]" if "Ca" in fileName else r"$V_m$ [mV]"
+
+####################################
+# main plot
+t = [0]
+# main plot
+aveX = np.zeros(X[0].shape)
+maxCa = 0
+# plot the rest if splitted into batches
+Xall = np.zeros((len(imagedCells),shapeXBatch[0][1]*nBatch))
+tall = np.zeros(shapeXBatch[0][1]*nBatch)
+if nBatch>0:
+    for iBatch in range(nBatch):
+        counter = 0
+        shapeX = shapeXBatch[iBatch]
+        X = np.memmap(fileNameBatch[iBatch], dtype='float64', mode='r', shape=shapeX)*1000.
+        t = np.arange(t[-1],t[-1]+shapeX[1]*tstep,tstep)  # account dt
+        tall[iBatch*shapeX[1]:(iBatch+1)*shapeX[1]] = t
+        aveX = np.zeros(X[0].shape)
+        for i in xrange(len(X)):
+            if isImagedCells:
+                if (i in imagedCells):
+                    #ax.plot(t/1000., X[i], 'k', alpha=0.3)
+                    #aveX += X[i]
+                    Xall[counter,iBatch*shapeX[1]:(iBatch+1)*shapeX[1]] = X[i]
+                    counter+=1
+            else:
+                if True:
+                    Xall[counter,iBatch*shapeX[1]:(iBatch+1)*shapeX[1]] = X[i]
+                    counter+=1
+
 np.savetxt('figure3a_raw_bottom.txt', Xall)
 Xall[Xall>0.2] = 1
 Xall[Xall<1] = 0
 np.savetxt('figure3a_raster_bottom.txt', Xall.astype(int), fmt='%i')
-ax2.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,500,0])
+ax3.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,500,0])
+
 
 
 
@@ -215,9 +280,10 @@ ax2.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,
 
 
 # plotting setup
-ax2.set_xlabel("t [s]")
+ax3.set_xlabel("t [s]")
 ax.set_ylabel(r"cell index")
 ax2.set_ylabel(r"cell index")
+ax3.set_ylabel(r"cell index")
 
 #ax.set_ylim([0.05, 0.45])
 #ax2.set_ylim([0.05, 0.45])
