@@ -8,7 +8,7 @@ import os
 import glob
 
 CASE=6
-CASE2=1801260107#61
+CASE2=1801260513#61
 
 
 ## figure setup
