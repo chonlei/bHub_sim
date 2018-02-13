@@ -1,0 +1,36 @@
+// Cell Template
+// High glucose condition
+// RAND parameter values
+
+// chdir("H:/models/islet_model/mod")
+
+// nrn_load_dll("nrnmech.dll")
+
+// load_file("nrngui.hoc")
+
+begintemplate deltacell
+public soma
+create soma
+
+proc init() {
+    create soma
+
+    soma {
+	nseg=1 
+	L=20
+	insert morphology {diam=40}
+	insert na_ion {ena=60}
+	insert ca_ion {eca=65}
+	insert k_ion {ek=-75}
+	insert capacitance {cm=4}
+	insert nadel {gbar_nadel=11e-2}
+	insert kadel {gbar_kadel=1.2e-2}
+	insert kdrdel {gbar_kdrdel=4.5e-2}
+	insert caldel {gbar_caldel=0.65e-2}
+	insert candel {gbar_candel=0.3e-2}
+	insert catdel {gbar_catdel=0.05e-2}
+	insert pas {e_pas=-40 g_pas=0.02e-2}
+	insert rel {b_rel=1e15}
+	}
+	}
+endtemplate deltacell
