@@ -39,7 +39,7 @@ isImitateExp # if True, simulate whole islet but only analyse imaged cells
 mode # 0: WT; 1: silent hubs; 2: silent non hubs; 3: inject current to delta cells
 silenceStart  # I clamp hubs to silence them, compare results from Johnston et al., 2016
 silenceDur
-silenceAmp #-100#mV  #-0.005#uA # if model=3, this will apply to delta cells
+silenceAmp #-100#mV  #-0.005#uA # if mode=3, this will apply to delta cells
 pHubs  # percentage/fraction of hubs in islet (if <1) else number of hubs in islet (i.e. >1)
 methodToPickHubs  # 0: random; 1: top GJ links; 2: bottom GJ links; 3: next to delta cells
 whichHub # indix of imaged hub/non-hub to silence
@@ -61,8 +61,8 @@ modelParam = {'model' : 5, \
               'morphology' : 5, \
               'species' : 1, \
               'pyseed' : 11, \
-              'isImitateExp' : 0, \
-              'mode' : 2, \
+              'isImitateExp' : 1, \
+              'mode' : 3, \
               'silenceStart' : 250e3, \
               'silenceDur' : 250e3, \
               'silenceAmp' : -0.005, \
@@ -147,7 +147,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         subidx = modelParam['subidx']
         outputidx, outputdir = modelSetup.outputSetup_sub(model,morphology,pyseed,mode,parentout,subidx)
     except Exception:
-        outputidx, outputdir = modelSetup.outputSetup(model,morphology,pyseed,mode)
+        outputidx, outputdir = modelSetup.outputSetup(model,morphology,pyseed,mode, isTest=True)
     outlog = path.join(outputdir, outputidx+'.log')
     outCa = path.join(outputdir, 'Ca_'+outputidx)
     outVm = path.join(outputdir, 'Vm_'+outputidx)
@@ -341,12 +341,16 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     ######
     ## Import system setup files (.hoc files and system matrix)
     ######
-    CoorData = np.loadtxt(pathToMorphology)
+    CoorDataTmp = np.loadtxt(pathToMorphology)
     # process CoorData to be acceptable format in modelSetup.genCoupleMatrix()
-    if species==1 and morphology>3:
-        CoorData = CoorData[CoorData[:,0]==2][:,1:4]
+    if mode==3: #species==1 and morphology>3:
+        CoorData = CoorDataTmp[np.abs(CoorDataTmp[:,0]-11)<0.1][:,1:4]
         # Load delta cells' coordinates
-        DeltaCoorData = CoorData[CoorData[:,0]==6][:,1:4]
+        DeltaCoorData = CoorDataTmp[np.abs(CoorDataTmp[:,0]-6)<0.1][:,1:4]
+        # Control the number of delta cells
+        temp = range(len(DeltaCoorData))
+        random.shuffle(temp)
+        DeltaCoorData = DeltaCoorData[temp[0:50],:]  # say 50 of delta cells
         # Begin: Work out the coupling matrix for delta cells and beta cells
         # (row for delta cell index and column for beta cell index)
         DeltaCoupledMatrix = np.zeros([np.shape(DeltaCoorData)[0], np.shape(CoorData)[0]])
@@ -362,7 +366,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         # Return: HubListByDeltaCell, DeltaCoupledMatrix
         ndeltacells = DeltaCoupledMatrix.shape[0]
     else:
-        CoorData = CoorData[CoorData[:,0]==11][:,1:4] # assume all use `11' as beta cell
+        CoorData = CoorDataTmp[CoorDataTmp[:,0]==11][:,1:4] # assume all use `11' as beta cell
     CoupledMatrix = modelSetup.genCoupleMatrix(CoorData,dthres,isletsize,True)
     tempCoupledMatrix = CoupledMatrix + CoupledMatrix.T
     ncells = CoupledMatrix.shape[0]
@@ -387,9 +391,12 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         h.load_file (pathToModel+"betahub.hoc")
         h.load_file (pathToModel+"betacell.hoc")
         h.load_file (pathToGJModel+"gapjunction.hoc")
+    except Exception:
+        raise Exception("Please make sure files has been compiled using \n$ nrnivmodl\n")
+    try:
         # add delta cell
         h('nrn_load_dll("%sx86_64/.libs/libnrnmech.so")'%'./deltacell/')
-        h.load_file (sys.path.join('./deltacell', 'deltacell.hoc'))
+        h.load_file (path.join('./deltacell', 'deltacell.hoc'))
     except Exception:
         raise Exception("Please make sure files has been compiled using \n$ nrnivmodl\n")
 
@@ -408,7 +415,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         if hubsList_temp!=None and hubsList_temp!=[]:
             hubsList = hubsList_temp
     else: # Pick hubs base on delta cell
-        hubsList = HubListByDeltaCell
+        hubsList = list(HubListByDeltaCell)
         if len(HubListByDeltaCell) > numHubs:
             print('Warning: the number of beta hub cells defined by delta ' +
                     '(%d) '%len(HubListByDeltaCell) +
@@ -420,7 +427,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
                 while temp.count(hub_by_delta) > 0:
                         temp.remove(hub_by_delta)
             random.shuffle(temp)
-            hubsList += temp[0:(numHubs-HubListByDeltaCell)]
+            hubsList += temp[0:(numHubs-len(HubListByDeltaCell))]
     if False:
         truehub = hubsList[0]
         #truehub2 = hubsList[1]
