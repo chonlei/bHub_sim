@@ -63,7 +63,7 @@ modelParam = {'model' : 5, \
               'pyseed' : 11, \
               'isImitateExp' : 1, \
               'mode' : 3, \
-              'silenceStart' : 250e3, \
+              'silenceStart' : 200e3, \
               'silenceDur' : 250e3, \
               'silenceAmp' : -0.005, \
               'pHubs' : 0.1, \
@@ -151,6 +151,8 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     outlog = path.join(outputdir, outputidx+'.log')
     outCa = path.join(outputdir, 'Ca_'+outputidx)
     outVm = path.join(outputdir, 'Vm_'+outputidx)
+    outDeltaCa = path.join(outputdir, 'DeltaCa_'+outputidx)
+    outDeltaVm = path.join(outputdir, 'DeltaVm_'+outputidx)
     # save modelParam
     with open(path.join(outputdir,'modelParam.pkl'), 'wb') as f:
         pickle.dump(modelParam, f, pickle.HIGHEST_PROTOCOL)
@@ -639,11 +641,18 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     t.record(h._ref_t)
     vrec = []
     carec = []
+    deltavrec = []
+    deltacarec = []
     for i in range(ncells):
         vrec.append(h.Vector())
         carec.append(h.Vector())
         vrec[i].record(cell[i].soma(0.5)._ref_v)
         carec[i].record(cell[i].soma(0.5)._ref_cai)
+    for i in range(ndeltacells):
+        deltavrec.append(h.Vector())
+        deltacarec.append(h.Vector())
+        deltavrec[i].record(delta_cell[i].soma(0.5)._ref_v)
+        deltacarec[i].record(delta_cell[i].soma(0.5)._ref_cai)
 
 
     ######
@@ -684,6 +693,12 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         # exporting Vm time series
         tosave = modelSetup.convertSimOutput(vrec,downSampling,reuse=True)
         modelSetup.savedat(outVm,tosave,'Vm',outlog,idx=i)
+        # exporting Vm time series
+        tosave = modelSetup.convertSimOutput(deltacarec,downSampling,reuse=True)
+        modelSetup.savedat(outDeltaCa,tosave,'DeltaCa',outlog,idx=i)
+        # exporting Vm time series
+        tosave = modelSetup.convertSimOutput(deltavrec,downSampling,reuse=True)
+        modelSetup.savedat(outDeltaVm,tosave,'DeltaVm',outlog,idx=i)
         print("Finished section %d out of %d."%(i+1,nbatch))
     if tremain > 0:
         print("Running final section...")
@@ -695,6 +710,12 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         # exporting Vm time series
         tosave = modelSetup.convertSimOutput(vrec,downSampling,reuse=True)
         modelSetup.savedat(outVm,tosave,'Vm',outlog,idx=i+1)
+        # exporting Vm time series
+        tosave = modelSetup.convertSimOutput(deltacarec,downSampling,reuse=True)
+        modelSetup.savedat(outDeltaCa,tosave,'DeltaCa',outlog,idx=i+1)
+        # exporting Vm time series
+        tosave = modelSetup.convertSimOutput(deltavrec,downSampling,reuse=True)
+        modelSetup.savedat(outDeltaVm,tosave,'DeltaVm',outlog,idx=i+1)
     print("Simulation completed! :)")
     print("*************************")
 
