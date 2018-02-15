@@ -48,7 +48,7 @@ except Exception:
 try:
     modee = int(sys.argv[3])
 except Exception:
-    modee = 1
+    modee = 3
 try:
     archi = int(sys.argv[4])
 except Exception:
