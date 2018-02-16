@@ -669,7 +669,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     print("Dividing simulation into %d batches..."%nbatch)
     tremain = tstop%tbatch  # remaining simulation time after nbatch
     for i in xrange(nbatch):
-        if temptstop >= silenceStart:
+        if temptstop >= silenceStart and False:
            for iclamp in iclamp_hubs:
                 iclamp.rs = 0.001
         #if temptstop > 150e3:
