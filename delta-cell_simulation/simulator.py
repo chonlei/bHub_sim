@@ -63,7 +63,7 @@ modelParam = {'model' : 5, \
               'pyseed' : 11, \
               'isImitateExp' : 1, \
               'mode' : 3, \
-              'silenceStart' : 200e3, \
+              'silenceStart' : 150e3, \
               'silenceDur' : 250e3, \
               'silenceAmp' : 0.09, \
               'pHubs' : 0.1, \
@@ -78,7 +78,7 @@ modelParam = {'model' : 5, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.2, \
-              'tstop' : 500e3, \
+              'tstop' : 600e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
               'tbatch' : 5e3}
