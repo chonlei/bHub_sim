@@ -24,7 +24,7 @@ isImitateExp # if True, simulate whole islet but only analyse imaged cells
 mode # 0: WT; 1: silent hubs; 2: silent non hubs
 silenceStart  # I clamp hubs to silence them, compare results from Johnston et al., 2016
 silenceDur
-silenceAmp #-100#mV  #-0.005#uA
+silenceAmp #-100#mV  #-0.005#uA # if mode=3, this will apply to delta cells and use +0.09#uA
 pHubs  # percentage/fraction of hubs in islet (if <1) else number of hubs in islet (i.e. >1)
 methodToPickHubs  # 0: random; 1: top GJ links; 2: bottom GJ links
 whichHub # indix of imaged hub/non-hub to silence
@@ -48,7 +48,7 @@ except Exception:
 try:
     modee = int(sys.argv[3])
 except Exception:
-    modee = 1
+    modee = 3
 try:
     archi = int(sys.argv[4])
 except Exception:
@@ -91,7 +91,7 @@ modelParam = {'model' : 5, \
               'mode' : modee, \
               'silenceStart' : 150e3, \
               'silenceDur' : 250e3, \
-              'silenceAmp' : -0.001, \
+              'silenceAmp' : 0.09, \
               'pHubs' : 0.1, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
