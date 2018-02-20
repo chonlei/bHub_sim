@@ -7,8 +7,8 @@ import sys
 import os
 import glob
 
-CASE=6
-CASE2=1801260513#61
+CASE=18508
+CASE2=18508
 
 
 ## figure setup
@@ -45,7 +45,8 @@ except Exception:
     nBatch = 40 #len(glob.glob("case%s/*"%CASE)) - 3
 
 if fileName == None:
-    allfiles=glob.glob("../plot-traces/case%s/*"%CASE)
+    # allfiles=glob.glob("../plot-traces/case%s/*"%CASE)
+    allfiles=glob.glob("case%s/*"%CASE)
     fileName = [a for a in allfiles if "_p_32_" in a][0]
 fileDir = os.path.dirname(fileName)
 fileBase = os.path.basename(fileName)
@@ -110,7 +111,7 @@ if isImagedCells:
     imagedHubs = [int(x.strip()) for x in imagedHubs.split(',')]
     hubList = imagedHubs
 
-
+#'''
 ####################################
 # main plot
 aveX = np.zeros(X[0].shape)
@@ -140,15 +141,16 @@ if nBatch>0:
                     Xall[counter,iBatch*shapeX[1]:(iBatch+1)*shapeX[1]] = X[i]
                     counter+=1
 
-np.savetxt('figure3a_raw_top.txt', Xall)
+np.savetxt('figure3a_raw_top_%d.txt'%CASE2, Xall)
+print(np.max(Xall))
 Xall[Xall>0.2] = 1
 Xall[Xall<1] = 0
-np.savetxt('figure3a_raster_top.txt', Xall.astype(int), fmt='%i')
+np.savetxt('figure3a_raster_top_%d.txt'%CASE2, Xall.astype(int), fmt='%i')
 ax.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,500,0])
+#'''
 
 
-
-
+#'''
 ## During inhibition
 ###############################################################################
 if True:
@@ -174,6 +176,7 @@ if nBatch>0:
         fileNameBatch.append(tempfilename)
 #varName = r"[Ca]$_i$ [$\mu$M]" if "Ca" in fileName else r"$V_m$ [mV]"
 
+imagedCells = range(shapeX[0])
 ####################################
 # main plot
 t = [0]
@@ -203,16 +206,18 @@ if nBatch>0:
                     Xall[counter,iBatch*shapeX[1]:(iBatch+1)*shapeX[1]] = X[i]
                     counter+=1
 
-np.savetxt('figure3a_raw_middle.txt', Xall)
+np.savetxt('figure3a_raw_middle_%d.txt'%CASE2, Xall)
+print(np.max(Xall))
+#Xall[Xall>0.3*np.max(Xall)] = 1
 Xall[Xall>0.2] = 1
 Xall[Xall<1] = 0
-np.savetxt('figure3a_raster_middle.txt', Xall.astype(int), fmt='%i')
+np.savetxt('figure3a_raster_middle_%d.txt'%CASE2, Xall.astype(int), fmt='%i')
 ax2.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,500,0])
+#'''
 
 
 
-
-
+'''
 ## Recovery
 ###############################################################################
 if True:
@@ -267,12 +272,12 @@ if nBatch>0:
                     Xall[counter,iBatch*shapeX[1]:(iBatch+1)*shapeX[1]] = X[i]
                     counter+=1
 
-np.savetxt('figure3a_raw_bottom.txt', Xall)
+np.savetxt('figure3a_raw_bottom_%d.txt'%CASE2, Xall)
 Xall[Xall>0.2] = 1
 Xall[Xall<1] = 0
-np.savetxt('figure3a_raster_bottom.txt', Xall.astype(int), fmt='%i')
+np.savetxt('figure3a_raster_bottom_%d.txt'%CASE2, Xall.astype(int), fmt='%i')
 ax3.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,500,0])
-
+#'''
 
 
 
