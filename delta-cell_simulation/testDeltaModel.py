@@ -15,7 +15,7 @@ except Exception:
     raise Exception("Please properly install NEURON package: http://www.neuron.yale.edu/neuron/download")
 import numpy as np
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 import matplotlib.pylab as plt
 import random as random
 import os.path as path
@@ -63,9 +63,9 @@ modelParam = {'model' : 5, \
               'pyseed' : 11, \
               'isImitateExp' : 1, \
               'mode' : 1, \
-              'silenceStart' : 75e3, \
-              'silenceDur' : 100e3, \
-              'silenceAmp' : 0.09, \
+              'silenceStart' : 320e3, \
+              'silenceDur' : 50e3, \
+              'silenceAmp' : 0.12, \
               'pHubs' : 0.1, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
@@ -77,10 +77,10 @@ modelParam = {'model' : 5, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.1, \
-              'tstop' : 275e3, \
+              'tstop' : 600e3, \
               'dt' : 0.1 , \
-              'downSampling' : 1000, \
-              'tbatch' : 275e3}
+              'downSampling' : 10, \
+              'tbatch' : 600e3}
 
 #modelParam['model_kwargs'] = {'beta':{'gamma':(0.985,0.0) , 'useDistribution':None , 'applytime':0e3} , 'betahub':{'hubgamma':1.0 , 'applytime':0e3}}
 #modelParam['model_kwargs'] = {'beta':{'gkatp':(6.5,6.5) , 'useDistribution':'sq' , 'applytime':0e3} , 'betahub':{'hubgkatp':11.0 , 'applytime':0e3}}
@@ -600,6 +600,12 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     vm1.record (betacell.soma(0.5)._ref_v)
     ca1 = h.Vector()
     ca1.record (betacell.soma(0.5)._ref_cai)
+    t_rel = h.Vector()
+    t_rel.record (deltacell.soma(0.5)._ref_T_rel)
+    vm2 = h.Vector()
+    vm2.record (deltacell.soma(0.5)._ref_v)
+    ca2 = h.Vector()
+    ca2.record (deltacell.soma(0.5)._ref_cai)
 
     ######
     ## Main simulation
@@ -653,18 +659,34 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     print("Simulation completed! :)")
     print("*************************")
     vm1 = np.array(vm1)
+    vm2 = np.array(vm2)
     ca1 = np.array(ca1)
-    plt.plot(vm1, 'r-',label='cell1')
+    ca2 = np.array(ca2)
+    t_rel = np.array(t_rel)
+    plt.plot(np.arange(len(vm1))*1e-4, vm1, 'r-',label='b-cell')
+    plt.plot(np.arange(len(vm1))*1e-4, vm2, 'b-',label='d-cell')
     plt.legend()
-    plt.xlabel("time [ms]", fontsize=20)
+    plt.xlabel("time [s]", fontsize=20)
     plt.ylabel("V [mV]", fontsize=20)
+    plt.savefig("vm.png")
     plt.figure(2)
-    plt.plot(ca1, 'r-',label='cell1')
+    plt.plot(np.arange(len(vm1))*1e-4, ca1, 'r-',label='b-cell')
+    plt.plot(np.arange(len(vm1))*1e-4, ca2, 'b-',label='d-cell')
     plt.legend()
-    plt.xlabel("time [ms]", fontsize=20)
+    plt.xlabel("time [s]", fontsize=20)
     plt.ylabel(r"[Ca]$_i$ [mM]", fontsize=20)
-    #plt.savefig("test.png")
-    plt.show()
+    plt.savefig("ca.png")
+    plt.figure(3)
+    plt.plot(np.arange(len(vm1))*1e-4, t_rel)
+    plt.xlabel("time [s]", fontsize=20)
+    plt.ylabel(r"$T_{rel}$", fontsize=20)
+    plt.savefig("t_rel.png")
+    #plt.show()
+    np.savetxt('quicksim/vm_bcell.txt', vm1[::downSampling])
+    np.savetxt('quicksim/vm_dcell.txt', vm2[::downSampling])
+    np.savetxt('quicksim/ca_bcell.txt', ca1[::downSampling])
+    np.savetxt('quicksim/ca_dcell.txt', ca2[::downSampling])
+    np.savetxt('quicksim/t_rel_dcell.txt', t_rel[::downSampling])
 
 
     ######

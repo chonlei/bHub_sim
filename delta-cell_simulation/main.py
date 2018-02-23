@@ -89,8 +89,8 @@ modelParam = {'model' : 5, \
               'pyseed' : pyseed, \
               'isImitateExp' : 1, \
               'mode' : modee, \
-              'silenceStart' : 150e3, \
-              'silenceDur' : 250e3, \
+              'silenceStart' : 300e3, \
+              'silenceDur' : 300e3, \
               'silenceAmp' : 0.09, \
               'pHubs' : 0.1, \
               'methodToPickHubs' : 0 , \
@@ -104,7 +104,7 @@ modelParam = {'model' : 5, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.2, \
-              'tstop' : 800e3, \
+              'tstop' : 900e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
               'tbatch' : 5e3}
