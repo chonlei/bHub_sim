@@ -7,8 +7,8 @@ import sys
 import os
 import glob
 
-CASE=18508
-CASE2=18508
+CASE=1802160115
+CASE2=1802160115
 
 
 ## figure setup
@@ -47,7 +47,8 @@ except Exception:
 if fileName == None:
     # allfiles=glob.glob("../plot-traces/case%s/*"%CASE)
     allfiles=glob.glob("case%s/*"%CASE)
-    fileName = [a for a in allfiles if "_p_32_" in a][0]
+    fileName = [a for a in allfiles if "_p_10_" in a][2]
+    print(fileName)
 fileDir = os.path.dirname(fileName)
 fileBase = os.path.basename(fileName)
 fileIdx = re.findall(".*model_(\d+)_morphology_(\d+)_seed_(\d+)_mode_(\d+)_.*",fileName)
@@ -141,11 +142,13 @@ if nBatch>0:
                     Xall[counter,iBatch*shapeX[1]:(iBatch+1)*shapeX[1]] = X[i]
                     counter+=1
 
-np.savetxt('figure3a_raw_top_%d.txt'%CASE2, Xall)
+#np.savetxt('figure3a_raw_top_%d.txt'%CASE2, Xall)
+print(Xall)
 print(np.max(Xall))
-Xall[Xall>0.2] = 1
-Xall[Xall<1] = 0
-np.savetxt('figure3a_raster_top_%d.txt'%CASE2, Xall.astype(int), fmt='%i')
+#Xall[Xall>0.2*np.max(Xall)] = 1
+#Xall[Xall<1] = 0
+Xall = Xall/np.max(Xall)
+#np.savetxt('figure3a_raster_top_%d.txt'%CASE2, Xall.astype(int), fmt='%i')
 ax.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,500,0])
 #'''
 
@@ -155,7 +158,8 @@ ax.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,5
 ###############################################################################
 if True:
     allfiles=glob.glob("case%s/*"%CASE2)
-    fileName = [a for a in allfiles if "_p_32_" in a][0]
+    fileName = [a for a in allfiles if "_p_100_" in a][2]
+    print(fileName)
 fileDir = os.path.dirname(fileName)
 fileBase = os.path.basename(fileName)
 fileIdx = re.findall(".*model_(\d+)_morphology_(\d+)_seed_(\d+)_mode_(\d+)_.*",fileName)
@@ -206,12 +210,12 @@ if nBatch>0:
                     Xall[counter,iBatch*shapeX[1]:(iBatch+1)*shapeX[1]] = X[i]
                     counter+=1
 
-np.savetxt('figure3a_raw_middle_%d.txt'%CASE2, Xall)
+#np.savetxt('figure3a_raw_middle_%d.txt'%CASE2, Xall)
 print(np.max(Xall))
-#Xall[Xall>0.3*np.max(Xall)] = 1
-Xall[Xall>0.2] = 1
-Xall[Xall<1] = 0
-np.savetxt('figure3a_raster_middle_%d.txt'%CASE2, Xall.astype(int), fmt='%i')
+#Xall[Xall>0.2*np.max(Xall)] = 1
+#Xall[Xall<1] = 0
+Xall = Xall/np.max(Xall)
+#np.savetxt('figure3a_raster_middle_%d.txt'%CASE2, Xall.astype(int), fmt='%i')
 ax2.imshow(Xall,cmap='Greys',aspect='auto', interpolation='none', extent=[0,200,500,0])
 #'''
 
@@ -296,7 +300,7 @@ ax3.set_ylabel(r"cell index")
 
 
 plt.savefig("../figures/raster-%d.png"%CASE,bbox_inches='tight')
-plt.savefig("../figures/raster-%d.pdf"%CASE,format='pdf',bbox_inches='tight')
+#plt.savefig("../figures/raster-%d.pdf"%CASE,format='pdf',bbox_inches='tight')
 
 plt.show()
 
