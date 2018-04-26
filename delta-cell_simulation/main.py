@@ -24,7 +24,7 @@ isImitateExp # if True, simulate whole islet but only analyse imaged cells
 mode # 0: WT; 1: silent hubs; 2: silent non hubs
 silenceStart  # I clamp hubs to silence them, compare results from Johnston et al., 2016
 silenceDur
-silenceAmp #-100#mV  #-0.005#uA
+silenceAmp #-100#mV  #-0.005#uA # if mode=3, this will apply to delta cells and use +0.09#uA
 pHubs  # percentage/fraction of hubs in islet (if <1) else number of hubs in islet (i.e. >1)
 methodToPickHubs  # 0: random; 1: top GJ links; 2: bottom GJ links
 whichHub # indix of imaged hub/non-hub to silence
@@ -89,11 +89,11 @@ modelParam = {'model' : 5, \
               'pyseed' : pyseed, \
               'isImitateExp' : 1, \
               'mode' : modee, \
-              'silenceStart' : 150e3, \
-              'silenceDur' : 250e3, \
-              'silenceAmp' : -0.001, \
+              'silenceStart' : 300e3, \
+              'silenceDur' : 300e3, \
+              'silenceAmp' : 0.12, \
               'pHubs' : 0.1, \
-              'methodToPickHubs' : 0 , \
+              'methodToPickHubs' : 3 , \
               'whichHub' : 0 , \
               'ggap' : gjnonhub, \
               'ggaphub' : gjhub, \
@@ -104,7 +104,7 @@ modelParam = {'model' : 5, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.2, \
-              'tstop' : 800e3, \
+              'tstop' : 900e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
               'tbatch' : 5e3}
@@ -143,9 +143,9 @@ def main(comm,modelParam,outputdir):
         modelParam['tstop'] = 360e3
     #tempParam = stepstart + rank*stepsizer #rank+1 #(12*rank+30)/2 #
     # check they are doing right thing
-    modelParam['silenceAmp'] = modelParam['silenceAmp'] * (2^rank)
+    tempParam = 10 + rank * 6
     #print("RANK %d of SIZE %d is doing the right job..."%(rank,size))
-    simulator.main(modelParam)#,tempParam=tempParam)
+    simulator.main(modelParam, tempParam=tempParam)
 
 
 if __name__ == "__main__":

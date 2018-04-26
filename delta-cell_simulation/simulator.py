@@ -36,12 +36,12 @@ morphology
 species # 0: mouse; 1: human; 2: cubic lattice
 pyseed 
 isImitateExp # if True, simulate whole islet but only analyse imaged cells
-mode # 0: WT; 1: silent hubs; 2: silent non hubs; 3: inject current to delta cells
+mode # 0: WT; 1: silent hubs; 2: silent non hubs; 3: inject current to delta cells (next to hubs); 4: same as 3 but next to nonhubs
 silenceStart  # I clamp hubs to silence them, compare results from Johnston et al., 2016
 silenceDur
-silenceAmp #-100#mV  #-0.005#uA # if mode=3, this will apply to delta cells
+silenceAmp #-100#mV  #-0.005#uA # if mode=3, this will apply to delta cells and use +0.09#uA
 pHubs  # percentage/fraction of hubs in islet (if <1) else number of hubs in islet (i.e. >1)
-methodToPickHubs  # 0: random; 1: top GJ links; 2: bottom GJ links; 3: next to delta cells
+methodToPickHubs  # 0: random; 1: top GJ links; 2: bottom GJ links; 3: next to delta cells (if with mode=4, this hubs list will be swapped with nonhubs)
 whichHub # indix of imaged hub/non-hub to silence
 ggap  # model 1,2: ~1/6.*5.1*0.385*1e-4; model 3: ~0.12 [nS]
 ggaphub 
@@ -60,12 +60,12 @@ modelParam = {'model' : 5, \
               'gjmodel' : 1, \
               'morphology' : 5, \
               'species' : 1, \
-              'pyseed' : 11, \
+              'pyseed' : 1, \
               'isImitateExp' : 1, \
               'mode' : 3, \
-              'silenceStart' : 200e3, \
-              'silenceDur' : 250e3, \
-              'silenceAmp' : -0.005, \
+              'silenceStart' : 150e3, \
+              'silenceDur' : 100e3, \
+              'silenceAmp' : 0.12, \
               'pHubs' : 0.1, \
               'methodToPickHubs' : 3 , \
               'whichHub' : 0 , \
@@ -78,7 +78,7 @@ modelParam = {'model' : 5, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.2, \
-              'tstop' : 500e3, \
+              'tstop' : 400e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
               'tbatch' : 5e3}
@@ -89,7 +89,7 @@ modelParam['model_kwargs'] = {'beta':{'glu':(6.0,7.0) , 'useDistribution':'sq' ,
                               'betahub':{'hubglu':11.0 , 'applytime':50e3}}
 
 
-def main(modelParam=modelParam, hubsList_temp=[]):
+def main(modelParam=modelParam, hubsList_temp=[], tempParam=None):
     ######
     ## Define model and setup
     ######
@@ -345,14 +345,14 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     ######
     CoorDataTmp = np.loadtxt(pathToMorphology)
     # process CoorData to be acceptable format in modelSetup.genCoupleMatrix()
-    if mode==3: #species==1 and morphology>3:
+    if mode==3 or mode==4: #species==1 and morphology>3:
         CoorData = CoorDataTmp[np.abs(CoorDataTmp[:,0]-11)<0.1][:,1:4]
         # Load delta cells' coordinates
         DeltaCoorData = CoorDataTmp[np.abs(CoorDataTmp[:,0]-6)<0.1][:,1:4]
         # Control the number of delta cells
         temp = range(len(DeltaCoorData))
         random.shuffle(temp)
-        DeltaCoorData = DeltaCoorData[temp[0:50],:]  # say 50 of delta cells
+        DeltaCoorData = DeltaCoorData[temp[0:tempParam],:]  # say 50 of delta cells
         # Begin: Work out the coupling matrix for delta cells and beta cells
         # (row for delta cell index and column for beta cell index)
         DeltaCoupledMatrix = np.zeros([np.shape(DeltaCoorData)[0], np.shape(CoorData)[0]])
@@ -367,6 +367,10 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         # End
         # Return: HubListByDeltaCell, DeltaCoupledMatrix
         ndeltacells = DeltaCoupledMatrix.shape[0]
+        with open(outlog, 'a') as f:
+            f.write('#betaNextToDeltaList = \n')
+            f.write(','.join(map(str, HubListByDeltaCell)))
+            f.write('\n\n')
     else:
         CoorData = CoorDataTmp[CoorDataTmp[:,0]==11][:,1:4] # assume all use `11' as beta cell
     CoupledMatrix = modelSetup.genCoupleMatrix(CoorData,dthres,isletsize,True)
@@ -468,14 +472,6 @@ def main(modelParam=modelParam, hubsList_temp=[]):
     # Uncomment this to set specific hubs
     #hubsList = [self_def_list]
     #imagedHubs = hubsList[:]
-    print(hubsList)
-    with open(outlog, 'a') as f:
-        f.write('#hubsList = \n')
-        f.write(','.join(map(str, hubsList)))
-        f.write('\n\n')
-        f.write('#imagedHubs = ')
-        f.write(','.join(map(str, imagedHubs)))
-        f.write('\n\n')
 
     # Randomly pick some non-hubs cells
     numNonHubsToPick = numHubs
@@ -492,6 +488,23 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         temp = [i for i in imagedCells if i not in imagedHubs]
         random.shuffle(temp)
         imagedNonHubs = temp[0:len(imagedHubs)]
+    
+    if mode==4:
+        # swap hub and nonhub list!
+        tmp = hubsList[:]
+        hubsList = nonHubsToPickList[:]
+        nonHubsToPickList = tmp[:]
+        # Note that now the HubListByDeltaCell is in nonHubsToPickList 
+        # i.e. they are now non-hubs, which will be silenced by delta-cells.
+
+    print(hubsList)
+    with open(outlog, 'a') as f:
+        f.write('#hubsList = \n')
+        f.write(','.join(map(str, hubsList)))
+        f.write('\n\n')
+        f.write('#imagedHubs = ')
+        f.write(','.join(map(str, imagedHubs)))
+        f.write('\n\n')
     print(nonHubsToPickList)
     with open(outlog, 'a') as f:
         f.write('#nonHubsToPickList = ')
@@ -574,7 +587,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
 
 
     # Define delta cell
-    if mode==3:
+    if mode==3 or mode==4:
         print "Defining delta cells..."
         assert iclamp_hubs == []  # Make sure we are doing the right thing...
         delta_cell = []
@@ -585,8 +598,10 @@ def main(modelParam=modelParam, hubsList_temp=[]):
             syn.append(h.sst(0.5, sec=cell[HubListByDeltaCell[i]].soma))
             h.setpointer(delta_cell[i].soma(0.5)._ref_T_rel, 'cp', syn[i])
             # End
+            print "Linking delta cell %d to beta cell %d..."%(i,HubListByDeltaCell[i])
             print "Injecting current (IClamp) to delta cell ",i
             with open(outlog, 'a') as f:
+                f.write('#LinkDeltaCellToBetaCell = (%d,%d)\n'%(i,HubListByDeltaCell[i]))
                 f.write('#IClampingDeltaCell = %d\n'%i)
             silenceCell(iclamp_hubs,delta_cell[i],silenceStart,silenceDur,silenceAmp)
     

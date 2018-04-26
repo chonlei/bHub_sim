@@ -111,6 +111,8 @@ INITIAL {
 
 BREAKPOINT {
 	SOLVE state METHOD derivimplicit : see http://www.neuron.yale.edu/phpBB/viewtopic.php?f=28&t=592
+	if (t<300e3) {T = 0}
+	if (t>600e3) {T = 0}
 }
 
 LOCAL bfc , kfv
