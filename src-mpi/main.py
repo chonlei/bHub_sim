@@ -77,6 +77,14 @@ try:
     stepsizer = int(sys.argv[10])
 except Exception:
     stepsizer = 5
+try:
+    stepstart = int(sys.argv[11])
+except Exception:
+    stepstart = 0
+try:
+    base_glucose = float(sys.argv[12])
+except Exception:
+    base_glucose = 0
 
 modelParam = {'model' : 5, \
               'gjmodel' : gjm, \
@@ -93,14 +101,14 @@ modelParam = {'model' : 5, \
               'whichHub' : 0 , \
               'ggap' : gjnonhub, \
               'ggaphub' : gjhub, \
-              'pggaphubstd' : 0.1, \
+              'pggaphubstd' : 0.7, \
               'pggapstd' : 0.7, \
               'gjtau' : 400.0, \
               'p_connect': 1, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.2, \
-              'tstop' : 400e3, \
+              'tstop' : 800e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
               'tbatch' : 5e3}
@@ -110,7 +118,9 @@ modelParam = {'model' : 5, \
 # model 2 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None} , 'betahub':{'hubgkatp':10}}
 # model 3 default: {'beta':{'gkatp':(6.5,0.0) , 'useDistribution':None , 'applytime':5e3} , 'betahub':{'hubgkatp':10 , 'applytime':5e3}}
 #modelParam['model_kwargs'] = {'beta':{'gkatp':(6.0,7.0) , 'useDistribution':'sq'} , 'betahub':{'hubgkatp':11.0}}
-modelParam['model_kwargs'] = {'beta':{'glu':(6.0,7.0) , 'useDistribution':'sq' , 'applytime':50e3} , \
+# modelParam['model_kwargs'] = {'beta':{'glu':(6.0,7.0) , 'useDistribution':'sq' , 'applytime':50e3} , \
+#                               'betahub':{'hubglu':11.0 , 'applytime':50e3}}
+modelParam['model_kwargs'] = {'beta':{'glu':(base_glucose,base_glucose+1.0) , 'useDistribution':'sq' , 'applytime':50e3} , \
                               'betahub':{'hubglu':11.0 , 'applytime':50e3}}
 
 # setup output directory
@@ -137,7 +147,7 @@ def main(comm,modelParam,outputdir):
         modelParam['pHubs'] = 10*rank
         modelParam['silenceStart'] = 350e3
         modelParam['tstop'] = 360e3
-    tempParam = rank*stepsizer #rank+1 #(12*rank+30)/2 #
+    tempParam = stepstart + rank*stepsizer #rank+1 #(12*rank+30)/2 #
     # check they are doing right thing
     #print("RANK %d of SIZE %d is doing the right job..."%(rank,size))
     simulator.main(modelParam,tempParam=tempParam)
