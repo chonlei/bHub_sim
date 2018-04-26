@@ -1,0 +1,13 @@
+#!/bin/sh
+if test "x${NRNHOME}" = "x" ; then
+	NRNHOME="/system/software/linux-x86_64/neuron/7.4"
+fi
+if test "x${NRNBIN}" = "x" ; then
+	NRNBIN="/system/software/linux-x86_64/neuron/7.4/x86_64/bin/"
+fi
+if test "" = "yes" ; then
+	NRNIV="${NRNBIN}nrniv.app/Contents/MacOS/nrniv"
+else
+	NRNIV="${NRNBIN}nrniv"
+fi
+"${NRNIV}" -dll "/home/coml-islet-simulations/univ4198-islet/bHub_sim/delta-cell_simulation/deltacell/x86_64/.libs/libnrnmech.so" "$@"
