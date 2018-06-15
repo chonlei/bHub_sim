@@ -10,7 +10,7 @@ NEURON {
 	USEION k READ ki,ek WRITE ik
 	USEION ca READ cai,eca WRITE ica
 	USEION Jcaer WRITE Jcaeri VALENCE 0 :: NOT REALLY ION - should use POINTER
-        RANGE gammatoset, gammaapplytime, gKATP, PCaL, pIbNSC, pKDr, GKto, PKslow, P_PMCA, Pii
+        RANGE gammatoset, gammaapplytime, gKATP, PCaL, pIbNSC, pKDr, GKto, PKslow, P_PMCA, Pii, PCaER
 }
 
 PARAMETER {
@@ -126,7 +126,7 @@ PARAMETER {
 	Nt=10.0
 	totalATP=4.0
 	:ERcalciumdynamics(Jserca,Jout)
-	PCaER=0.096
+	PCaER:=0.096
 	KCarp=0.0005
 	
 	Pleak=0.46
