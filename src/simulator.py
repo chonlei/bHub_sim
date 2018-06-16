@@ -56,35 +56,36 @@ downSampling  # down sample the output -> output_timestep = dt*downSampling
 tbatch  # split simulation into batches; same unit as tstop
 """
 modelParam = {'model' : 5, \
-              'gjmodel' : 2, \
-              'morphology' : 0, \
-              'species' : 2, \
-              'pyseed' : 11, \
+              'gjmodel' : 1, \
+              'morphology' : 1, \
+              'species' : 0, \
+              'pyseed' : 2, \
               'isImitateExp' : 1, \
               'mode' : 1, \
-              'silenceStart' : 250e3, \
+              'silenceStart' : 600e3, \
               'silenceDur' : 250e3, \
               'silenceAmp' : -100.0, \
-              'pHubs' : 0.01, \
+              'pHubs' : 0.1, \
               'methodToPickHubs' : 0 , \
               'whichHub' : 0 , \
-              'ggap' : 0.17, \
-              'ggaphub' : 0.17, \
+              'ggap' : 0.01, \
+              'ggaphub' : 0.01, \
               'pggaphubstd' : 0.7, \
               'pggapstd' : 0.7, \
-              'gjtau' : 500.0, \
-              'p_connect': 0.7, \
+              'gjtau' : 400.0, \
+              'p_connect': 1.0, \
               'dthres' : 17.5, \
               'isletsize' : 40 , \
               'hetVar' : 0.2, \
-              'tstop' : 500e3, \
+              'tstop' : 600e3, \
               'dt' : 0.1 , \
               'downSampling' : 1000, \
-              'tbatch' : 5e3}
+              'tbatch' : 5e2}
 
+#modelParam['model_kwargs'] = {'beta':{'gkatp':(6.,7.0) , 'useDistribution':'sq'} , 'betahub':{'hubgkatp':11.0 }}
 #modelParam['model_kwargs'] = {'beta':{'gamma':(0.985,0.0) , 'useDistribution':None , 'applytime':0e3} , 'betahub':{'hubgamma':1.0 , 'applytime':0e3}}
-#modelParam['model_kwargs'] = {'beta':{'gkatp':(6.5,6.5) , 'useDistribution':'sq' , 'applytime':0e3} , 'betahub':{'hubgkatp':11.0 , 'applytime':0e3}}
-modelParam['model_kwargs'] = {'beta':{'glu':(6.0,6.5) , 'useDistribution':'sq' , 'applytime':0e3} , 'betahub':{'hubglu':11.0 , 'applytime':0e3}}
+#modelParam['model_kwargs'] = {'beta':{'gkatp':(6.,7.0) , 'useDistribution':'sq' , 'applytime':0e3} , 'betahub':{'hubgkatp':11.0 , 'applytime':0e3}}
+modelParam['model_kwargs'] = {'beta':{'glu':(6.,7.) , 'useDistribution':'sq' , 'applytime':0e3} , 'betahub':{'hubglu':11.0 , 'applytime':0e3}}
 
 
 def main(modelParam=modelParam, hubsList_temp=[]):
@@ -402,6 +403,12 @@ def main(modelParam=modelParam, hubsList_temp=[]):
                     except:
                         pass
         hubsList = hubsList[0:numHubs]
+    if True:
+        # pick by number of links
+        print hubsList
+        tmpList = np.argsort(np.sum(tempCoupledMatrix, axis=0))
+        # hubsList = list(tmpList[:len(hubsList)])  # The smallest number of links
+        hubsList = list(tmpList[-len(hubsList):])  # The largest number of links
     imagedHubs = list(set(hubsList).intersection(imagedCells))
     numImHubs = int(pHubs*len(imagedCells)) if pHubs<=1 else len(imagedCells)/ncells*pHubs
     if isImitateExp and len(imagedHubs) < max(numImHubs,1) and True:
@@ -483,7 +490,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
                 #if i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
                 #if (i == imagedNonHubs[whichHub]) and (mode==2):
                 #if False and (i in imagedCells[:50]):
-                if mode==2 and i in nonHubsToPickList[:]:
+                if mode==2 and i in nonHubsToPickList[:50]:
                     print "silencing cell ",i
                     with open(outlog, 'a') as f:
                         f.write('#silencedCell = %d\n'%i)
@@ -499,7 +506,7 @@ def main(modelParam=modelParam, hubsList_temp=[]):
         else:
             defineBetaHub(cell,i,**(model_kwargs['betahub']))
             if isImitateExp:
-                if mode==1 and (i in hubsList[:4]):#i==imagedHubs[whichHub]:
+                if mode==1 and (i in hubsList[:50]):#i==imagedHubs[whichHub]:
                     #or i in list(np.arange(ncells)[tempCoupledMatrix[:,imagedHubs[whichHub]]>0]):
                     print "silencing cell ",i
                     with open(outlog, 'a') as f:
