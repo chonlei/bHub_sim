@@ -1,1 +1,0 @@
-../catdel.mod

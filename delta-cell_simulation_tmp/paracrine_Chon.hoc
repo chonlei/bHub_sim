@@ -1,7 +1,0 @@
-// Sets up SST connectivities between Beta and Delta cells according to CouplingMatrix
-
-access Bcell[i].soma
-
-syn[n] = new sst(0.5)
-setpointer syn[n].cp, Dcell[q-(j+1)].soma.T_rel(0.5)
-syn.k = 1e3
